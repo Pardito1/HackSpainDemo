@@ -12,7 +12,7 @@ import pymupdf as fitz
 from . import modelo
 from .utils import clean, digest, identifier, invoice_date, money
 
-VERSION = "native-rapidocr-modelo-7"
+VERSION = "native-rapidocr-modelo-8"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -49,7 +49,16 @@ def currency(value):
     value = clean(value).upper()
     if value == "$":
         raise ValueError("El símbolo $ no identifica por sí solo la moneda")
-    return {"€": "EUR", "EURO": "EUR", "EUROS": "EUR", "£": "GBP"}.get(value, value)
+    return {
+        "€": "EUR",
+        "EURO": "EUR",
+        "EUROS": "EUR",
+        "£": "GBP",
+        "¥": "JPY",
+        "R$": "BRL",
+        "MX$": "MXN",
+        "FR": "CHF",
+    }.get(value, value)
 
 
 def invoice_number(value):
@@ -212,8 +221,23 @@ def parse_fields(lines):
     date_pattern = r"\d{4}-\d{2}-\d{2}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4}"
     for line in lines:
         s = line["text"]
-        for m in re.finditer(r"(?<![A-Z])(?:EUR|USD|GBP|CHF|euros?)(?![A-Z])|€|\$|£", s, re.I):
+        for m in re.finditer(
+            r"(?<![A-Z])(?:EUR|USD|GBP|CHF|JPY|MXN|BRL|euros?)(?![A-Z])"
+            r"|€|£|¥|MX\$|R\$"
+            r"|(?<![A-Z])(?-i:Fr)(?=\s*\d)"
+            r"|\$",
+            s,
+            re.I,
+        ):
             candidate("currency", m[0], line, m.span(), currency)
+        for m in re.finditer(
+            r"(?:divisa\s+de\s+facturaci[oó]n|billing\s+currency|rechnungsw[aä]hrung"
+            r"|moeda\s+de\s+fatura[cç][aã]o|devise\s+de\s+facturation)"
+            r"\s*[:.]?\s*([A-Z]{3})(?![A-Z])",
+            s,
+            re.I,
+        ):
+            candidate("currency", m[1], line, m.span(1), currency)
         for m in re.finditer(
             r"(?:ref\.?\s*factura|n[ºo°]?\s*(?:de\s*)?factura|factura(?:\s+simplificada)?(?:\s*n[ºo°])?|invoice\s*#?)\s*[:#]?\s*([A-Z0-9][A-Z0-9/_-]{2,})",
             s,
@@ -278,6 +302,15 @@ def parse_fields(lines):
                 if left.rstrip().endswith("(") and right.lstrip().startswith(")"):
                     raw = "-" + raw  # explicit accounting negative
                 candidate(field, raw, line, (start + m.start(), start + m.end()), printed_amount)
+    # "$" a secas solo es ambiguo si el documento no imprime ningún código ISO;
+    # con "USD ($)" el símbolo se ignora y manda el código.
+    if any(
+        re.fullmatch(r"[A-Za-z]{3}", clean(c["raw_value"]))
+        for c in candidates["currency"]
+    ):
+        candidates["currency"] = [
+            c for c in candidates["currency"] if clean(c["raw_value"]) != "$"
+        ]
     fields = {}
     for field in (*FIELDS, "currency"):
         choices = candidates[field]

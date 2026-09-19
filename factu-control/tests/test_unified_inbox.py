@@ -23,6 +23,8 @@ def test_unprocessed_document_is_not_claimed_to_be_error_free():
 def test_diagnosis_comes_from_rules_not_the_question(facts, case, expected):
     extraction, master, erp, policy = copy.deepcopy(facts)
     if case == "currency":
+        # Sin default_currency: aquí se prueba el diagnóstico, no la inferencia.
+        policy = {k: v for k, v in policy.items() if k != "default_currency"}
         extraction["fields"]["currency"] = {"value": None, "status": "MISSING", "evidence": []}
     elif case == "iban":
         extraction["fields"]["iban"]["value"] = "ES0000000000000000000000"
@@ -79,6 +81,8 @@ def test_inbox_owns_review_filter_and_has_distinct_issue_and_next_action(bundle)
 
 def test_more_than_one_problem_is_preserved(facts):
     extraction, master, erp, policy = copy.deepcopy(facts)
+    # Sin default_currency: aquí se prueba que se conservan varios motivos.
+    policy = {k: v for k, v in policy.items() if k != "default_currency"}
     extraction["fields"]["iban"]["value"] = "ES0000000000000000000000"
     extraction["fields"]["currency"] = {"value": None, "status": "MISSING", "evidence": []}
     issue = invoice_issue(evaluate(extraction, master, erp, policy, "2026-09-19"))

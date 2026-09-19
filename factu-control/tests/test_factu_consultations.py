@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -15,7 +16,18 @@ def external_case(bundle, tmp_path, erp_snapshot):
     make_pdf(folder / "factura_ñ.pdf", currency="")
     make_pdf(folder / "segunda.pdf", currency="", extra="Segunda copia para pruebas")
     service = Service(tmp_path / "external-state")
-    batch = service.ingest(folder, workbook, "Consultas", "2026-09-19")["batch_id"]
+    # Sin default_currency: estas facturas deben quedar con moneda por confirmar
+    # para generar consultas al proveedor; aquí se prueba ese flujo.
+    policy = json.loads(
+        (Path(__file__).resolve().parents[1] / "factu" / "policies" / "v3.json").read_text()
+    )
+    policy.pop("default_currency", None)
+    policy["version"] = "v3-sin-default"
+    policy_path = tmp_path / "politica_sin_default.json"
+    policy_path.write_text(json.dumps(policy))
+    batch = service.ingest(
+        folder, workbook, "Consultas", "2026-09-19", policy_path=policy_path
+    )["batch_id"]
     source = service.store.put_source("erp", erp_snapshot)
     with service.store.connect() as db:
         db.execute("UPDATE batches SET snapshot_id=? WHERE id=?", (source, batch))
