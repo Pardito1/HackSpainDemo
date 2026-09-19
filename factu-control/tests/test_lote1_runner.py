@@ -31,3 +31,23 @@ def test_prepare_resumes_without_duplicating_the_500_records(tmp_path):
     with pytest.raises(ValueError, match="otro lote"):
         prepare_batch(service, root, "2026-09-19")
     assert service.store.verify_audit()["valid"]
+
+
+def test_prepare_resumes_lote1_when_the_versioned_lote2_also_exists(tmp_path):
+    root = materials(tmp_path, 500)
+    service = Service(tmp_path / "state")
+    initial = prepare_batch(service, root, "2026-09-19")
+    lote2_folder = tmp_path / "lote2"
+    lote2_folder.mkdir()
+    (lote2_folder / "lote2.pdf").write_bytes(b"%PDF-1.4\n")
+    service.ingest(
+        lote2_folder,
+        root / "FINAL_v7_DEFINITIVO_ahorasi.xlsx",
+        "Lote 2 · 40 facturas",
+        "2026-09-19",
+        profile="lote2_ocr_v1",
+    )
+
+    assert prepare_batch(service, root, "2026-09-19") == initial
+    assert len(service.store.all("SELECT id FROM batches")) == 2
+    assert service.store.verify_audit()["valid"]

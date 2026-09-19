@@ -1,0 +1,178 @@
+{
+  "schema_version": "factu-lote2-ocr-labels-v1",
+  "purpose": "Transcripciones manuales internas revisadas de los originales públicos del Lote 2. No contiene decisiones de pago. Los campos sobrescritos, tachados o contradictorios se dejan fuera de fields y se documentan en review_flags.",
+  "documents": {
+    "2026-08-05_P005.pdf": {
+      "template_id": "supplier-B96233419-conservative-v1", "supplier_id": "B96233419",
+      "fields": {"invoice_number":{"value":"FA-2747"},"supplier_nif":{"value":"B96233419"},"iban":{"value":"ES1800815290070001234567"},"order":{"value":"PO-2026-0532"},"date":{"value":"2026-08-05"},"base":{"value":"5642.62"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1184.95"},"total":{"value":"6827.57"},"currency":{"value":"EUR"}}
+    },
+    "2026-08-09_P001.pdf": {
+      "template_id": "supplier-B46102331-conservative-v1", "supplier_id": "B46102331",
+      "fields": {"invoice_number":{"value":"2026/25453"},"supplier_nif":{"value":"B46102331"},"iban":{"value":"ES2100491500051234567890"},"order":{"value":"PO-2026-0534"},"date":{"value":"2026-08-09"},"base":{"value":"7815.70"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1641.30"},"total":{"value":"9457.00"},"currency":{"value":"EUR"}}
+    },
+    "2026-08-22_P010.pdf": {
+      "template_id": "supplier-B98455101-conservative-v1", "supplier_id": "B98455101",
+      "fields": {"invoice_number":{"value":"FA-1650"},"supplier_nif":{"value":"B98455101"},"iban":{"value":"ES2702390806667122334455"},"order":{"value":"PO-2026-0071"},"date":{"value":"2026-08-22"},"base":{"value":"786.69"},"tax_rate":{"value":"21"},"tax_amount":{"value":"165.20"},"total":{"value":"951.89"},"currency":{"value":null}},
+      "review_flags":["currency_not_printed"]
+    },
+    "2026-08-26_P010.pdf": {
+      "template_id": "supplier-B98455101-conservative-v1", "supplier_id": "B98455101",
+      "fields": {"invoice_number":{"value":"FA-5836"},"supplier_nif":{"value":"B98455101"},"iban":{"value":"ES2702390806667122334455"},"order":{"value":"PO-2026-0517"},"date":{"value":"2026-08-26"},"base":{"value":"3345.04"},"tax_rate":{"value":"21"},"tax_amount":{"value":"702.46"},"total":{"value":"4047.50"},"currency":{"value":null}},
+      "review_flags":["currency_not_printed"]
+    },
+    "2026-08-27_P007.pdf": {
+      "template_id": "supplier-J40112358-conservative-v1", "supplier_id": "J40112358",
+      "fields": {"invoice_number":{"value":"FA-3766"},"supplier_nif":{"value":"J40112358"},"iban":{"value":"ES5531590012348765123407"},"order":{"value":"PO-2026-0520"},"date":{"value":"2026-08-27"},"base":{"value":"3027.13"},"tax_rate":{"value":"21"},"tax_amount":{"value":"635.70"},"total":{"value":"3662.83"},"currency":{"value":null}},
+      "review_flags":["currency_not_printed"]
+    },
+    "2026-27450_suministros.pdf": {
+      "template_id": "supplier-B46102331-conservative-v1", "supplier_id": "B46102331",
+      "fields": {"invoice_number":{"value":"2026/27450"},"supplier_nif":{"value":"B46102331"},"iban":{"value":"ES2100491500051234567890"},"order":{"value":"PO-2026-0523"},"date":{"value":"2026-08-03"},"base":{"value":"4053.96"},"tax_rate":{"value":"21"},"tax_amount":{"value":"851.33"},"total":{"value":"4905.29"},"currency":{"value":"EUR"}}
+    },
+    "2026-42111_construcciones.pdf": {
+      "template_id": "supplier-A46311208-conservative-v1", "supplier_id": "A46311208",
+      "fields": {"invoice_number":{"value":"2026/42111"},"supplier_nif":{"value":"A46311208"},"iban":{"value":"ES8201280011230100044571"},"order":{"value":"PO-2026-0529"},"date":{"value":"2026-08-08"},"base":{"value":"2889.87"},"tax_rate":{"value":"21"},"tax_amount":{"value":"606.87"},"total":{"value":"3496.74"},"currency":{"value":"EUR"}}
+    },
+    "2026-72452_suministros.pdf": {
+      "template_id": "supplier-B46102331-conservative-v1", "supplier_id": "B46102331",
+      "fields": {"invoice_number":{"value":"2026/72452"},"supplier_nif":{"value":"B46102331"},"iban":{"value":"ES2100491500051234567890"},"order":{"value":"PO-2026-0531"},"date":{"value":"2026-08-10"},"base":{"value":"1827.83"},"tax_rate":{"value":"21"},"tax_amount":{"value":"383.84"},"total":{"value":"2211.67"},"currency":{"value":"EUR"}}
+    },
+    "FA-3955_electricidad.pdf": {
+      "template_id": "supplier-A46990201-conservative-v1", "supplier_id": "A46990201",
+      "fields": {"invoice_number":{"value":"FA-3955"},"supplier_nif":{"value":"A46990201"},"iban":{"value":"ES1400496170682100043399"},"order":{"value":"PO-2026-0536"},"date":{"value":"2026-08-25"},"base":{"value":"780.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"163.80"},"total":{"value":"943.80"},"currency":{"value":"EUR"}},
+      "review_flags":["printed_bank_change_claim"]
+    },
+    "FA-5103_electricidad.pdf": {
+      "template_id": "supplier-A46990201-conservative-v1", "supplier_id": "A46990201",
+      "fields": {"invoice_number":{"value":"FA-5103"},"supplier_nif":{"value":"A46990201"},"iban":{"value":"ES3520385778983000765410"},"order":{"value":"PO-2026-0528"},"date":{"value":"2026-08-24"},"base":{"value":"833.07"},"tax_rate":{"value":"21"},"tax_amount":{"value":"174.94"},"total":{"value":"1008.01"},"currency":{"value":"EUR"}}
+    },
+    "FA-6217_transportes.pdf": {
+      "template_id": "supplier-A41220987-conservative-v1", "supplier_id": "A41220987",
+      "fields": {"invoice_number":{"value":"FA-6217"},"supplier_nif":{"value":"A41220987"},"iban":{"value":"ES7621000813610123456789"},"order":{"value":"PO-2026-0500"},"date":{"value":"2026-08-17"},"base":{"value":"2594.76"},"tax_rate":{"value":"21"},"tax_amount":{"value":"544.90"},"total":{"value":"3139.66"},"currency":{"value":"EUR"}}
+    },
+    "FA-7357_papelería.pdf": {
+      "template_id": "supplier-J40112358-conservative-v1", "supplier_id": "J40112358",
+      "fields": {"invoice_number":{"value":"FA-7357"},"supplier_nif":{"value":"J40112358"},"iban":{"value":"ES5531590012348765123407"},"order":{"value":"PO-2026-0518"},"date":{"value":"2026-08-07"},"base":{"value":"5016.55"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1053.48"},"total":{"value":"6070.03"},"currency":{"value":"EUR"}}
+    },
+    "FA-7532_informática.pdf": {
+      "template_id": "supplier-B98455101-conservative-v1", "supplier_id": "B98455101",
+      "fields": {"invoice_number":{"value":"FA-7532"},"supplier_nif":{"value":"B98455101"},"iban":{"value":"ES7101821200561099887766"},"order":{"value":"PO-2026-0537"},"date":{"value":"2026-08-12"},"base":{"value":"12890.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"2706.90"},"total":{"value":"15596.90"},"currency":{"value":"EUR"}},
+      "review_flags":["printed_bank_change_claim"]
+    },
+    "e01_P001.pdf": {
+      "template_id": "supplier-B46102331-conservative-v1", "supplier_id": "B46102331",
+      "fields": {"invoice_number":{"value":"FA-9101"},"supplier_nif":{"value":"B46102331"},"iban":{"value":"ES2100491500051234567890"},"order":{"value":"PO-2026-1301"},"date":{"value":"2026-01-02"},"base":{"value":"1240.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"260.40"},"total":{"value":"1500.40"},"currency":{"value":"EUR"}}
+    },
+    "e02_P002.pdf": {
+      "template_id": "supplier-A41220987-conservative-v1", "supplier_id": "A41220987",
+      "fields": {"invoice_number":{"value":"INV-9102"},"supplier_nif":{"value":"A41220987"},"iban":{"value":"ES7621000813610123456789"},"order":{"value":"PO-2026-1302"},"date":{"value":"2026-03-07"},"base":{"value":"2450.00"},"tax_amount":{"value":"0.00"},"total":{"value":"2450.00"},"currency":{"value":"USD"}},
+      "review_flags":["printed_tax_rate_conflict"]
+    },
+    "e03_P002.pdf": {
+      "template_id": "supplier-A41220987-conservative-v1", "supplier_id": "A41220987",
+      "fields": {"invoice_number":{"value":"INV-9103"},"supplier_nif":{"value":"A41220987"},"iban":{"value":"ES7621000813610123456789"},"order":{"value":"PO-2026-1303"},"date":{"value":"2026-02-03"},"base":{"value":"780.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"163.80"},"total":{"value":"943.80"},"currency":{"value":"EUR"}}
+    },
+    "e04_P003.pdf": {
+      "template_id": "supplier-B30455812-conservative-v1", "supplier_id": "B30455812",
+      "fields": {"invoice_number":{"value":"FAC-9104"},"supplier_nif":{"value":"B30455812"},"iban":{"value":"ES6001825322180201588391"},"order":{"value":"PO-2026-1304"},"date":{"value":"2026-01-02"},"base":{"value":"1180.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"247.80"},"total":{"value":"1427.80"},"currency":{"value":"EUR"}}
+    },
+    "e05_P004.pdf": {
+      "template_id": "supplier-B90233808-conservative-v1", "supplier_id": "B90233808",
+      "fields": {"invoice_number":{"value":"FAT-9105"},"supplier_nif":{"value":"B90233808"},"iban":{"value":"ES4414650100951704302211"},"order":{"value":"PO-2026-1305"},"date":{"value":"2026-02-15"},"base":{"value":"920.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"193.20"},"total":{"value":"1113.20"},"currency":{"value":"EUR"}}
+    },
+    "e06_P013.pdf": {
+      "template_id": "supplier-FR40303265045-conservative-v1", "supplier_id": "FR40303265045",
+      "fields": {"invoice_number":{"value":"FAC-9106"},"supplier_nif":{"value":"FR40303265045"},"iban":{"value":"FR7630006000011234567890189"},"order":{"value":"PO-2026-1306"},"date":{"value":"2026-01-03"},"base":{"value":"1560.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"327.60"},"total":{"value":"1887.60"},"currency":{"value":"EUR"}}
+    },
+    "e07_P006.pdf": {
+      "template_id": "supplier-A46990201-conservative-v1", "supplier_id": "A46990201",
+      "fields": {"invoice_number":{"value":"FAT-9107"},"supplier_nif":{"value":"A46990201"},"iban":{"value":"ES3520385778983000765410"},"order":{"value":"PO-2026-1307"},"date":{"value":"2026-08-07"},"base":{"value":"2340.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"491.40"},"total":{"value":"2831.40"},"currency":{"value":"EUR"}}
+    },
+    "e08_P012.pdf": {
+      "template_id": "supplier-DE812345678-conservative-v1", "supplier_id": "DE812345678",
+      "fields": {"invoice_number":{"value":"RE-9108"},"supplier_nif":{"value":"DE812345678"},"iban":{"value":"DE89370400440532013000"},"order":{"value":"PO-2026-1308"},"date":{"value":"2026-03-07"},"base":{"value":"3120.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"655.20"},"total":{"value":"3775.20"},"currency":{"value":"EUR"}}
+    },
+    "e09_P015.pdf": {
+      "template_id": "supplier-5010401075570-conservative-v1", "supplier_id": "5010401075570",
+      "fields": {"invoice_number":{"value":"INV-9109"},"supplier_nif":{"value":"5010401075570"},"iban":{"value":"JP010001233123456789012"},"order":{"value":"PO-2026-1309"},"date":{"value":"2026-04-12"},"base":{"value":"773000.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"77000.00"},"total":{"value":"850000.00"},"currency":{"value":"JPY"}}
+    },
+    "e10_P006.pdf": {
+      "template_id": "supplier-A46990201-conservative-v1", "supplier_id": "A46990201",
+      "fields": {"invoice_number":{"value":"FA-9110"},"supplier_nif":{"value":"A46990201"},"iban":{"value":"ES3520385778983000765410"},"order":{"value":"PO-2026-1310"},"date":{"value":"2026-05-05"},"base":{"value":"3450.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"0.00"},"total":{"value":"3450.00"},"currency":{"value":"USD"}}
+    },
+    "e11_P011.pdf": {
+      "template_id": "supplier-B90233808-conservative-v1", "supplier_id": "B90233808",
+      "fields": {"invoice_number":{"value":"FA-9111"},"supplier_nif":{"value":"B90233808"},"iban":{"value":"GB29NWBK60161331926819"},"order":{"value":"PO-2026-1311"},"date":{"value":"2026-05-18"},"base":{"value":"2900.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"0.00"},"total":{"value":"2900.00"},"currency":{"value":"GBP"}}
+    },
+    "e12_P010.pdf": {
+      "template_id": "supplier-B98455101-conservative-v1", "supplier_id": "B98455101",
+      "fields": {"invoice_number":{"value":"FA-9112"},"supplier_nif":{"value":"B98455101"},"iban":{"value":"ES2702390806667122334455"},"order":{"value":"PO-2026-1312"},"date":{"value":"2026-05-22"},"base":{"value":"4200.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"0.00"},"total":{"value":"4200.00"},"currency":{"value":"CHF"}}
+    },
+    "e13_P014.pdf": {
+      "template_id": "supplier-12345678000195-conservative-v1", "supplier_id": "12345678000195",
+      "fields": {"invoice_number":{"value":"FAT-9113"},"supplier_nif":{"value":"12.345.678/0001-95"},"iban":{"value":"BR9700360305000010009795493C1"},"order":{"value":"PO-2026-1313"},"date":{"value":"2026-05-30"},"base":{"value":"15500.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"0.00"},"total":{"value":"15500.00"},"currency":{"value":"BRL"}}
+    },
+    "e14_P004.pdf": {
+      "template_id": "supplier-B98120774-conservative-v1", "supplier_id": "B98120774",
+      "fields": {"invoice_number":{"value":"FA-9114"},"supplier_nif":{"value":"B98120774"},"iban":{"value":"ES4414650100951704302211"},"order":{"value":"PO-2026-1314"},"date":{"value":"2026-06-03"},"base":{"value":"45800.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"9160.00"},"total":{"value":"48800.00"},"currency":{"value":"MXN"}},
+      "review_flags":["arithmetic_conflict"]
+    },
+    "e15_P012.pdf": {
+      "template_id": "supplier-DE812345678-conservative-v1", "supplier_id": "DE812345678",
+      "fields": {"invoice_number":{"value":"RE-9115"},"supplier_nif":{"value":"DE812345678"},"iban":{"value":"DE89370400440532013000"},"order":{"value":"PO-2026-1315"},"date":{"value":"2026-06-15"},"base":{"value":"5400.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"0.00"},"total":{"value":"5400.00"},"currency":{"value":"CHF"}}
+    },
+    "e16_P011.pdf": {
+      "template_id": "supplier-B90233808-conservative-v1", "supplier_id": "B90233808",
+      "fields": {"invoice_number":{"value":"FA-9116"},"supplier_nif":{"value":"B90233808"},"iban":{"value":"ES9368884400123588900142"},"order":{"value":"PO-2026-1316"},"date":{"value":"2026-03-15"},"base":{"value":"520.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"109.20"},"total":{"value":"629.20"},"currency":{"value":"EUR"}},
+      "review_flags":["handwritten_date"]
+    },
+    "e17_P007.pdf": {
+      "template_id": "supplier-J40112358-conservative-v1", "supplier_id": "J40112358",
+      "fields": {"invoice_number":{"value":"FA-9117"},"supplier_nif":{"value":"J40112358"},"iban":{"value":"ES5531590012348765123407"},"order":{"value":"PO-2026-1317"},"date":{"value":"2026-06-12"},"base":{"value":"680.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"142.80"},"total":{"value":"822.80"},"currency":{"value":"EUR"}},
+      "review_flags":["document_handwritten","not_eligible_for_auto_decision"]
+    },
+    "e18_P001.pdf": {
+      "template_id": "supplier-B46102331-conservative-v1", "supplier_id": "B46102331",
+      "fields": {"invoice_number":{"value":"FA-9118"},"supplier_nif":{"value":"B46102331"},"iban":{"value":"ES2100491500051234567890"},"order":{"value":"PO-2026-1318"},"date":{"value":"2026-03-18"},"tax_rate":{"value":"21"},"currency":{"value":"EUR"}},
+      "review_flags":["struck_out_amounts","handwritten_correction","arithmetic_conflict","amounts_not_scored"]
+    },
+    "factura_1210.pdf": {
+      "template_id": "supplier-B30455812-conservative-v1", "supplier_id": "B30455812",
+      "fields": {"invoice_number":{"value":"F26-3928"},"supplier_nif":{"value":"B30455812"},"iban":{"value":"ES6001825322180201588391"},"order":{"value":"PO-2026-0512"},"date":{"value":"2026-08-24"},"base":{"value":"3041.22"},"tax_rate":{"value":"21"},"tax_amount":{"value":"638.66"},"total":{"value":"3679.88"},"currency":{"value":"EUR"}}
+    },
+    "factura_1221.pdf": {
+      "template_id": "supplier-A41220987-conservative-v1", "supplier_id": "A41220987",
+      "fields": {"invoice_number":{"value":"FA-7272"},"supplier_nif":{"value":"A41220987"},"iban":{"value":"ES7621000813610123456789"},"order":{"value":"PO-2026-0533"},"date":{"value":"2026-08-15"},"base":{"value":"5511.55"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1157.43"},"total":{"value":"6668.98"},"currency":{"value":"EUR"}}
+    },
+    "factura_2923.pdf": {
+      "template_id": "supplier-B98120774-conservative-v1", "supplier_id": "B98120774",
+      "fields": {"invoice_number":{"value":"2026/67055"},"supplier_nif":{"value":"B98120774"},"iban":{"value":"ES4414650100951704302211"},"order":{"value":"PO-2026-0530"},"date":{"value":"2026-08-22"},"base":{"value":"5602.22"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1176.47"},"total":{"value":"6778.69"},"currency":{"value":null}},
+      "review_flags":["currency_not_printed"]
+    },
+    "factura_6932.pdf": {
+      "template_id": "supplier-B98455101-conservative-v1", "supplier_id": "B98455101",
+      "fields": {"invoice_number":{"value":"FA-9867"},"supplier_nif":{"value":"B98455101"},"iban":{"value":"ES2702390806667122334455"},"order":{"value":"PO-2026-0535"},"date":{"value":"2026-08-06"},"base":{"value":"2210.00"},"tax_rate":{"value":"21"},"tax_amount":{"value":"464.10"},"total":{"value":"2674.10"},"currency":{"value":"EUR"}}
+    },
+    "factura_6990.pdf": {
+      "template_id": "supplier-A46990201-conservative-v1", "supplier_id": "A46990201",
+      "fields": {"invoice_number":{"value":"FA-2805"},"supplier_nif":{"value":"A46990201"},"iban":{"value":"ES3520385778983000765410"},"order":{"value":"PO-2026-0504"},"date":{"value":"2026-08-16"},"base":{"value":"5358.55"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1125.30"},"total":{"value":"6483.85"},"currency":{"value":"EUR"}}
+    },
+    "factura_7036.pdf": {
+      "template_id": "supplier-B30455812-conservative-v1", "supplier_id": "B30455812",
+      "fields": {"invoice_number":{"value":"F26-8242"},"supplier_nif":{"value":"B30455812"},"iban":{"value":"ES6001825322180201588391"},"order":{"value":"PO-2026-0524"},"date":{"value":"2026-08-09"},"base":{"value":"2996.36"},"tax_rate":{"value":"21"},"tax_amount":{"value":"629.24"},"total":{"value":"3625.60"},"currency":{"value":"EUR"}}
+    },
+    "factura_7495.pdf": {
+      "template_id": "supplier-B30455812-conservative-v1", "supplier_id": "B30455812",
+      "fields": {"invoice_number":{"value":"F26-0995"},"supplier_nif":{"value":"B30455812"},"iban":{"value":"ES6001825322180201588391"},"order":{"value":"PO-2026-0509"},"date":{"value":"2026-08-02"},"base":{"value":"4419.70"},"tax_rate":{"value":"21"},"tax_amount":{"value":"928.14"},"total":{"value":"5347.84"},"currency":{"value":"EUR"}}
+    },
+    "factura_7713.pdf": {
+      "template_id": "supplier-J40112358-conservative-v1", "supplier_id": "J40112358",
+      "fields": {"invoice_number":{"value":"FA-6506"},"supplier_nif":{"value":"J40112358"},"iban":{"value":"ES5531590012348765123407"},"order":{"value":"PO-2026-0519"},"date":{"value":"2026-08-10"},"base":{"value":"1687.43"},"tax_rate":{"value":"21"},"tax_amount":{"value":"354.36"},"total":{"value":"2041.79"},"currency":{"value":"EUR"}}
+    },
+    "factura_9660.pdf": {
+      "template_id": "supplier-B46102331-conservative-v1", "supplier_id": "B46102331",
+      "fields": {"invoice_number":{"value":"2026/83251"},"supplier_nif":{"value":"B46102331"},"iban":{"value":"ES2100491500051234567890"},"order":{"value":"PO-2026-0526"},"date":{"value":"2026-08-23"},"base":{"value":"4844.42"},"tax_rate":{"value":"21"},"tax_amount":{"value":"1017.33"},"total":{"value":"5861.75"},"currency":{"value":null}},
+      "review_flags":["currency_not_printed"]
+    }
+  }
+}

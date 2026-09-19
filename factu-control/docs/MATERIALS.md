@@ -1,6 +1,17 @@
 # Auditoría de materiales · 19 septiembre 2026
 
-Los cinco archivos aportados coinciden byte por byte con las versiones revisadas. Los **500 PDFs aportados están importados y extraídos**, con una decisión por archivo. No hay PDFs ausentes ni diferencias entre originales y blobs conservados. Informe reproducible: `materials-audit.json`; script: `scripts/audit_materials.py`.
+Los cinco materiales base de Lote 1 coinciden byte por byte con las versiones
+revisadas. Los **500 PDFs aportados están importados y extraídos**, con una
+decisión por archivo. No hay PDFs ausentes ni diferencias entre originales y
+blobs conservados. Informe reproducible para esa base:
+`materials-audit.json`; script: `scripts/audit_materials.py`.
+
+Lote 2 añade 40 PDFs públicos y tres fuentes incrementales. El runner
+`factu lote2` comprueba antes de escribir que existen exactamente 40 nombres
+únicos, el Excel, ambos CSV y el export ERP con 40 filas/esquema esperado; sus
+hashes, blobs, filas de origen y perfil de extracción quedan vinculados al lote.
+No sustituye el ERP por el CSV: exige que el snapshot HTTP contenga su
+actualización.
 
 | Material | Uso real | Qué no hacemos |
 |---|---|---|
@@ -10,6 +21,9 @@ Los cinco archivos aportados coinciden byte por byte con las versiones revisadas
 | MANUAL_ERP_2009.md | Contrato del conector y pruebas de sesión, errores, codificación y autoridad contable | No es una fuente factual por factura |
 | Makefile | Revisado como guía de arranque y opciones de segundo lote. Ejecutar Python es equivalente a su objetivo de arranque | No se ingiere en el motor ni hace falta ejecutar todos sus targets |
 | README.md | Requisitos de salidas, defensa y documentación, contrastados con capturas y aclaración humana | No sustituye la norma de negocio; conservamos discrepancia de horario |
+| `facturas_primin/` (40 PDFs) | Perfil `lote2_ocr_v1`, evidencia de lectura nativa/RapidOCR, decisiones y exportación del Lote 2 | No se infiere moneda por idioma, país o dirección; anotaciones/tachones se escalan |
+| `proveedores_nuevos.csv` + `pedidos_nuevos.csv` | Incremento de proveedor/pedido, con archivo, hash, columna y fila de procedencia | No sobrescriben la copia del Excel ni convierten texto libre en una regla |
+| `erp_export_lote2.csv` | Contrato de presencia de los pedidos incrementales en el snapshot HTTP | No se usa como ERP local ni se confunde con una autorización de pago |
 
 ## Excel: usar lo pertinente, no todas las celdas
 
@@ -26,7 +40,10 @@ El diagnóstico de checksum IBAN no bloquea porque los números sintéticos del 
 
 ## Qué falta
 
-El lote adicional oficial, su ERP/norma actualizados y la referencia privada no están incluidos. No podemos declarar APTO ni precisión oficial. La captura nueva fija domingo 20 a las 11:00 (Madrid); el README aportado aún dice 10:30. Usar 10:30 como margen interno y confirmar con organización.
+La referencia privada del jurado y cualquier norma/lote posterior no están
+disponibles. No podemos declarar APTO ni precisión oficial. La captura nueva
+fija domingo 20 a las 11:00 (Madrid); el README aportado aún dice 10:30. Usar
+10:30 como margen interno y confirmar con organización.
 
 ## Auditoría repetible
 

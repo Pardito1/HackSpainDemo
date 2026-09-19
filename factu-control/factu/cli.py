@@ -21,6 +21,13 @@ def main(argv=None):
     lote1.add_argument("--user", default=os.getenv("ERP_USER", "alberto"))
     lote1.add_argument("--serve", action="store_true", help="Abre el servidor web con el mismo estado al terminar")
     lote1.add_argument("--port", type=int, default=8089)
+    lote2 = sub.add_parser("lote2", help="Importa/reanuda las 40 facturas oficiales de Lote 2 con su perfil OCR")
+    lote2.add_argument("--materials", required=True, help="Carpeta oficial con facturas_primin/, Excel, CSV y export ERP")
+    lote2.add_argument("--as-of", required=True, help="Fecha de referencia explícita YYYY-MM-DD")
+    lote2.add_argument("--url", default=os.getenv("ERP_URL", "http://127.0.0.1:8009"))
+    lote2.add_argument("--user", default=os.getenv("ERP_USER", "alberto"))
+    lote2.add_argument("--serve", action="store_true", help="Abre el servidor web con el mismo estado al terminar")
+    lote2.add_argument("--port", type=int, default=8089)
     ingest = sub.add_parser(
         "ingest", help="Importa originales y registra un manifiesto"
     )
@@ -68,6 +75,18 @@ def main(argv=None):
         if args.command == "lote1":
             from .lote1 import run_lote1
             result = run_lote1(service, args.materials, args.as_of, args.url, args.user,
+                               os.getenv("ERP_PASSWORD", "FACTURAS2009"))
+            print(json.dumps(result, ensure_ascii=False, indent=2), flush=True)
+            print(f"Bandeja: http://127.0.0.1:{args.port}/?batch={result['batch_id']}", flush=True)
+            if args.serve:
+                import uvicorn
+                from .web import create_app
+                os.environ["ERP_URL"] = args.url
+                uvicorn.run(create_app(args.data), host="127.0.0.1", port=args.port)
+            return
+        elif args.command == "lote2":
+            from .lote2 import run_lote2
+            result = run_lote2(service, args.materials, args.as_of, args.url, args.user,
                                os.getenv("ERP_PASSWORD", "FACTURAS2009"))
             print(json.dumps(result, ensure_ascii=False, indent=2), flush=True)
             print(f"Bandeja: http://127.0.0.1:{args.port}/?batch={result['batch_id']}", flush=True)

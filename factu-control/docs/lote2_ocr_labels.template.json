@@ -1,0 +1,54 @@
+{
+  "schema_version": "factu-lote2-ocr-labels-v1",
+  "purpose": "Etiquetas humanas independientes para evaluar la lectura de campos; no usar decisiones PAGAR/NO_PAGAR/ESCALAR como etiqueta.",
+  "documents": {
+    "ejemplo-train.pdf": {
+      "template_id": "plantilla-proveedor-A-v1",
+      "supplier_id": "NIF-O-ID-VERIFICADO",
+      "fields": {
+        "invoice_number": {"value": "F-2026-001"},
+        "supplier_nif": {"value": "B12345674"},
+        "iban": {"value": "ES9121000418450200051332"},
+        "order": {"value": "PO-2026-0001"},
+        "date": {"value": "2026-02-01"},
+        "base": {"value": "100.00"},
+        "tax_rate": {"value": "21"},
+        "tax_amount": {"value": "21.00"},
+        "total": {"value": "121.00"},
+        "currency": {"value": "EUR"}
+      }
+    },
+    "ejemplo-validation.pdf": {
+      "template_id": "plantilla-proveedor-B-v1",
+      "supplier_id": "NIF-O-ID-VALIDACION",
+      "fields": {
+        "invoice_number": {"value": "F-2026-002"},
+        "supplier_nif": {"value": "B12345674"},
+        "iban": {"value": "ES9121000418450200051332"},
+        "order": {"value": "PO-2026-0002"},
+        "date": {"value": "2026-02-02"},
+        "base": {"value": "100.00"},
+        "tax_rate": {"value": "21"},
+        "tax_amount": {"value": "21.00"},
+        "total": {"value": "121.00"},
+        "currency": {"value": "EUR"}
+      }
+    },
+    "ejemplo-test.pdf": {
+      "template_id": "plantilla-proveedor-C-v1",
+      "supplier_id": "NIF-O-ID-TEST",
+      "fields": {
+        "invoice_number": {"value": "F-2026-003"},
+        "supplier_nif": {"value": "B12345674"},
+        "iban": {"value": "ES9121000418450200051332"},
+        "order": {"value": "PO-2026-0003"},
+        "date": {"value": "2026-02-03"},
+        "base": {"value": "100.00"},
+        "tax_rate": {"value": "21"},
+        "tax_amount": {"value": "21.00"},
+        "total": {"value": "121.00"},
+        "currency": {"value": "EUR"}
+      }
+    }
+  }
+}
