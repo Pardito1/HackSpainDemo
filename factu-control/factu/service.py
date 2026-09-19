@@ -856,9 +856,9 @@ class Service(WorkspaceMixin):
         self.batch(batch_id)
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            db.execute("UPDATE documents SET latest_decision=NULL")
             db.execute(
-                "UPDATE documents SET extraction=NULL,state='QUEUED' WHERE batch_id=?",
+                "UPDATE documents SET latest_decision=NULL,extraction=NULL,state='QUEUED'"
+                " WHERE batch_id=?",
                 (batch_id,),
             )
             changed = db.execute(

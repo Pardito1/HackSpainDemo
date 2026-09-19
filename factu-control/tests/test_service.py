@@ -142,6 +142,28 @@ def test_reextract_preserves_history(bundle):
     assert service.store.verify_audit()["valid"]
 
 
+def test_reextract_leaves_the_other_batches_decided(bundle, erp_snapshot):
+    """Los dos lotes de la entrega viven en el mismo `--data`.
+
+    Reextraer el lote 1 para releer los 29 escaneados no puede dejar al lote 2
+    sin decisiones: son 40 facturas ya exportadas que nadie ha pedido rehacer.
+    """
+    service, first, folder, workbook = bundle
+    service.process(first, ocr=False)
+    second = service.ingest(folder, workbook, "Otro", "2026-09-19")["batch_id"]
+    snapshot_id = service.store.put_source("erp", erp_snapshot)
+    with service.store.connect() as db:
+        db.execute("UPDATE batches SET snapshot_id=? WHERE id=?", (snapshot_id, second))
+    service.process(second, ocr=False)
+    decided = service.export_rows(second)
+
+    service.reextract(first)
+
+    assert service.export_rows(second) == decided
+    with pytest.raises(ValueError):
+        service.export_rows(first)
+
+
 def test_workflow_lock_between_instances(bundle):
     import fcntl
 
