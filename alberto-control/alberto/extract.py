@@ -11,7 +11,7 @@ import pymupdf as fitz
 
 from .utils import clean, digest, identifier, invoice_date, money
 
-VERSION = "native-rapidocr-3"
+VERSION = "native-rapidocr-4"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -177,10 +177,12 @@ def parse_fields(lines):
             s,
             re.I,
         ):
-            if re.search(r"fecha\s*$", s[: m.start()], re.I) or re.fullmatch(
+            if re.search(r"(?:fecha|total|importe|base)\s*$", s[: m.start()], re.I) or re.fullmatch(
                 date_pattern, m[1], re.I
             ):
-                continue  # "Fecha factura" is a date label, not a second invoice number.
+                continue  # "Fecha factura" / "Total factura" are labels, not a second invoice number.
+            if re.match(r"[,.]\d{2}\b", s[m.end(1):]):
+                continue  # "Total factura: 535,35": an amount, not an identifier.
             if re.search(r"\d", m[1]):
                 # Split only a recognizable adjacent date label; preserve raw line
                 # and token coordinates so a person can inspect the separation.

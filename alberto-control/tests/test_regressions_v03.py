@@ -222,3 +222,26 @@ def test_erp_preview_failure_is_clear_503(bundle, monkeypatch):
                         headers={"X-CSRF-Token":service.store.csrf_token})
         assert r.status_code == 503 and "ERP" in r.json()["detail"]
     assert service.batch(batch) == before
+
+
+@pytest.mark.parametrize("line", ["Total factura: 535,35 €", "Importe base: 442,44 €", "TOTAL............ 520,30"])
+def test_amount_label_is_not_a_second_invoice_number(line):
+    """'Total factura: 535,35' producia un candidato '535' y un CONFLICT que escalaba facturas limpias."""
+    lines = [
+        {"text": "Nº de factura: FA-2348", "bbox": [0, 0, 200, 15], "confidence": None},
+        {"text": line, "bbox": [0, 20, 200, 35], "confidence": None},
+    ]
+    fields = parse_fields(group_lines(lines, 1, "pymupdf"))
+    assert fields["invoice_number"]["status"] == "OK"
+    assert fields["invoice_number"]["value"] == "FA-2348"
+
+
+def test_invoice_number_conflict_is_informative_not_blocking(facts):
+    """Ninguna norma usa el numero de factura: su lectura no puede convertir una factura que cuadra en ESCALAR."""
+    import copy
+    extraction, master, snapshot, policy = facts
+    ex = copy.deepcopy(extraction)
+    ex["fields"]["invoice_number"] = {"value": None, "status": "CONFLICT", "evidence": []}
+    out = evaluate(ex, master, snapshot, policy, "2026-09-19")
+    assert out["result"] == evaluate(*facts, "2026-09-19")["result"]
+    assert not any("número de factura" in q for q in out["questions"])
