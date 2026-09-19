@@ -5,6 +5,7 @@ import os
 import tempfile
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 import pymupdf as fitz
@@ -122,12 +123,28 @@ def create_app(data_dir=None):
             active[batch_id] = {"task": task, "future": executor.submit(function)}
         return {"accepted": True, "task": task}
 
+    def _amount(d):
+        # El total llega como texto ("9221.75") porque Decimal no es JSON-serializable;
+        # se reconstruye aqui para poder comparar por valor, no por orden de caracteres.
+        try:
+            return Decimal(d["total"]) if d["total"] is not None else None
+        except InvalidOperation:
+            return None
+
+    SORTERS = {
+        "total_desc": lambda d: (_amount(d) is None, -(_amount(d) or Decimal(0))),
+        "total_asc": lambda d: (_amount(d) is None, _amount(d) or Decimal(0)),
+        "supplier_asc": lambda d: d["supplier"].casefold(),
+        "supplier_desc": lambda d: d["supplier"].casefold(),
+    }
+
     @app.get("/", response_class=HTMLResponse)
     def home(
         request: Request,
         batch: str | None = None,
         result: str | None = None,
         q: str = "",
+        sort: str = "attention",
         page: int = 1,
     ):
         if batch:
@@ -146,6 +163,10 @@ def create_app(data_dir=None):
                 for d in documents
                 if q.casefold() in (d["file_id"] + " " + (d["nif"] or "") + " " + d["supplier"] + " " + (d["order"] or "")).casefold()
             ]
+        # "attention" is the order decorate_dashboard already applied; sólo se
+        # reordena de verdad si piden explícitamente otra cosa.
+        if sort in SORTERS:
+            documents = sorted(documents, key=SORTERS[sort], reverse=sort == "supplier_desc")
         total_filtered = len(documents)
         pages = max(1, (total_filtered + 39) // 40)
         page = max(1, min(page, pages))
@@ -157,6 +178,7 @@ def create_app(data_dir=None):
             **(data | {"documents": documents}),
             selected_batch=batch,
             selected_result=result,
+            selected_sort=sort,
             query=q,
             current_page=page, total_pages=pages, total_filtered=total_filtered,
             attention=attention,
