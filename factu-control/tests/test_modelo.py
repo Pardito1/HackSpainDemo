@@ -5,6 +5,7 @@ tokens deterministas: así se controla exactamente qué campos quedan sin leer
 y se comprueba la fusión OCR/modelo, la validación y la caché.
 """
 
+import copy
 import json
 from decimal import Decimal
 
@@ -13,6 +14,7 @@ import pytest
 
 from factu import modelo
 from factu.extract import extract_pdf, fusionar_modelo
+from factu.policy import evaluate
 from factu.service import Service
 from conftest import make_pdf
 
@@ -331,6 +333,38 @@ def test_checksum_es_diagnostico_no_bloqueo():
     assert fields["iban"]["status"] == "OK"
     assert fields["iban"]["evidence"][-1]["checksum"] is False
     assert fields["total"]["evidence"][-1]["checksum"] is None
+
+
+def test_pedido_solo_del_modelo_no_produce_no_pagar(facts):
+    """Un pedido leído únicamente por el modelo con asiento PAGADA se consulta,
+    nunca se rechaza; leído por texto nativo u OCR sigue siendo NO_PAGAR."""
+    extraction, master, snapshot, policy = facts
+    pagado = dict(snapshot, rows=[dict(snapshot["rows"][0], estado="PAGADA")])
+    base = evaluate(extraction, master, pagado, policy, "2026-09-19")
+    assert base["result"] == "NO_PAGAR"
+
+    solo_modelo = copy.deepcopy(extraction)
+    fact = solo_modelo["fields"]["order"]
+    fact["evidence"] = [
+        {
+            "raw_value": fact["value"],
+            "value": fact["value"],
+            "error": None,
+            "page": 1,
+            "bbox": None,
+            "coordinate_space": None,
+            "method": "modelo",
+            "confidence": None,
+            "source_text": "Pedido: " + fact["value"],
+            "checksum": None,
+            "transformations": ["modelo", "identifier"],
+        }
+    ]
+    decision = evaluate(solo_modelo, master, pagado, policy, "2026-09-19")
+    assert decision["result"] == "ESCALAR"
+    assert any(
+        "lo leyó el modelo y el ERP lo da por pagado" in q for q in decision["questions"]
+    )
 
 
 # --- (g) parseo de la salida del modelo ----------------------------------------
