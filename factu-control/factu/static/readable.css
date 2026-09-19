@@ -187,3 +187,45 @@ input[type=checkbox] { min-height: 0; width: 18px; height: 18px; flex-shrink: 0;
   .erp-update button { white-space: normal; }
   .decision-reason .reason-next { font-size: 16px; }
 }
+
+/* ── Pulido visual ─────────────────────────────────────────────────────────
+   Solo presentación: no cambia ninguna estructura ni ningún texto. Toda
+   animación vive dentro de prefers-reduced-motion: no-preference. */
+
+/* Contraste de los textos pequeños, medido sobre su fondo real. Los cuatro
+   estaban por debajo del 4,5:1 de AA; el peor, la numeración de filas, en
+   2,70:1. Se oscurece lo justo para pasar, conservando el tono. */
+.invoice-meta { color: #72786b; }  /* 3,73 -> 4,51 */
+.row-number   { color: #71776d; }  /* 2,70 -> 4,56 */
+.folio        { color: #6e7461; }  /* 3,48 -> 4,51 */
+th            { color: #64715d; }  /* 3,70 -> 4,54 */
+
+/* El foco era verde oscuro también sobre la barra lateral, que es verde
+   oscuro: ahí no se veía. */
+.sidebar :focus-visible { outline-color: #cfe3c2; }
+
+/* Filas, badges y botones: el cambio de color deja de ser un salto. */
+tbody tr, .badge, .button, button, .open-link, .sidebar nav a, .text-link {
+  transition: background-color .14s ease, border-color .14s ease, color .14s ease;
+}
+tbody tr:hover .badge { border-color: #c3ccb5; }
+
+/* Mientras un trabajo corre, la tabla y el resumen enseñan las cifras de
+   antes de empezar. Se atenúan y una barra recorre la tabla: son
+   provisionales hasta que el trabajo termina y la página se recarga.
+   La clase la pone `poll()` en app.js. */
+.tablewrap { position: relative; }
+.invoice-table tbody, .summary-strip { transition: opacity .2s ease; }
+body.working .invoice-table tbody, body.working .summary-strip { opacity: .55; }
+
+@media (prefers-reduced-motion: no-preference) {
+  main { animation: page-in .28s ease-out; }
+  body.working .tablewrap::before {
+    content: ""; position: absolute; top: 0; left: 0; z-index: 2;
+    height: 2px; width: 28%;
+    background: linear-gradient(90deg, transparent, #6e9368, transparent);
+    animation: table-sweep 1.15s linear infinite;
+  }
+}
+@keyframes page-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes table-sweep { from { transform: translateX(-100%) } to { transform: translateX(357%) } }
