@@ -20,8 +20,7 @@
 <aside class="sidebar"><a class="brand" href="/">alberto<span>.</span></a><p class="brand-caption">La mesa de las cuentas claras.</p>
 <div class="workspace-label">ESPACIO DE TRABAJO</div>
 <nav aria-label="Navegación principal">
-<a href="/{{ bquery }}" class="{% if request.url.path=='/' and not selected_result %}active{% endif %}">{{ icon('inbox') }}<span>Bandeja</span></a>
-<a href="/?result=ESCALAR{% if selected_batch %}&batch={{ selected_batch }}{% endif %}" class="{% if selected_result=='ESCALAR' %}active{% endif %}">{{ icon('talk') }}<span>Para Alberto</span>{% if metrics is defined and metrics.counts.ESCALAR %}<span class="nav-count">{{ metrics.counts.ESCALAR }}</span>{% endif %}</a>
+<a href="/{{ bquery }}" class="{% if request.url.path=='/' %}active{% endif %}">{{ icon('inbox') }}<span>Bandeja</span>{% if metrics is defined and metrics.counts.ESCALAR %}<span class="nav-count">{{ metrics.counts.ESCALAR }}</span>{% endif %}</a>
 <a href="/sources{{ bquery }}" class="{% if request.url.path=='/sources' %}active{% endif %}">{{ icon('source') }}<span>Fuentes y cambios</span></a>
 <a href="/groups{{ bquery }}" class="{% if request.url.path=='/groups' %}active{% endif %}">{{ icon('group') }}<span>En común</span></a>
 <a href="/operations{{ bquery }}" class="{% if request.url.path=='/operations' %}active{% endif %}">{{ icon('chart') }}<span>Actividad y coste</span></a>
