@@ -1,4 +1,5 @@
 """Plain-language labels. Presentation never modifies source facts or decisions."""
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 FIELDS_ES = {"invoice_number":"Número de factura", "supplier_nif":"NIF del proveedor",
@@ -15,6 +16,20 @@ EVENTS_ES = {"decision_published":"Resultado registrado", "human_correction":"Le
     "source_change_applied":"Nueva fuente aplicada", "source_change_previewed":"Impacto calculado",
     "erp_snapshot_published":"ERP sincronizado", "batch_ingested":"Lote registrado",
     "erp_request_retry":"Consulta ERP reintentada", "worker_run":"Procesamiento terminado"}
+
+def greeting(hour=None):
+    """Saludo segun la hora local de la maquina que sirve la app.
+
+    Herramienta local de un solo operador (ver README): el reloj del
+    servidor es el mismo que el de quien la usa, así que no hace falta
+    la hora del navegador.
+    """
+    hour = datetime.now().hour if hour is None else hour
+    if 6 <= hour < 14:
+        return "Buenos días,"
+    if 14 <= hour < 21:
+        return "Buenas tardes,"
+    return "Buenas noches,"
 
 def euros(value):
     if value is None or value == "":

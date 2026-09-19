@@ -323,6 +323,10 @@ class Service(WorkspaceMixin):
                             "cache_hit": bool(cached),
                             "pages": len(extraction["pages"]),
                             "engines": extraction["engines"],
+                            "ocr_used": any(
+                                p.get("method") == "rapidocr-onnxruntime"
+                                for p in extraction["pages"]
+                            ),
                         },
                         db=db,
                     )
@@ -922,16 +926,33 @@ class Service(WorkspaceMixin):
         costs = self.store.all(
             "SELECT * FROM costs" + (" WHERE batch_id=?" if batch_id else ""), params
         )
-        extraction_times = [
-            c["seconds"] for c in costs if c["stage"] in ("extract", "extract_cache")
-        ]
-        sorted_times = sorted(extraction_times)
+
+        def percentiles(times):
+            times = sorted(times)
+            if not times:
+                return None, None
+            p50 = statistics.median(times)
+            p95 = times[min(len(times) - 1, int(len(times) * 0.95))]
+            return p50, p95
+
+        extraction_costs = [c for c in costs if c["stage"] in ("extract", "extract_cache")]
+        ocr_times, text_times = [], []
+        for c in extraction_costs:
+            payload = json.loads(c["payload"]) if c["payload"] else {}
+            (ocr_times if payload.get("ocr_used") else text_times).append(c["seconds"])
+        extract_p50, extract_p95 = percentiles([c["seconds"] for c in extraction_costs])
+        ocr_p50, ocr_p95 = percentiles(ocr_times)
+        text_p50, text_p95 = percentiles(text_times)
         wall_events = self.store.all(
             "SELECT payload FROM events WHERE kind='worker_run'"
             + (" AND batch_id=?" if batch_id else ""),
             params,
         )
-        run_records = [json.loads(e["payload"]) for e in wall_events]
+        run_records = []
+        for e in wall_events:
+            run = json.loads(e["payload"])
+            run["per_second"] = run["processed"] / run["wall_seconds"] if run["wall_seconds"] else None
+            run_records.append(run)
         metrics = {
             "documents": len(items),
             "decisions": sum(counts.values()),
@@ -941,12 +962,14 @@ class Service(WorkspaceMixin):
             "compute_seconds": sum(c["seconds"] for c in costs if c["stage"] != "human_review"),
             "human_seconds": sum(c["seconds"] for c in costs if c["stage"] == "human_review"),
             "human_responses": sum(c["stage"] == "human_review" for c in costs),
-            "extract_p50": statistics.median(sorted_times) if sorted_times else None,
-            "extract_p95": (
-                sorted_times[min(len(sorted_times) - 1, int(len(sorted_times) * 0.95))]
-                if sorted_times
-                else None
-            ),
+            "extract_p50": extract_p50,
+            "extract_p95": extract_p95,
+            "extract_ocr_p50": ocr_p50,
+            "extract_ocr_p95": ocr_p95,
+            "extract_ocr_count": len(ocr_times),
+            "extract_text_p50": text_p50,
+            "extract_text_p95": text_p95,
+            "extract_text_count": len(text_times),
             "worker_runs": run_records,
             "cost_note": "Sin llamadas de pago. Infraestructura y tiempo humano no valorados; no equivalen a coste cero.",
             "accuracy": None,

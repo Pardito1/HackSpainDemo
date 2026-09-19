@@ -24,7 +24,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .service import Service
 from .erp import ERPUnavailable
 from .utils import canonical
-from .presentation import FIELDS_ES, RESULTS_ES, EVENTS_ES, euros, decorate_dashboard
+from .presentation import FIELDS_ES, RESULTS_ES, EVENTS_ES, euros, greeting, decorate_dashboard
 
 ROOT = Path(__file__).parent
 
@@ -72,7 +72,7 @@ def create_app(data_dir=None):
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
     templates = Jinja2Templates(directory=ROOT / "templates")
     templates.env.filters["euros"] = euros
-    templates.env.globals.update(field_labels=FIELDS_ES, result_labels=RESULTS_ES, event_labels=EVENTS_ES)
+    templates.env.globals.update(field_labels=FIELDS_ES, result_labels=RESULTS_ES, event_labels=EVENTS_ES, greeting=greeting)
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="factu-worker")
     active = {}
     lock = threading.Lock()
