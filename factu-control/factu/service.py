@@ -911,7 +911,11 @@ class Service(WorkspaceMixin):
             + (" AND batch_id=?" if batch_id else ""),
             params,
         )
-        run_records = [json.loads(e["payload"]) for e in wall_events]
+        run_records = []
+        for e in wall_events:
+            run = json.loads(e["payload"])
+            run["per_second"] = run["processed"] / run["wall_seconds"] if run["wall_seconds"] else None
+            run_records.append(run)
         metrics = {
             "documents": len(items),
             "decisions": sum(counts.values()),
