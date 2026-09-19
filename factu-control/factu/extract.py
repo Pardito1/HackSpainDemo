@@ -10,7 +10,15 @@ from functools import lru_cache
 import pymupdf as fitz
 
 from . import modelo
-from .utils import clean, digest, identifier, invoice_date, money
+from .utils import (
+    DATE_WORDS,
+    clean,
+    date_language,
+    digest,
+    identifier,
+    invoice_date,
+    money,
+)
 
 VERSION = "native-rapidocr-modelo-8"
 FIELDS = (
@@ -218,7 +226,7 @@ def parse_fields(lines):
             }
         )
 
-    date_pattern = r"\d{4}-\d{2}-\d{2}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4}"
+    date_pattern = r"\d{4}-\d{2}-\d{2}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}"
     for line in lines:
         s = line["text"]
         for m in re.finditer(
@@ -260,14 +268,24 @@ def parse_fields(lines):
                     candidates["invoice_number"][-1]["transformations"].append("split_adjacent_date_label")
         for m in re.finditer(r"\bPO\s*[-–]\s*\d{4}\s*[-–]\s*\d{3,6}\b", s, re.I):
             candidate("order", m[0], line, m.span(), identifier)
+        # La etiqueta admite cualquier idioma del lote ("Data de emissão",
+        # "Ausstellungsdatum"), pero el valor sale del patrón numérico o de las
+        # tablas de palabras: sin comodín, la prosa no produce candidatos.
         for m in re.finditer(
-            r"(?:fecha(?:\s+de\s+emisi[oó]n|\s+factura)?|date)\s*[:.]?\s*("
+            r"(?:fecha|date|data|datum)[^\d]{0,25}?[:.]?\s*("
             + date_pattern
+            + r"|"
+            + DATE_WORDS
             + r")",
             s,
             re.I,
         ):
             candidate("date", m[1], line, m.span(1), invoice_date)
+            language = date_language(m[1])
+            if language:
+                candidates["date"][-1]["transformations"].append(
+                    f"date_words:{language}"
+                )
         if not re.search(r"cliente|destinatario|facturar\s+a|bill\s+to", s, re.I):
             for m in re.finditer(
                 r"(?:NIF|CIF|Tax\s*ID|VAT\s*ID)\s*[:.]?\s*([A-Z]\s*\d{7}\s*[A-Z0-9]|\d{8}[A-Z])\b",

@@ -103,6 +103,14 @@ class Service(WorkspaceMixin):
             raise ValueError("El lote debe contener PDFs y nombres de archivo únicos")
         workbook = Path(workbook)
         master = read_master(workbook)
+        # No se puede evaluar "hoy" antes del último pedido conocido: con un
+        # as_of anterior toda factura posterior parecería futura y escalaría.
+        last_order = master.get("last_order_date")
+        if last_order and as_of < last_order:
+            raise ValueError(
+                f"as_of {as_of} es anterior al último pedido del maestro "
+                f"({last_order}); revisa la fecha de referencia"
+            )
         master["blob"] = str(self.store.blob(workbook.read_bytes(), ".xlsx"))
         master_id = self.store.put_source("master", master)
         policy_id = self.policy(policy_path, actor)
