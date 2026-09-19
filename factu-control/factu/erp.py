@@ -150,6 +150,7 @@ class ERPClient:
             raise ERPUnavailable("Metadatos de paginación inválidos") from exc
         if not 1 <= pages <= 100000 or total < 0:
             raise ERPUnavailable("Paginación fuera de límites")
+        self.callback("erp_pages_known", {"pages": pages, "total": total})
         records, responses = [], []
         for page in range(1, pages + 1):
             root, content = (

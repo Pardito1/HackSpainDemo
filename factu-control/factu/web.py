@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -140,6 +141,29 @@ def create_app(data_dir=None):
                 )
             active[batch_id] = {"task": task, "future": executor.submit(function)}
         return {"accepted": True, "task": task}
+
+    def erp_progress(batch_id):
+        # Reconstruido a partir de los eventos de auditoría que ya emite ERPClient,
+        # no de un estado aparte: lo que se ve en vivo es lo mismo que queda registrado.
+        rows = service.store.all(
+            "SELECT kind,payload FROM events WHERE batch_id=? AND kind IN ('erp_request','erp_pages_known') "
+            "ORDER BY id DESC LIMIT 500",
+            (batch_id,),
+        )
+        pages = total = page = retries = None
+        for row in rows:
+            payload = json.loads(row["payload"])
+            if row["kind"] == "erp_pages_known":
+                if pages is None:
+                    pages, total = payload["pages"], payload["total"]
+                continue
+            if payload.get("attempt", 1) > 1:
+                retries = (retries or 0) + 1
+            if page is None and payload.get("status") == 200:
+                match = re.search(r"pagina=(\d+)", payload.get("path", ""))
+                if match:
+                    page = int(match.group(1))
+        return {"page": page, "pages": pages, "total": total, "retries": retries}
 
     def _amount(d):
         # El total llega como texto ("9221.75") porque Decimal no es JSON-serializable;
@@ -291,6 +315,8 @@ def create_app(data_dir=None):
             "active": bool(task and not task["future"].done()),
             "task": task["task"] if task else None,
         }
+        if run["active"] and run["task"] == "ERP":
+            run["erp"] = erp_progress(batch_id)
         if task and task["future"].done():
             try:
                 run["result"] = task["future"].result()
