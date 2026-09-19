@@ -23,6 +23,12 @@ document.querySelectorAll('.human-form').forEach(form=>{
   });
   commit.addEventListener('click',async()=>{if(!pending)return;commit.disabled=true;try{await api(`/api/documents/${form.dataset.document}/answer/commit`,pending);location.reload();}catch(e){toast(e.message);commit.disabled=false;}});
 });
+document.querySelectorAll('.retract-form').forEach(form=>form.addEventListener('submit',async event=>{
+  event.preventDefault();const button=form.querySelector('[type=submit]');button.disabled=true;
+  const data=new FormData(form);
+  try{await api(`/api/documents/${form.dataset.document}/answer/retract`,{actor:data.get('actor'),reason:data.get('reason')});location.reload();}
+  catch(e){toast(e.message);button.disabled=false;}
+}));
 function showChange(batch,id){location.href=`/sources?batch=${encodeURIComponent(batch)}&change=${encodeURIComponent(id)}#change-${encodeURIComponent(id)}`;}
 document.querySelectorAll('.source-form,.erp-change-form').forEach(form=>form.addEventListener('submit',async event=>{
   event.preventDefault();const button=form.querySelector('button[type=submit]');button.disabled=true;

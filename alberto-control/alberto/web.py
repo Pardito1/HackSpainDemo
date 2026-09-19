@@ -50,6 +50,12 @@ class HumanRequest(BaseModel):
     preview_token: str | None = None
 
 
+class RetractRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    actor: str = Field(min_length=1, max_length=120)
+    reason: str = Field(min_length=10, max_length=2000)
+
+
 class ChangeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     actor: str = Field(min_length=1, max_length=120)
@@ -304,6 +310,10 @@ def create_app(data_dir=None):
         if not body.preview_token:
             raise ValueError("Primero revisa el efecto de tu respuesta")
         return service.human_commit(doc_id, **body.model_dump())
+
+    @app.post("/api/documents/{doc_id}/answer/retract")
+    def human_retract(doc_id: str, body: RetractRequest):
+        return service.retract_human_answer(doc_id, body.actor, body.reason)
 
     @app.post("/api/batches/{batch_id}/changes/upload")
     async def change_upload(batch_id: str, kind: str = Form(...), actor: str = Form(...),
