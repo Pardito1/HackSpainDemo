@@ -15,10 +15,16 @@ from __future__ import annotations
 import argparse
 import sys
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
-from pipeline.erp_estado import consultar_erp, transicionar_estado, verificar_duplicado
+from pipeline.erp_estado import (
+    consultar_erp,
+    forzar_resincronizacion_erp,
+    transicionar_estado,
+    verificar_duplicado,
+    verificar_duplicado_contenido,
+)
 from pipeline.extraccion import extraer_campos
 from pipeline.interfaces import (
     VERSION_ERP,
@@ -185,6 +191,15 @@ def procesar_una(
     transicionar_estado(file_id, EstadoProceso.PROCESANDO, DIR_ESTADO)
 
     campos = extraer_campos(ruta_pdf, file_id)
+
+    # Duplicado por CONTENIDO (mismo NIF+numero+importe+fecha, otro
+    # nombre de archivo): distinto del duplicado por file_id de arriba.
+    # Este SI necesita su propia linea en outcomes.jsonl (es un file_id
+    # nuevo de La Caja), pero la decision se fuerza a ESCALAR.
+    dup_contenido = verificar_duplicado_contenido(campos, DIR_ESTADO)
+    if dup_contenido.es_duplicado:
+        duplicados_acumulados.append(dup_contenido)
+
     parcial = aplicar_reglas(campos, ruta_excel)
     erp = consultar_erp(campos)
 
@@ -197,6 +212,17 @@ def procesar_una(
 
     transicionar_estado(file_id, EstadoProceso.DECIDIR, DIR_ESTADO)
     outcome = consolidar_decision(campos, parcial, erp)
+    if dup_contenido.es_duplicado and outcome.result != ResultadoFinal.ESCALAR:
+        outcome = replace(
+            outcome,
+            result=ResultadoFinal.ESCALAR,
+            razonamiento=(
+                f"{outcome.razonamiento} | Posible duplicado de "
+                f"{dup_contenido.file_id_original} ({dup_contenido.motivo}): "
+                "no se paga en automatico, norma 5 (nunca pagar dos veces el mismo pedido)."
+            ),
+            confianza=min(outcome.confianza, 0.4),
+        )
     reg = transicionar_estado(file_id, EstadoProceso.HECHO, DIR_ESTADO)
     traza = construir_traza(reg.timestamps, campos, parcial, erp, outcome)
     escribir_salidas(outcome, traza, DIR_OUTPUTS, duplicados_acumulados)
@@ -253,6 +279,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Fuerza las 3 facturas de ejemplo aunque haya PDFs en entradas/",
     )
+    parser.add_argument(
+        "--resync-erp",
+        action="store_true",
+        help="Tira la cache del ERP y la vuelve a bajar entera antes de procesar "
+        "(usar cuando llegue el lote2 del sabado o cambie un dato el domingo)",
+    )
     return parser.parse_args(argv)
 
 
@@ -267,6 +299,19 @@ def main(argv=None) -> int:
             ruta = DIR_OUTPUTS / nombre
             if ruta.exists():
                 ruta.unlink()
+
+    if args.resync_erp:
+        print("[erp] --resync-erp: tirando la cache y bajando el ERP entero de nuevo...")
+        resumen = forzar_resincronizacion_erp(DIR_ESTADO)
+        aviso_fallos = (
+            f", con fallos en paginas {', '.join(sorted(resumen['paginas_fallidas']))}"
+            if resumen["paginas_fallidas"]
+            else ""
+        )
+        print(
+            f"[erp] listo: {resumen['total_pedidos']} pedidos en "
+            f"{resumen['total_paginas']} paginas (completo={resumen['completo']}){aviso_fallos}"
+        )
 
     duplicados: list = []
     for file_id, ruta_pdf in listar_facturas(solo_demo=args.solo_demo):

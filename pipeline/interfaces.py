@@ -75,6 +75,10 @@ class CamposExtraidos:
     iva: Optional[float] = None
     fecha: Optional[str] = None  # YYYY-MM-DD cuando se sepa parsear
     numero_factura: Optional[str] = None
+    # Clave de conciliacion con el ERP (Norma_Pagos_v3, regla 2). Todas las
+    # facturas reales lo imprimen como "Pedido: PO-2026-XXXX". Sin esto, P3
+    # no puede cruzar contra los asientos del bridge. Anadido por P3.
+    pedido: Optional[str] = None
     campos_texto_libre: list[CampoTextoLibre] = field(default_factory=list)
     tiene_capa_texto: bool = True
     uso_ocr: bool = False
@@ -239,6 +243,29 @@ def consultar_erp(campos: CamposExtraidos) -> ResultadoERP:
         responsabilidad de esta funcion, no del LLM.
 
     Implementacion: `pipeline.erp_estado.consultar_erp`.
+    """
+    raise NotImplementedError("Contrato: implementar en erp_estado.py")
+
+
+def verificar_duplicado_contenido(campos: "CamposExtraidos", directorio_estado: Path) -> InfoDuplicado:
+    """INTERFAZ P3, ADICIONAL (no estaba en el encargo original).
+
+    Complementa a `verificar_duplicado` (que solo cala el mismo file_id
+    reprocesado). Esta cala la MISMA factura llegada con otro nombre de
+    archivo (NIF+numero+importe+fecha iguales) -- caso real en La Caja:
+    "reimpresion_0712.pdf" / "copia_2026_0518.pdf" son escaneos sin capa
+    de texto que huelen a ser el reenvio de una factura ya vista.
+
+    Recibe:
+        campos: salida de P1 (necesita nif_proveedor, numero_factura,
+            importe y fecha; si falta alguno, no se pronuncia).
+        directorio_estado: la misma carpeta de la cola persistente.
+
+    Devuelve:
+        InfoDuplicado. Si es_duplicado, el orquestador debe forzar
+        ESCALAR (norma 6) en vez de dejar pasar un posible pago doble.
+
+    Implementacion: `pipeline.erp_estado.verificar_duplicado_contenido`.
     """
     raise NotImplementedError("Contrato: implementar en erp_estado.py")
 
