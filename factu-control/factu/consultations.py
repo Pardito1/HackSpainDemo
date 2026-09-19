@@ -59,7 +59,16 @@ def workspace(service, batch_id=None):
         topics = set()
         if "currency" in failed:
             topics.add("currency")
-        if failed & {"amount_matches_order", "tax_arithmetic", "total_arithmetic"}:
+        amount_rule_ids = failed & {"amount_matches_order", "tax_arithmetic", "total_arithmetic"}
+        # When the currency is unknown, policy deliberately leaves the ERP
+        # amount comparison as UNKNOWN: an amount question would be redundant
+        # and misleading until the supplier identifies the currency. Keep the
+        # internal trace of that dependency, but ask the supplier only once.
+        amount_comparison_blocked_by_currency = (
+            amount_rule_ids == {"amount_matches_order"}
+            and fields.get("currency", {}).get("status") != "OK"
+        )
+        if amount_rule_ids and not amount_comparison_blocked_by_currency:
             # Check the original internally first when a read is uncertain.
             if all(fields.get(k, {}).get("status") == "OK" for k in ("base", "tax_rate", "tax_amount", "total")):
                 topics.add("amounts")

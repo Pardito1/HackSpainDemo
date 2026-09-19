@@ -16,7 +16,10 @@ def main():
         for name in ("README.md", "GITHUB.md", "ACTUALIZAR-DEMO.md", "PROCESAR-500.md", "pyproject.toml", "requirements.lock", ".gitignore")
     ]
     extensions = {".py", ".md", ".html", ".css", ".js", ".mjs", ".json", ".pdf", ".svg"}
-    for folder in ("factu", "docs", "tests", "scripts"):
+    # Las etiquetas y el informe del Lote 2 forman parte de la evidencia de
+    # evaluación: incluirlos permite repetir la métrica publicada sin
+    # empaquetar datos de ejecución, credenciales ni PDFs del reto.
+    for folder in ("factu", "docs", "tests", "scripts", "evaluacion"):
         chosen.extend(
             p
             for p in (root / folder).rglob("*")

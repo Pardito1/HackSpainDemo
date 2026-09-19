@@ -1,6 +1,27 @@
 # Verificación realizada · 19 septiembre 2026
 
-## Actualización 0.7.0
+## Actualización 0.10.0 · Lote 2 público
+
+La ejecución integrada contra el bridge oficial arrancado con
+`--lote2 erp_export_lote2.csv` validó 40 originales, Excel v7, proveedores y
+pedidos incrementales, snapshot HTTP y perfil `lote2_ocr_v1`. Resultado del
+corte con fecha `2026-09-19`: **19 PAGAR, 1 NO_PAGAR, 20 ESCALAR**, sin
+pendientes y con auditoría válida. `PO-2026-0071` conserva sus dos asientos y
+elige el último `PAGADA` únicamente porque proveedor/NIF/importe concuerdan y
+la fecha máxima es única.
+
+`python -m pytest -q` supera **279 pruebas Python** (dos avisos externos de
+deprecación). `scripts/evaluate_lote2_ocr.py --strict-groups` mide el perfil
+completo contra transcripciones manuales internas revisadas: 99,0 % de exact
+match macro de campos en un holdout interno agrupado de 10 PDFs; 8/10
+expedientes con campos de riesgo autoaceptados y correctos frente a etiqueta,
+31/38 de cobertura segura entre expedientes elegibles y 31/40 (77,50 %) sobre
+el lote completo. No es accuracy de pagos, de RapidOCR aislado ni validación
+privada; la agrupación actual solo acredita proveedor, no layout visual
+independiente. El informe trazable es
+`evaluacion/lote2_ocr_report.v1.json`.
+
+## Histórico · Actualización 0.7.0
 
 153 pruebas Python y 6 JavaScript pasan. 500 documentos reevaluados con el histórico parcial incorporado, sin repetir lecturas ni aprobar pagos: 273 PAGAR, 9 NO_PAGAR, 218 ESCALAR. Se comprueban las 500 páginas de expediente, las pantallas principales y exportación de 500 nombres únicos. Integridad válida sobre 500 documentos, 3000 decisiones históricas, cinco fuentes y 501 blobs. El Excel original no se modifica. Los dos pedidos históricos no coinciden con los del lote, y no contienen identidad, número de factura ni estado de pago.
 
@@ -47,18 +68,25 @@ Materiales del repositorio `ikurotime/500-sombras-de-alberto`, commit inspeccion
 
 El informe actualizado `benchmark-v02.json` mide la versión 0.2: 46,967 segundos de extremo a extremo; 5,219 segundos de ERP; 30 intentos y 3 reintentos; 638,75 documentos/minuto en este lote; 1413,88 MiB de RSS máximo del proceso Python. Equipo macOS 15.1 arm64, 12 CPU lógicas, un worker, caché fría y ERP normal. El informe anterior `benchmark-lote1.json` se conserva como histórico 0.1. No es un compromiso de SLA ni una proyección validada a millones de documentos. El benchmark se ejecutó mientras había otras comprobaciones locales activas.
 
-No hay etiquetas independientes del primer lote ni acceso a la referencia privada: **no se ha medido accuracy ni se ha obtenido APTO oficial**. Los casos escalados incluyen limitaciones reales del OCR y discrepancias de negocio; no deben presentarse todos como anomalías correctamente detectadas sin revisión.
+No hay etiquetas equivalentes del primer lote ni acceso a la referencia privada:
+**no se ha medido accuracy de pagos ni se ha obtenido APTO oficial**. Lote 2
+añade una medición interna del perfil de extracción, no una certificación. Los
+casos escalados incluyen limitaciones reales del OCR y discrepancias de negocio;
+no deben presentarse todos como anomalías correctamente detectadas sin revisión.
 
 ## Interfaz y empaquetado
 
 Verificadas las rutas principales con FastAPI TestClient y comprobados visualmente la bandeja y un expediente con evidencia sobre el PDF. El resaltado se comprobó sobre el IBAN de `FA-9104_electricidad.pdf`. Los textos del PDF no se ejecutan ni alteran la política. Instalación editable y `pip check` satisfactorios.
 
-El paquete no incluye base de datos de usuario, credenciales reales, PDFs oficiales, resultados del jurado ni un JSONL inventado del segundo lote. El generador y ERP de demo son sintéticos y están identificados como tales.
+El paquete no incluye base de datos de usuario, credenciales reales, PDFs
+oficiales, resultados del jurado ni un JSONL estático generado fuera de un
+estado auditado. El generador y ERP de demo son sintéticos y están identificados
+como tales.
 
 ## Pendiente antes de presentar
 
 1. Aprobar con el equipo los criterios de decisión y las precedencias de fuentes.
 2. Revisar una muestra independiente de propuestas PAGAR y todos los escalados críticos; medir precisión por categoría y tiempo humano.
-3. Incorporar datos/ERP/norma oficiales del lote 2 y ejecutar regresiones.
-4. El `docs/albertitos_plan.pdf` refleja la versión 0.4.0. Actualizarlo de nuevo tras el lote 2 y cualquier cambio posterior.
+3. Repetir la evaluación de extracción con el próximo lote/una muestra externa antes de cambiar umbrales.
+4. Comprobar que `docs/albertitos_plan.pdf` corresponde a v0.10.0 y regenerarlo solo si cambian métricas o ADRs.
 5. Confirmar plazo y comprobar el repositorio de entrega separado.

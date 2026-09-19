@@ -1,0 +1,9 @@
+{
+  "schema_version": "factu-lote2-ocr-splits-v1",
+  "purpose": "Cada PDF etiquetado debe aparecer una sola vez. Reserva test antes de ajustar la extracción.",
+  "splits": {
+    "train": ["ejemplo-train.pdf"],
+    "validation": ["ejemplo-validation.pdf"],
+    "test": ["ejemplo-test.pdf"]
+  }
+}

@@ -1,6 +1,15 @@
-# FactU · La mesa de las cuentas claras · v0.9.2
+# FactU · La mesa de las cuentas claras · v0.10.0
 
-**Integración 0.9.2:** interfaz 0.9.1 y funciones del equipo en `main`, sin sustituir su motor opcional de lectura con modelo. **251 pruebas Python y 13 JavaScript superadas**. Se conservan la ordenación de tabla, la retirada de respuestas y el historial. [Cambios y límites de esta integración](docs/RELEASE-v0.9.2.md).
+**Actualización Lote 2:** añade un perfil de extracción aislado para los 40
+PDFs nuevos, `lote2_ocr_v1`, y conserva el perfil existente para el lote de
+500. Usa texto nativo y RapidOCR local solo como segundo testigo cuando hace
+falta. Contra transcripciones manuales internas revisadas de los originales
+públicos, el holdout interno agrupado alcanza **99,0 % de exact match macro de
+campos** y 8/10 expedientes con campos de riesgo autoaceptados y correctos
+frente a etiqueta; no es una métrica de pagos ni una garantía fuera de este
+lote. La ejecución integrada produce **19
+PAGAR, 1 NO_PAGAR y 20 ESCALAR**, con auditoría válida. **279 pruebas Python
+superadas**. [Cambios, límites y protocolo de evaluación](docs/RELEASE-v0.10.0.md).
 
 La aplicación se ejecuta con `python -m factu`, dentro de `factu-control`. Conserva tu carpeta de estado: se admite tanto `factu.sqlite3` como una única base antigua `alberto.sqlite3`; si están ambas, se pide elegir sin borrar ninguna. Haz copia de seguridad con la app parada antes de actualizar.
 
@@ -10,7 +19,12 @@ El repositorio completo contiene los materiales oficiales ya aportados por el eq
 
 **Actualización 0.9.1:** corregida la lectura de `Importe` / `Importe_Total` y el historial repetitivo, sin borrar auditoría. **207 tests Python y 13 JavaScript superados.** v7 y v8 se leen correctamente; las reglas nuevas del Excel v8 de prueba NO se han implementado ni aplicado al lote real. [Cambios, límites y actualización](docs/RELEASE-v0.9.1.md).
 
-El ZIP completo incluye esta app y, en carpetas separadas, los materiales del primer lote y la entrega parcial. `outcomes.jsonl` contiene 500 resultados; el plan está actualizado. **Falta el segundo lote oficial: no hay `outcomes_lote2.jsonl` inventado.** No subas el ZIP completo al repositorio de entrega del jurado.
+El ZIP completo incluye esta app y, en carpetas separadas, los materiales del
+primer lote y la entrega parcial. `outcomes.jsonl` contiene 500 resultados; el
+Lote 2 se procesa mediante un comando dedicado, con sus fuentes y su perfil
+registrados. La exportación de `outcomes_lote2.jsonl` sigue siendo una acción
+explícita y verificable; no subas el ZIP completo al repositorio de entrega del
+jurado.
 
 **Ajuste de interfaz UI1:** la ficha muestra solo «Aprobar para pago» y «No pagar», sin solicitar minutos dedicados. Las dudas siguen pendientes de revisión. Excel, ERP y política se eligen desde un único selector; el ERP no requiere archivo y conserva la vista previa antes de aplicar. [Detalle del ajuste](docs/INTERFAZ-v0.9.0-UI1.md).
 
@@ -39,12 +53,16 @@ Para actualizar desde 0.4-0.6, conserva una copia de la carpeta `data` con la ap
 
 Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ERP y proponer `PAGAR`, `NO_PAGAR` o `ESCALAR`. Hecha para el track Maisa «500 sombras de Alberto».
 
-**Código funcional, no un sistema bancario de producción. No ejecuta pagos ni modifica el ERP.** Se ha probado sobre los 500 PDFs del primer lote, con OCR local y el bridge HTTP oficial. Los resultados no están contrastados con la referencia privada del jurado. La norma v4 y el segundo lote requieren validación cuando se publiquen.
+**Código funcional, no un sistema bancario de producción. No ejecuta pagos ni
+modifica el ERP.** Se ha probado sobre los 500 PDFs iniciales y los 40 PDFs
+públicos de Lote 2, con OCR local y el bridge HTTP oficial. Los resultados no
+están contrastados con la referencia privada del jurado. Cualquier nueva norma
+o lote requiere evaluación y versionado antes de ampliar automatizaciones.
 
 ## Qué incluye
 
 - Bandeja web con filtros, carga de lotes y estados operativos.
-- Lectura en embudo: texto nativo con PyMuPDF → OCR local RapidOCR/ONNX en páginas escaneadas → modelo multimodal solo para los campos que el OCR deja sin resolver (lee, nunca decide).
+- Lectura en embudo: texto nativo con PyMuPDF → OCR local RapidOCR/ONNX en páginas escaneadas → modelo multimodal solo para los campos que el OCR deja sin resolver (lee, nunca decide). Lote 2 añade un segundo testigo RapidOCR multilingüe, aislado por perfil y con coordenadas/confianza.
 - Evidencia por campo: texto original, valor normalizado, página, coordenadas, método, transformaciones y candidatos contradictorios.
 - Maestro Excel con referencias a celdas e histórico parcial de pedidos como alerta revisable. Las otras hojas y las fórmulas no se ejecutan ni se toman como instrucciones.
 - ERP por HTTP/XML: autenticación, paginación completa, renovación de sesión y reintentos acotados. Se conservan las respuestas XML, sin guardar el token.
@@ -109,6 +127,32 @@ factu --data data serve --port 8080
 
 Abre **http://127.0.0.1:8080**. También puedes importar PDFs y Excel desde la interfaz. Selecciona el lote y pulsa primero «Sincronizar ERP» y después «Procesar». La fecha `--as-of` es un contexto explícito de evaluación, no se toma del nombre del archivo.
 
+### Lote 2 oficial · 40 PDFs
+
+El Lote 2 se ejecuta por una ruta separada: valida los 40 nombres y los CSV
+incrementales, fusiona el ERP por HTTP y fija `lote2_ocr_v1` en el lote. No
+mezcla ni reextrae el lote de 500. Arranca el bridge con su actualización:
+
+```bash
+cd ../500-sombras-de-alberto
+python3 alberto_erp.py --lote2 erp_export_lote2.csv
+```
+
+En otra terminal, desde `factu-control`:
+
+```bash
+source .venv/bin/activate
+factu --data data lote2 \
+  --materials ../500-sombras-de-alberto \
+  --as-of 2026-09-19 \
+  --url http://127.0.0.1:8009
+factu --data data serve --port 8080
+```
+
+El comando es idempotente: reanuda el mismo lote si el manifiesto y las
+fuentes coinciden. Si el ERP no anuncia la actualización o falta uno de los
+40 PDFs/CSV, se detiene antes de publicar resultados.
+
 Variables opcionales: `FACTU_DATA`, `ERP_URL`, `ERP_USER`, `ERP_PASSWORD`. Por defecto usa el usuario y clave sintéticos documentados por el reto (`alberto` / `FACTURAS2009`), en `http://127.0.0.1:8009`. No reutilices esas claves en sistemas reales. No incluyas credenciales en URLs ni en Git.
 
 ### Demo independiente de cuatro casos
@@ -145,6 +189,16 @@ La tabla refleja los filtros; los contadores superiores resumen el lote. «0 pen
 | ESCALAR | Discrepancia, ambigüedad, dato ausente o lectura de calidad insuficiente. Se muestran las preguntas pendientes. |
 
 Un fallo técnico que impide terminar el trabajo **no se disfraza de ESCALAR**: queda pendiente y bloquea la exportación. Una lectura completada pero incompleta sí puede requerir revisión humana. No se «rellena» un IBAN/NIF que falta usando el maestro para hacer que coincida.
+
+En Lote 2, una moneda no impresa o ambigua **no se convierte a EUR por el
+idioma, NIF, IBAN o dirección**: se escala. Una factura en USD, JPY, GBP, CHF,
+BRL o MXN se extrae y conserva con su ISO, pero la política v3 no puede
+compararla con un ERP sin tipo de cambio trazable, así que también escala. Las
+anotaciones manuscritas, importes tachados/corregidos, campos contradictorios,
+IBAN fuera de maestro y texto que intenta dar instrucciones bloquean `PAGAR`.
+La única excepción segura a una moneda ausente es `NO_PAGAR` cuando el pedido
+e identidad están verificados y el asiento ERP más reciente, único y
+consistente ya figura como `PAGADA`; no se mueve dinero.
 
 La norma v3 está implementada en `factu/policy.py` y configurada en `factu/policies/v3.json`. Los criterios de `NO_PAGAR` son decisiones explícitas del equipo, no reglas supuestamente publicadas por Maisa. El checksum del IBAN se conserva como diagnóstico, pero no bloquea: los IBAN sintéticos del maestro fallan ese checksum. La regla del reto es la igualdad con el maestro.
 
@@ -185,16 +239,31 @@ Los cambios del ERP se comparan por pedido; los del maestro por proveedor/pedido
 
 Una previsualización ERP fallida conserva la fuente vigente y registra el error: no se ha aplicado el cambio. «Sincronizar ERP completo», en cambio, refresca el lote completo e invalida resultados si falla. La interfaz distingue ambas operaciones.
 
-## Segundo lote y cambios de norma
+## Lote 2 y cambios de norma
 
-1. Conserva los originales y los resultados/versiones del primer lote.
-2. Lee la norma v4 y registra qué cambia; no se interpreta automáticamente con un LLM.
-3. Configura una nueva política JSON. El motor admite cambios de tolerancia, monedas y reglas adicionales `eq`, `ne`, `lte`, `gte` sobre campos extraídos. Semánticas nuevas requieren código y pruebas; no se ignoran campos desconocidos.
-4. Arranca el ERP oficial con la actualización del lote 2 según su manual (su opción `--lote2` fusiona los asientos).
-5. Importa el nuevo directorio con `--policy ruta/politica-v4.json`, sincroniza ese lote y procésalo. No existe un límite de 500/40 codificado.
-6. Se conservan snapshot/política propios por lote y se revisan duplicados entre lotes. Mientras haya documentos sin terminar, no se finalizan decisiones dependientes del índice global de duplicados.
+Lote 2 ya usa el comando dedicado descrito arriba. El runner valida los límites
+del reto a propósito: 500 PDFs en Lote 1 y 40 en Lote 2; ambos conservan
+snapshot, política y perfil de extracción propios. Los duplicados se vuelven a
+calcular entre lotes antes de publicar decisiones.
 
-El adaptador Excel espera `Proveedores`, `Pedidos_2026`, `Norma_Pagos_v3` y las columnas del libro inicial. Si cambia ese esquema, adapta `master.py` con tests antes de importar. Versionar una política no es afirmar compatibilidad automática con una norma desconocida.
+Una norma v4 futura **no** se interpreta automáticamente con un LLM ni se
+puede pasar hoy como `--policy` al comando `lote2`. El flujo correcto es:
+
+1. Guardar el texto/fichero original como una fuente versionada y documentar la
+   diferencia de negocio.
+2. Implementar explícitamente la semántica nueva y sus pruebas; por ejemplo,
+   una política FX necesita moneda nativa, tipo de cambio fechado, fuente
+   autorizada y reglas de redondeo.
+3. Crear un JSON de política válido solo cuando el código represente esa
+   semántica y un responsable lo haya revisado.
+4. Aplicar la política al lote correspondiente y enseñar la previsualización de
+   impacto antes de confirmar.
+
+El adaptador Excel espera `Proveedores`, `Pedidos_2026`, `Norma_Pagos_v3` y las
+columnas del libro inicial; Lote 2 añade adaptadores explícitos para los dos
+CSV incrementales. Si cambia ese esquema, adapta `master.py` con tests antes de
+importar. Versionar una política no afirma compatibilidad automática con una
+norma desconocida.
 
 ```bash
 factu --data data policy ID_DEL_LOTE --file politica-v4.json --actor 'Equipo'
@@ -258,7 +327,14 @@ factu --data data export ID_LOTE2 --output ../entrega/outcomes_lote2.jsonl
 python scripts/validate_submission.py ../entrega --lote1 ../datos/facturas --lote2 ../datos/lote2
 ```
 
-El plan actualizado de esta versión está en `docs/albertitos_plan.pdf`, con arquitectura y cinco ADRs; revisadlo al incorporar el lote 2. Sustituye como referencia al borrador de propuesta anterior del chat. No generamos un segundo JSONL vacío para fingir que hemos procesado datos que todavía no tenemos. La auditoría de materiales está en `docs/MATERIALS.md` y el estado de cumplimiento en `docs/COMPLIANCE.md`.
+El plan actualizado de esta versión está en `docs/albertitos_plan.pdf`, con
+arquitectura y ADRs; revisadlo junto con el nuevo
+`docs/RELEASE-v0.10.0.md` antes de entregar. Sustituye como referencia al
+borrador de propuesta anterior del chat. Lote 2 ya se procesa localmente con
+materiales oficiales, pero el JSONL de entrega se exporta desde el estado
+auditado que vaya a presentarse, no se versiona un resultado estático en el
+código. La auditoría de materiales está en `docs/MATERIALS.md` y el estado de
+cumplimiento en `docs/COMPLIANCE.md`.
 
 El validador comprueba nombres exactos, unicidad, cobertura, valores permitidos y PDF abrible; **no tiene acceso a la referencia privada y no acredita APTO**. La documentación compartida presenta 10:30 y 11:00 como horas distintas: confirmar con la organización y entregar antes de la más temprana hasta aclararlo. Nada se publica ni se envía automáticamente.
 

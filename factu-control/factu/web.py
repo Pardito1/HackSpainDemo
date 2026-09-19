@@ -82,7 +82,7 @@ class SupplierResponseRequest(BaseModel):
 
 def create_app(data_dir=None):
     service = Service(data_dir or os.environ.get("FACTU_DATA", "data"))
-    app = FastAPI(title="FactU · Mesa de trabajo", version="0.9.2")
+    app = FastAPI(title="FactU · Mesa de trabajo", version="0.10.0")
     app.state.service = service
     app.add_middleware(
         TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]

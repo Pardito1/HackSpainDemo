@@ -1,0 +1,654 @@
+{
+  "schema_version": "factu-lote2-ocr-evaluation-v1",
+  "profile": "lote2_ocr_v1",
+  "generated_at": "2026-09-19T18:39:14.065741+00:00",
+  "protocol": {
+    "exact_match": "Valores normalizados por tipo; no compara decisiones de pago.",
+    "automatic_field_acceptance": "status=OK y valor no vacío.",
+    "automatic_document_acceptance": "Todos los campos de riesgo OK, sin warning de OCR ni instrucciones no fiables.",
+    "evaluation_split_role": "train/validation/test es una partición retrospectiva interna; test es holdout agrupado de desarrollo, no prueba ciega ni privada.",
+    "strict_groups": true
+  },
+  "overall": {
+    "documents_labelled": 40,
+    "documents_with_full_autoaccept_labels": 38,
+    "documents_autoaccepted": 31,
+    "documents_autoaccepted_exact": 31,
+    "document_autoaccept_precision": 1.0,
+    "document_autoaccept_coverage": 0.815789,
+    "document_autoaccept_safe_coverage": 0.815789,
+    "document_autoaccept_lot_coverage": 0.775,
+    "macro_exact_match_accuracy": 0.972244,
+    "macro_autoaccept_precision": 1.0,
+    "field_metrics": {
+      "invoice_number": {
+        "labelled": 40,
+        "exact": 38,
+        "exact_match_accuracy": 0.95,
+        "autoaccepted": 38,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.95,
+        "autoaccept_safe_coverage": 0.95
+      },
+      "supplier_nif": {
+        "labelled": 40,
+        "exact": 39,
+        "exact_match_accuracy": 0.975,
+        "autoaccepted": 39,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.975,
+        "autoaccept_safe_coverage": 0.975
+      },
+      "iban": {
+        "labelled": 40,
+        "exact": 39,
+        "exact_match_accuracy": 0.975,
+        "autoaccepted": 39,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.975,
+        "autoaccept_safe_coverage": 0.975
+      },
+      "order": {
+        "labelled": 40,
+        "exact": 39,
+        "exact_match_accuracy": 0.975,
+        "autoaccepted": 39,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.975,
+        "autoaccept_safe_coverage": 0.975
+      },
+      "date": {
+        "labelled": 40,
+        "exact": 38,
+        "exact_match_accuracy": 0.95,
+        "autoaccepted": 38,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.95,
+        "autoaccept_safe_coverage": 0.95
+      },
+      "base": {
+        "labelled": 39,
+        "exact": 38,
+        "exact_match_accuracy": 0.974359,
+        "autoaccepted": 38,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.974359,
+        "autoaccept_safe_coverage": 0.974359
+      },
+      "tax_rate": {
+        "labelled": 39,
+        "exact": 38,
+        "exact_match_accuracy": 0.974359,
+        "autoaccepted": 38,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.974359,
+        "autoaccept_safe_coverage": 0.974359
+      },
+      "tax_amount": {
+        "labelled": 39,
+        "exact": 38,
+        "exact_match_accuracy": 0.974359,
+        "autoaccepted": 38,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.974359,
+        "autoaccept_safe_coverage": 0.974359
+      },
+      "total": {
+        "labelled": 39,
+        "exact": 38,
+        "exact_match_accuracy": 0.974359,
+        "autoaccepted": 38,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.974359,
+        "autoaccept_safe_coverage": 0.974359
+      },
+      "currency": {
+        "labelled": 40,
+        "exact": 40,
+        "exact_match_accuracy": 1.0,
+        "autoaccepted": 35,
+        "autoaccept_precision": 1.0,
+        "autoaccept_coverage": 0.875,
+        "autoaccept_safe_coverage": 0.875
+      }
+    },
+    "pages_by_method": {
+      "pymupdf": 42,
+      "rapidocr-lote2": 3
+    }
+  },
+  "splits": {
+    "train": {
+      "documents_labelled": 15,
+      "documents_with_full_autoaccept_labels": 13,
+      "documents_autoaccepted": 12,
+      "documents_autoaccepted_exact": 12,
+      "document_autoaccept_precision": 1.0,
+      "document_autoaccept_coverage": 0.923077,
+      "document_autoaccept_safe_coverage": 0.923077,
+      "document_autoaccept_lot_coverage": 0.8,
+      "macro_exact_match_accuracy": 1.0,
+      "macro_autoaccept_precision": 1.0,
+      "field_metrics": {
+        "invoice_number": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 15,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "supplier_nif": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 15,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "iban": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 15,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "order": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 15,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "date": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 15,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "base": {
+          "labelled": 14,
+          "exact": 14,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "tax_rate": {
+          "labelled": 14,
+          "exact": 14,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "tax_amount": {
+          "labelled": 14,
+          "exact": 14,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "total": {
+          "labelled": 14,
+          "exact": 14,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "currency": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        }
+      },
+      "pages_by_method": {
+        "pymupdf": 17,
+        "rapidocr-lote2": 1
+      }
+    },
+    "validation": {
+      "documents_labelled": 15,
+      "documents_with_full_autoaccept_labels": 15,
+      "documents_autoaccepted": 11,
+      "documents_autoaccepted_exact": 11,
+      "document_autoaccept_precision": 1.0,
+      "document_autoaccept_coverage": 0.733333,
+      "document_autoaccept_safe_coverage": 0.733333,
+      "document_autoaccept_lot_coverage": 0.733333,
+      "macro_exact_match_accuracy": 0.933333,
+      "macro_autoaccept_precision": 1.0,
+      "field_metrics": {
+        "invoice_number": {
+          "labelled": 15,
+          "exact": 13,
+          "exact_match_accuracy": 0.866667,
+          "autoaccepted": 13,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.866667,
+          "autoaccept_safe_coverage": 0.866667
+        },
+        "supplier_nif": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "iban": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "order": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "date": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "base": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "tax_rate": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "tax_amount": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "total": {
+          "labelled": 15,
+          "exact": 14,
+          "exact_match_accuracy": 0.933333,
+          "autoaccepted": 14,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.933333,
+          "autoaccept_safe_coverage": 0.933333
+        },
+        "currency": {
+          "labelled": 15,
+          "exact": 15,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 12,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.8,
+          "autoaccept_safe_coverage": 0.8
+        }
+      },
+      "pages_by_method": {
+        "pymupdf": 15,
+        "rapidocr-lote2": 1
+      }
+    },
+    "test": {
+      "documents_labelled": 10,
+      "documents_with_full_autoaccept_labels": 10,
+      "documents_autoaccepted": 8,
+      "documents_autoaccepted_exact": 8,
+      "document_autoaccept_precision": 1.0,
+      "document_autoaccept_coverage": 0.8,
+      "document_autoaccept_safe_coverage": 0.8,
+      "document_autoaccept_lot_coverage": 0.8,
+      "macro_exact_match_accuracy": 0.99,
+      "macro_autoaccept_precision": 1.0,
+      "field_metrics": {
+        "invoice_number": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "supplier_nif": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "iban": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "order": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "date": {
+          "labelled": 10,
+          "exact": 9,
+          "exact_match_accuracy": 0.9,
+          "autoaccepted": 9,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.9,
+          "autoaccept_safe_coverage": 0.9
+        },
+        "base": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "tax_rate": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "tax_amount": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "total": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 10,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 1.0,
+          "autoaccept_safe_coverage": 1.0
+        },
+        "currency": {
+          "labelled": 10,
+          "exact": 10,
+          "exact_match_accuracy": 1.0,
+          "autoaccepted": 9,
+          "autoaccept_precision": 1.0,
+          "autoaccept_coverage": 0.9,
+          "autoaccept_safe_coverage": 0.9
+        }
+      },
+      "pages_by_method": {
+        "pymupdf": 10,
+        "rapidocr-lote2": 1
+      }
+    }
+  },
+  "errors": [
+    {
+      "file_id": "FA-3955_electricidad.pdf",
+      "split": "validation",
+      "field": "invoice_number",
+      "expected": "FA-3955",
+      "observed": null,
+      "status": "CONFLICT",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e16_P011.pdf",
+      "split": "test",
+      "field": "date",
+      "expected": "2026-03-15",
+      "observed": null,
+      "status": "INVALID",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "invoice_number",
+      "expected": "FA-9117",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "supplier_nif",
+      "expected": "J40112358",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "iban",
+      "expected": "ES5531590012348765123407",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "order",
+      "expected": "PO-2026-1317",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "date",
+      "expected": "2026-06-12",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "base",
+      "expected": "680",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "tax_rate",
+      "expected": "21",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "tax_amount",
+      "expected": "142.8",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    },
+    {
+      "file_id": "e17_P007.pdf",
+      "split": "validation",
+      "field": "total",
+      "expected": "822.8",
+      "observed": null,
+      "status": "MISSING",
+      "normalization_error": null
+    }
+  ],
+  "unlabelled_pdf_files": [],
+  "limitations": [
+    "Las etiquetas son transcripciones manuales internas revisadas; no sustituyen una doble anotación independiente.",
+    "Una coincidencia de campos no equivale a autorizar un pago; las reglas y el ERP siguen decidiendo.",
+    "No se publica una accuracy si faltan etiquetas o si un PDF aparece en más de un split.",
+    "La agrupación usa los IDs declarados por el dataset; un template_id derivado del proveedor no prueba independencia de layout visual."
+  ],
+  "provenance": {
+    "profile_identity": {
+      "profile": "lote2_ocr_v1",
+      "version": "native-rapidocr-lote2-v1",
+      "mode": "defects",
+      "min_witness_confidence": 0.84,
+      "min_conflict_confidence": 0.92
+    },
+    "extraction_versions": [
+      "native-rapidocr-lote2-v1"
+    ],
+    "engine_sets_observed": [
+      {
+        "pymupdf": "1.28.2",
+        "rapidocr": "1.4.4",
+        "ocr_model_hashes": {
+          "ch_PP-OCRv4_det_infer.onnx": "d2a7720d45a54257208b1e13e36a8479894cb74155a5efe29462512d42f49da9",
+          "ch_PP-OCRv4_rec_infer.onnx": "48fc40f24f6d2a207a2b1091d3437eb3cc3eb6b676dc3ef9c37384005483683b",
+          "ch_ppocr_mobile_v2.0_cls_infer.onnx": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c"
+        },
+        "profile": "lote2_ocr_v1",
+        "lote2_ocr": {
+          "engine": "RapidOCR",
+          "profile": "lote2_ocr_v1",
+          "version": "native-rapidocr-lote2-v1",
+          "mode": "defects",
+          "min_witness_confidence": 0.84,
+          "min_conflict_confidence": 0.92,
+          "second_witness_only": true
+        }
+      }
+    ],
+    "pdf_sha256": {
+      "2026-08-05_P005.pdf": "a7feb45947c1e1a99af00135c19ea02e7f3d7f6838ea41fa279bb13ef8b1e07a",
+      "2026-08-09_P001.pdf": "67c2b975d68d248fd58e7df3d4367cc846ffb93a96e761943516346b907d0c93",
+      "2026-08-22_P010.pdf": "8d4bbbe2ef26e7746fb99a020f69345f2320b78c6ea405b44ccbfc024b52360e",
+      "2026-08-26_P010.pdf": "ebd1acaed15fe2ac564ba90e19c1762a7c40926dd47dbb9120b4ae15bee4148e",
+      "2026-08-27_P007.pdf": "72be96e033caa30d69c0d08277ccff1113f2ac3aafab8580e780e9dfefdddd8d",
+      "2026-27450_suministros.pdf": "40a6cc024d9cb2010cd34d140b6c15c0f49c488d999766b309c2d78484fd804b",
+      "2026-42111_construcciones.pdf": "3e5db096e7b3ff35e54bcc0ada255f4fa2f529f4e7d622d3c940508f8924e203",
+      "2026-72452_suministros.pdf": "c7dc4dcb4aaf9fc803d88c029596944a81f64b43ad9cdc72f8d5ff9d3bbaf823",
+      "FA-3955_electricidad.pdf": "923854226d095ad63822a607b2fa5e87ca147edc377726ea0442dc9d8fe65103",
+      "FA-5103_electricidad.pdf": "ef3a7747adc7a718cfc36a96252fe625fe0816ce32b5cd64319061643999c58c",
+      "FA-6217_transportes.pdf": "4a916803b73bd65bdec40c7b269fc659584d713807ac6090c73823f88f43c138",
+      "FA-7357_papelería.pdf": "51c8efa44ed1ab913225d1a7c3b7845f714623e506597415fb1be986d3d2630c",
+      "FA-7532_informática.pdf": "f942d366cc8515b770598e58b3de0331f9b29e161bd67d869d1acb6cf4b87e8d",
+      "e01_P001.pdf": "2275123eb1e2d5ff2deaa0044420abf3cd5691e436f405e118dc44bb03f4c674",
+      "e02_P002.pdf": "de7291797a63a042a544da6ab3ba7906ba09b6d05ae0373df87e17a1d629ce34",
+      "e03_P002.pdf": "5fc16ac991000266c7234ac8c5d8b4455917cb1672af894f9b40022e43f9e51f",
+      "e04_P003.pdf": "22c8f8276f66dc6101ae45a1c6767ba39e8083674df98ed6f551087d74402865",
+      "e05_P004.pdf": "cedf15dfae72247718ebab0095c85c2a302182960a344f683e9ae18a21428620",
+      "e06_P013.pdf": "593a16568c6e64f75f05fceceac8b2432774accb1e1d0139c08c735972a88710",
+      "e07_P006.pdf": "d1c9da038d4019cc61a9dabfbe5baf36cc7773113eff396ed12a0ce193ea5a36",
+      "e08_P012.pdf": "9877d02a4a456e5df7ae6adec698f4d8ab11e9b1c8677e12737750be7f5becc3",
+      "e09_P015.pdf": "d662af5a048346b600fff23e83b36168d2edea0603501dc290cf66946fa283ee",
+      "e10_P006.pdf": "9f0ed56af59b0459428abda3ae8eb99869725141aa16cca95b1fc1b5d3e14cc0",
+      "e11_P011.pdf": "e8228ac8d6b7f3cf6c9ccd937c58aa50b9e1b43d55e01fa59d59a39be8f0ea14",
+      "e12_P010.pdf": "b727ba162ef050e1810f22d06e6f2cfc53f2fb91e4f70502c989c7405e039e88",
+      "e13_P014.pdf": "a3f521540266b87edc44f07afbae4367709f03a1975730b5b7576438be2b20da",
+      "e14_P004.pdf": "c04c135b2a8eee6f69c0f5177882a31cc77372724667c2694334d0fdcdb446f3",
+      "e15_P012.pdf": "19d72e25c97fe475388349a579e6f7123a5e0d16b6a47538047582a9c63f15aa",
+      "e16_P011.pdf": "19c8b430b58be97f21b9094f25b5d3884bac9179eea6b1dab75ea051062ac76b",
+      "e17_P007.pdf": "e69efc42416316dfe137e797138b3e1f175f8990174aa762fe793469c9cabc40",
+      "e18_P001.pdf": "c9f996012f0c859a8a26d501d12f3b03164ac44842c4f2d5eb4fab41c50366e5",
+      "factura_1210.pdf": "8e6692ccd2c2bef73e56e9ac165d981f0582af100d7e3561b01df99453ec43af",
+      "factura_1221.pdf": "5a54f7ccb40fc1969e73ddce4cfa81d4a068db0af738fa0824dcac3edbeb9a9e",
+      "factura_2923.pdf": "1d742ce82cf8969fca1b08322b9e678f3b76af38f62f75e6931cdf98244c09fa",
+      "factura_6932.pdf": "ecd88106f44f986b4e5fafb87b944be466e3d66805dddbc23e7ddb39ca5c2f7f",
+      "factura_6990.pdf": "2073da1dc27619dc3746bdf44ad91cad5f23eabda8a27a79bc7874454da48aab",
+      "factura_7036.pdf": "02ce7da8acc339ed8dedfc656f86628af96a94622a4c774d0a1af42c170b5f01",
+      "factura_7495.pdf": "b2355ff82242f77e50dc0a129cdb4aa684e0228a52b94ea5f7079c1339995de4",
+      "factura_7713.pdf": "75ea8f7a63331033b5dd48dc3bb5708581e73c6a23b3529420feb298e1ccfd9e",
+      "factura_9660.pdf": "4ff6d5120c6af469d091821211641db16df308f82fdb20d83aaeccb847d38d01"
+    },
+    "pdf_manifest_sha256": "c4d5877240a82ea52d41e23a43876fc48110a6444a4ebd36804f9c60f3b8cbb9",
+    "code_sha256": {
+      "scripts/evaluate_lote2_ocr.py": "f8dedcbd62eca730930bd7e0d46dc11cf0151d615922a74261665e7857975278",
+      "factu/extract.py": "16febec585cfcecc1ec93accf2708c05fea457baefbe52d8dcd889894910b13d",
+      "factu/lote2_ocr.py": "172c6a91c67b8dbb62e18ec47060a84dd99ea339267d654c4cc1bc8c2d9cf83d",
+      "factu/policy.py": "7000364de06cf65a4c891010259623d43dd9a5e374233c567a3da12df0f4ebb0",
+      "pyproject.toml": "520e1dd5a05fb0b693652f5d7402bd743ab0ed1a29ccee6660e4515a7708f79c",
+      "requirements.lock": "fda431c2d0f4fd17043565b4dd0e4a86de9edbce1f45e2b014825316ee83fab4"
+    },
+    "runtime": {
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "implementation": "CPython",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.39"
+    }
+  },
+  "inputs": {
+    "labels": {
+      "path": "evaluacion/lote2_labels.v1.json",
+      "sha256": "67b851430c6d97e4f609526ea98c0812dd1877f7ce752357c650d29b04888a5f"
+    },
+    "splits": {
+      "path": "evaluacion/lote2_splits.v1.json",
+      "sha256": "e4dcb2ff7061ca7e17aceb53843e9f2b9d62395dc93b995525750b5983ddda8a"
+    },
+    "pdf_directory": "../../500-sombras-de-alberto/facturas_primin"
+  }
+}

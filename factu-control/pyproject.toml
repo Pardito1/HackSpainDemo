@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "factu-control"
-version = "0.9.2"
+version = "0.10.0"
 description = "Conciliación de facturas con evidencia, ERP, revisión humana y coste medible"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 ocr = ["rapidocr-onnxruntime==1.4.4"]
 test = ["pytest>=8,<10"]
+docs = ["reportlab>=4.0,<5"]
 
 [project.scripts]
 factu = "factu.cli:main"
