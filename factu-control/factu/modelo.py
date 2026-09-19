@@ -117,6 +117,12 @@ def nombre_modelo(backend=None):
     return _env("MODELO_EXTRACCION") or MODELOS_POR_DEFECTO.get(backend, "")
 
 
+def paginas_texto_activas():
+    """Tercer lector también en páginas con texto nativo. Apagado por defecto:
+    solo se enciende para el lote 2, donde las etiquetas están en otro idioma."""
+    return _env("MODELO_PAGINAS_TEXTO") in ("1", "true", "si", "sí")
+
+
 def credenciales_completas(backend=None):
     backend = backend or backend_activo()
     if backend == "cf_workers_ai":

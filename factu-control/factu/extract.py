@@ -20,7 +20,7 @@ from .utils import (
     money,
 )
 
-VERSION = "native-rapidocr-modelo-8"
+VERSION = "native-rapidocr-modelo-9"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -35,12 +35,52 @@ FIELDS = (
 _ocr = None
 _ocr_lock = threading.Lock()
 
+# La línea del cliente nunca aporta el NIF del proveedor: el lote 2 la rotula en
+# seis idiomas y sin estas etiquetas el CIF del banco entra como segundo candidato.
+CLIENT_LINE = (
+    r"client|destinatario|factura[rd]\s+a|facturé\s+à|faturar\s+a"
+    r"|rechnungsempfänger|bill\s+to"
+)
+# Formatos de identidad fiscal presentes en el maestro: español, francés/alemán
+# (país + dígitos), japonés (13 dígitos) y brasileño (CNPJ con puntos y barra).
+SUPPLIER_NIF = (
+    r"(?:NIF|CIF|Tax\s*ID|VAT\s*ID|N\.?\s*[º°]?\s*TVA|USt-?\s*ID|P\.\s*IVA)\s*[:.]?\s*"
+    r"([A-Z]\s*\d{7}\s*[A-Z0-9]|\d{8}[A-Z]|[A-Z]{2}\d{9,12}"
+    r"|\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}|\d{13})\b"
+)
+# IBAN de cualquier país, sensible a mayúsculas y siempre bajo etiqueta IBAN.
+IBAN_RUN = re.compile(r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ \u00a0]?[A-Z0-9]){11,40}")
+# Largo por pa\u00eds del registro ISO 13616. Un pa\u00eds que no est\u00e9 aqu\u00ed no produce
+# candidato: el campo queda MISSING y la factura escala, que es el lado seguro.
+IBAN_LENGTHS = {
+    "BE": 16, "BR": 29, "CH": 21, "DE": 22, "ES": 24, "FR": 27,
+    "GB": 22, "IT": 27, "JP": 23, "NL": 18, "PT": 25,
+}
+
+
+def iban_cut(run, start):
+    """Recorta la tirada al largo que el registro da a su pa\u00eds.
+
+    Una l\u00ednea puede pegar el IBAN con lo que sigue ("... 7890 TOTAL 121,00");
+    el largo por pa\u00eds es lo \u00fanico que los separa sin inventar nada.
+    """
+    expected = IBAN_LENGTHS.get(run[:2])
+    if expected is None:
+        return None
+    seen = 0
+    for i, character in enumerate(run):
+        seen += character.isalnum()
+        if seen == expected:
+            return run[: i + 1], (start, start + i + 1)
+    return None
+
 # A single OCR line can contain several labels. Never take its final number as
 # the amount for every label (e.g. "Base 100,00 IVA21%21,00 TOTAL121,00EUR").
 AMOUNT_LABEL = re.compile(
-    r"(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<base>importe\s+base|base(?:\s+imponible)?|subtotal)"
-    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<total>importe\s+total|total(?:\s+factura|\s+a\s+pagar)?)"
-    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<tax_amount>(?:cuota\s+)?(?:[I1l]\.?V\.?A\.?|VAT|tax))",
+    r"(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<base>importe\s+base|sous-total|zwischensumme"
+    r"|imponibile|valor\s+base|base(?:\s+imponible|\s+imposable)?|subtotal)"
+    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<total>importe\s+total|gesamt|total(?:\s+factura|\s+a\s+pagar)?)"
+    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<tax_amount>(?:cuota\s+)?(?:[I1l]\.?V\.?A\.?|VAT|TVA|MwSt\.?|tax))",
     re.I,
 )
 AMOUNT_TOKEN = re.compile(
@@ -107,6 +147,7 @@ def engine_versions():
             "backend": modelo.backend_activo(),
             "modelo": modelo.nombre_modelo(),
             "disponible": modelo.credenciales_completas(),
+            "paginas_texto": modelo.paginas_texto_activas(),
         }
     }
 
@@ -286,16 +327,14 @@ def parse_fields(lines):
                 candidates["date"][-1]["transformations"].append(
                     f"date_words:{language}"
                 )
-        if not re.search(r"cliente|destinatario|facturar\s+a|bill\s+to", s, re.I):
-            for m in re.finditer(
-                r"(?:NIF|CIF|Tax\s*ID|VAT\s*ID)\s*[:.]?\s*([A-Z]\s*\d{7}\s*[A-Z0-9]|\d{8}[A-Z])\b",
-                s,
-                re.I,
-            ):
+        if not re.search(CLIENT_LINE, s, re.I):
+            for m in re.finditer(SUPPLIER_NIF, s, re.I):
                 candidate("supplier_nif", m[1], line, m.span(1), identifier)
         if re.search(r"[I1l]BAN|cuenta\s+de\s+abono", s, re.I):
-            for m in re.finditer(r"\b(ES\s*\d{2}(?:\s*\d){20})(?!\d)", s, re.I):
-                candidate("iban", m[1], line, m.span(1), identifier)
+            for m in IBAN_RUN.finditer(s):
+                cut = iban_cut(m[0], m.start())
+                if cut:
+                    candidate("iban", cut[0], line, cut[1], identifier)
         labels = list(AMOUNT_LABEL.finditer(s))
         for i, label in enumerate(labels):
             # Labels must start a line or follow another amount, not occur in prose.
@@ -474,7 +513,10 @@ def extract_pdf(path, ocr=True):
         warnings.append({"code": "PDF_CORRUPT", "page": 0, "message": str(exc)})
     fields = parse_fields(lines)
     model_usage = None
-    pendientes = [p["number"] for p in pages if p["needs_ocr"]]
+    # Con MODELO_PAGINAS_TEXTO el modelo lee también páginas con texto nativo:
+    # sigue siendo un tercer lector que solo aporta candidatos validados.
+    texto_tambien = modelo.paginas_texto_activas()
+    pendientes = [p["number"] for p in pages if texto_tambien or p["needs_ocr"]]
     incompletos = [
         f for f in FIELDS if f != "invoice_number" and fields[f]["status"] != "OK"
     ]
