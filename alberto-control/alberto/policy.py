@@ -115,12 +115,17 @@ def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
         return fact.get("value") if fact.get("status") == "OK" else None
 
     for field in FIELDS:
+        # El numero de factura no interviene en ninguna norma: su lectura es
+        # informativa y nunca bloquea la decision (una etiqueta o un OCR sucio
+        # no deben convertir una factura que cuadra en ESCALAR).
+        informativo = field == "invoice_number"
         check(
             "field:" + field,
-            val(field) is not None,
-            f"Lectura: {FIELDS_ES.get(field, field)}",
+            True if informativo else val(field) is not None,
+            f"Lectura: {FIELDS_ES.get(field, field)}" + (" (informativo)" if informativo else ""),
             f"Confirma {FIELDS_ES.get(field, field).lower()} en el documento original.",
-            {"field": field, "candidates": fields.get(field, {}).get("evidence", [])},
+            {"field": field, "candidates": fields.get(field, {}).get("evidence", []),
+             "status": fields.get(field, {}).get("status"), "blocking": not informativo},
         )
     complete_pages = not any(
         w["code"] in ("OCR_UNAVAILABLE", "OCR_DISABLED", "OCR_EMPTY")
