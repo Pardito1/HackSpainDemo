@@ -20,6 +20,7 @@ from pathlib import Path
 
 from pipeline.erp_estado import (
     consultar_erp,
+    forzar_resincronizacion_erp,
     transicionar_estado,
     verificar_duplicado,
     verificar_duplicado_contenido,
@@ -278,6 +279,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Fuerza las 3 facturas de ejemplo aunque haya PDFs en entradas/",
     )
+    parser.add_argument(
+        "--resync-erp",
+        action="store_true",
+        help="Tira la cache del ERP y la vuelve a bajar entera antes de procesar "
+        "(usar cuando llegue el lote2 del sabado o cambie un dato el domingo)",
+    )
     return parser.parse_args(argv)
 
 
@@ -292,6 +299,19 @@ def main(argv=None) -> int:
             ruta = DIR_OUTPUTS / nombre
             if ruta.exists():
                 ruta.unlink()
+
+    if args.resync_erp:
+        print("[erp] --resync-erp: tirando la cache y bajando el ERP entero de nuevo...")
+        resumen = forzar_resincronizacion_erp(DIR_ESTADO)
+        aviso_fallos = (
+            f", con fallos en paginas {', '.join(sorted(resumen['paginas_fallidas']))}"
+            if resumen["paginas_fallidas"]
+            else ""
+        )
+        print(
+            f"[erp] listo: {resumen['total_pedidos']} pedidos en "
+            f"{resumen['total_paginas']} paginas (completo={resumen['completo']}){aviso_fallos}"
+        )
 
     duplicados: list = []
     for file_id, ruta_pdf in listar_facturas(solo_demo=args.solo_demo):

@@ -252,6 +252,30 @@ def _sincronizar_erp(
     return por_pedido
 
 
+def forzar_resincronizacion_erp(directorio_estado: Path | None = None) -> dict:
+    """Tira la cache y vuelve a bajar el ERP entero desde cero.
+
+    Pensada para el lote2 del sabado (el ERP se reinicia con
+    `--lote2 erp_export_lote2.csv` y puede traer pedidos NUEVOS o
+    ACTUALIZADOS) y para el cambio de dato de La Caja del domingo. Un
+    resync normal (sin forzar) solo rellena paginas que faltan; esto
+    vuelve a pedir las 26 completas porque un pedido ya conocido puede
+    haber cambiado de importe/estado sin que su pagina "falte".
+
+    No se llama por factura: se dispara una vez, a mano, con
+    `python3 main.py --resync-erp`.
+    """
+    directorio_estado = directorio_estado or _DIR_ESTADO_DEFECTO
+    por_pedido = _sincronizar_erp(directorio_estado, consultas=[], forzar=True)
+    estado_guardado = json.loads(_ruta_cache(directorio_estado).read_text(encoding="utf-8"))
+    return {
+        "total_paginas": estado_guardado.get("total_paginas"),
+        "total_pedidos": len(por_pedido),
+        "paginas_fallidas": estado_guardado.get("paginas_fallidas", {}),
+        "completo": estado_guardado.get("completo", False),
+    }
+
+
 _RAIZ_REPO = Path(__file__).resolve().parent.parent
 _DIR_ESTADO_DEFECTO = _RAIZ_REPO / "estado"
 
