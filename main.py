@@ -15,10 +15,15 @@ from __future__ import annotations
 import argparse
 import sys
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
-from pipeline.erp_estado import consultar_erp, transicionar_estado, verificar_duplicado
+from pipeline.erp_estado import (
+    consultar_erp,
+    transicionar_estado,
+    verificar_duplicado,
+    verificar_duplicado_contenido,
+)
 from pipeline.extraccion import extraer_campos
 from pipeline.interfaces import (
     VERSION_ERP,
@@ -185,6 +190,15 @@ def procesar_una(
     transicionar_estado(file_id, EstadoProceso.PROCESANDO, DIR_ESTADO)
 
     campos = extraer_campos(ruta_pdf, file_id)
+
+    # Duplicado por CONTENIDO (mismo NIF+numero+importe+fecha, otro
+    # nombre de archivo): distinto del duplicado por file_id de arriba.
+    # Este SI necesita su propia linea en outcomes.jsonl (es un file_id
+    # nuevo de La Caja), pero la decision se fuerza a ESCALAR.
+    dup_contenido = verificar_duplicado_contenido(campos, DIR_ESTADO)
+    if dup_contenido.es_duplicado:
+        duplicados_acumulados.append(dup_contenido)
+
     parcial = aplicar_reglas(campos, ruta_excel)
     erp = consultar_erp(campos)
 
@@ -197,6 +211,17 @@ def procesar_una(
 
     transicionar_estado(file_id, EstadoProceso.DECIDIR, DIR_ESTADO)
     outcome = consolidar_decision(campos, parcial, erp)
+    if dup_contenido.es_duplicado and outcome.result != ResultadoFinal.ESCALAR:
+        outcome = replace(
+            outcome,
+            result=ResultadoFinal.ESCALAR,
+            razonamiento=(
+                f"{outcome.razonamiento} | Posible duplicado de "
+                f"{dup_contenido.file_id_original} ({dup_contenido.motivo}): "
+                "no se paga en automatico, norma 5 (nunca pagar dos veces el mismo pedido)."
+            ),
+            confianza=min(outcome.confianza, 0.4),
+        )
     reg = transicionar_estado(file_id, EstadoProceso.HECHO, DIR_ESTADO)
     traza = construir_traza(reg.timestamps, campos, parcial, erp, outcome)
     escribir_salidas(outcome, traza, DIR_OUTPUTS, duplicados_acumulados)
