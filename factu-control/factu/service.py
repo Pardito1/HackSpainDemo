@@ -13,6 +13,7 @@ from pathlib import Path
 
 from .db import Store
 from .erp import ERPClient
+from . import modelo
 from .extract import FIELDS, VERSION, engine_versions, extract_pdf, invoice_number
 from .master import read_master
 from .policy import apply_reviews, evaluate, validate_policy
@@ -325,6 +326,25 @@ class Service(WorkspaceMixin):
                         },
                         db=db,
                     )
+                    if not cached and extraction.get("model_usage"):
+                        uso = extraction["model_usage"]
+                        eur, configurado = modelo.coste_externo(uso)
+                        self.store.cost(
+                            "modelo",
+                            uso.get("segundos") or 0,
+                            job["document_id"],
+                            batch_id,
+                            {
+                                "backend": uso.get("backend"),
+                                "modelo": uso.get("modelo"),
+                                "tokens_in": uso.get("tokens_in"),
+                                "tokens_out": uso.get("tokens_out"),
+                                "neurons": uso.get("neurons"),
+                                "precio_configurado": configurado,
+                            },
+                            external_eur=eur,
+                            db=db,
+                        )
                     self.store.event(
                         "extracted",
                         {

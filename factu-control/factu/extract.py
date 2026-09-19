@@ -12,7 +12,7 @@ import pymupdf as fitz
 from . import modelo
 from .utils import clean, digest, identifier, invoice_date, money
 
-VERSION = "native-rapidocr-4"
+VERSION = "native-rapidocr-modelo-1"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -39,7 +39,7 @@ def invoice_number(value):
 
 
 @lru_cache(maxsize=1)
-def engine_versions():
+def _engines_locales():
     try:
         package = importlib.metadata.distribution("rapidocr-onnxruntime")
         from pathlib import Path
@@ -55,6 +55,18 @@ def engine_versions():
         "pymupdf": fitz.VersionBind,
         "rapidocr": ocr_version,
         "ocr_model_hashes": artifacts,
+    }
+
+
+def engine_versions():
+    # La parte del modelo es dinámica a propósito: la clave de la caché de
+    # extracción debe distinguir "leído con modelo" de "modelo no disponible".
+    return _engines_locales() | {
+        "modelo": {
+            "backend": modelo.backend_activo(),
+            "modelo": modelo.nombre_modelo(),
+            "disponible": modelo.credenciales_completas(),
+        }
     }
 
 
