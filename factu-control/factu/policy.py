@@ -313,6 +313,22 @@ def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
             extra["question"],
             {"actual": current, "expected": extra["value"], "op": extra["op"]},
         )
+    soporte_order = [
+        c
+        for c in fields.get("order", {}).get("evidence", [])
+        if val("order") is not None and c.get("value") == val("order")
+    ]
+    order_solo_modelo = bool(soporte_order) and all(
+        c.get("method") == "modelo" for c in soporte_order
+    )
+    check(
+        "order_read_by_model",
+        not (order_solo_modelo and erp and erp["estado"] == "PAGADA"),
+        "Ningún rechazo depende solo de una lectura del modelo",
+        "El número de pedido lo leyó el modelo y el ERP lo da por pagado: "
+        "confirma el pedido en el original antes de rechazar el pago",
+        {"solo_modelo": order_solo_modelo, "erp": erp},
+    )
     confirmed_paid = (
         identity_ok
         and snapshot.get("complete") is True
@@ -320,6 +336,7 @@ def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
         and erp
         and erp["estado"] == "PAGADA"
         and val("order") is not None
+        and not order_solo_modelo
     )
     confirmed_copy = duplicate["state"] == "confirmed_copy"
     result = (

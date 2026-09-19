@@ -13,6 +13,13 @@ IBAN = (
 )
 
 
+@pytest.fixture(autouse=True)
+def sin_credenciales_modelo(monkeypatch):
+    """Ningún test toca la red: sin credenciales, leer_campos devuelve sin_clave."""
+    for variable in ("CLOUDFLARE_API_TOKEN", "CF_AIG_TOKEN", "LLM_ANTHROPIC_URL"):
+        monkeypatch.delenv(variable, raising=False)
+
+
 def make_pdf(path, total="121,00", iban=IBAN, extra="", raster=False):
     doc = fitz.open()
     page = doc.new_page()

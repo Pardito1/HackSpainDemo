@@ -4,6 +4,8 @@ Para subir el proyecto a GitHub, lee [GITHUB.md](GITHUB.md). El ZIP contiene la 
 
 Corrección 0.3: OCR sin mezclar número y fecha, etiquetas de procedencia, errores de entrada comprensibles, integridad de archivos/decisiones además de eventos y consulta obligatoria ante instrucciones sospechosas detectadas. 112 pruebas Python + 4 JavaScript pasan. La herramienta sigue siendo local, sin autenticación ni pagos reales; lote 2 y validación privada pendientes.
 
+Método `modelo` (nuevo): tercer paso de lectura para páginas escaneadas cuyos campos el OCR local no resuelve. Un modelo multimodal **solo lee** valores con su evidencia literal; nunca decide, y cada lectura pasa una validación propia antes de aceptarse (ver «Lectura con modelo»). Cualquier fallo del proveedor deja el aviso `MODELO_NO_DISPONIBLE` y la factura en ESCALAR. 151 pruebas Python + 4 JavaScript pasan.
+
 Para actualizar datos de una versión anterior, conserva una copia de la carpeta `data` con la app parada. Después ejecuta `factu --data data verify-audit`, `factu --data data reextract ID_DEL_LOTE` y `factu --data data process ID_DEL_LOTE`. Se conserva el historial; las respuestas cuyo contexto cambie requieren nueva revisión. No ignores una comprobación de integridad fallida ni borres el historial para hacerla pasar. Para pruebas del navegador: `node --test tests/test_frontend.mjs`.
 
 Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ERP y proponer `PAGAR`, `NO_PAGAR` o `ESCALAR`. Hecha para el track Maisa «500 sombras de Alberto».
@@ -13,7 +15,7 @@ Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ER
 ## Qué incluye
 
 - Bandeja web con filtros, carga de lotes y estados operativos.
-- Lectura de texto nativo con PyMuPDF; OCR local RapidOCR/ONNX en páginas escaneadas.
+- Lectura en embudo: texto nativo con PyMuPDF → OCR local RapidOCR/ONNX en páginas escaneadas → modelo multimodal solo para los campos que el OCR deja sin resolver (lee, nunca decide).
 - Evidencia por campo: texto original, valor normalizado, página, coordenadas, método, transformaciones y candidatos contradictorios.
 - Maestro Excel con referencias a celdas; hojas antiguas y fórmulas fuera de la fuente aprobada no deciden.
 - ERP por HTTP/XML: autenticación, paginación completa, renovación de sesión y reintentos acotados. Se conservan las respuestas XML, sin guardar el token.
@@ -45,7 +47,7 @@ Instalación alternativa, resolviendo dependencias de tu plataforma:
 python -m pip install -e '.[ocr,test]'
 ```
 
-La descarga inicial de paquetes/modelos necesita Internet; los documentos se procesan localmente. No necesitas claves de un LLM. En Linux, OpenCV puede requerir las bibliotecas de sistema `libGL`/`libglib`. No se instala nada automáticamente fuera del entorno virtual.
+La descarga inicial de paquetes/modelos necesita Internet; los documentos se procesan localmente. Sin claves de LLM la app funciona igualmente: el método `modelo` es opcional y, si faltan credenciales, los escaneados sin resolver quedan en ESCALAR con aviso (ver «Lectura con modelo»). En Linux, OpenCV puede requerir las bibliotecas de sistema `libGL`/`libglib`. No se instala nada automáticamente fuera del entorno virtual.
 
 ### Con el repositorio oficial
 
@@ -112,6 +114,25 @@ Resultado esperado de los datos generados: `demo-1.pdf → PAGAR`, `demo-2.pdf �
 Un fallo técnico que impide terminar el trabajo **no se disfraza de ESCALAR**: queda pendiente y bloquea la exportación. Una lectura completada pero incompleta sí puede requerir revisión humana. No se «rellena» un IBAN/NIF que falta usando el maestro para hacer que coincida.
 
 La norma v3 está implementada en `factu/policy.py` y configurada en `factu/policies/v3.json`. Los criterios de `NO_PAGAR` son decisiones explícitas del equipo, no reglas supuestamente publicadas por Maisa. El checksum del IBAN se conserva como diagnóstico, pero no bloquea: los IBAN sintéticos del maestro fallan ese checksum. La regla del reto es la igualdad con el maestro.
+
+## Lectura con modelo (tercer método)
+
+El embudo de lectura es texto nativo → OCR local → modelo, y cada paso solo actúa donde el anterior no llega. El modelo multimodal se consulta únicamente si una página necesitó OCR **y** algún campo distinto del número de factura sigue sin lectura firme. Devuelve, por campo, el valor, la **línea literal del documento de la que lo copió** y la página; entra como un candidato más (`method="modelo"`) junto a los del OCR: sin lectura previa firme resuelve el campo, y si contradice una lectura OK del OCR el campo queda en CONFLICT y la factura se consulta. El modelo **nunca decide**: `PAGAR`/`NO_PAGAR`/`ESCALAR` sale siempre del motor de reglas.
+
+Toda lectura del modelo pasa una validación previa, porque un modelo puede calcular o inventar en lugar de copiar:
+
+- NIF del emisor: forma de NIF/CIF de 9 caracteres; el CIF del cliente nunca se acepta como emisor.
+- IBAN: `ES` + 22 dígitos (formato).
+- Pedido: formato `PO-AAAA-NNNN` tal cual impreso; no se reconstruyen guiones perdidos.
+- Importes y tipo de IVA: el valor debe aparecer en la evidencia literal; un importe derivado se rechaza como `inferido`.
+
+La validación es formato + evidencia literal + contraste con maestro y ERP: el dígito de control del NIF y el módulo 97 del IBAN se registran en el candidato como diagnóstico (`checksum`), sin bloquear, porque los identificadores del caso son sintéticos (en el maestro solo 1 de 12 NIF pasa el dígito de control y 0 de 12 IBAN pasan el módulo 97). Un valor mal leído no coincide con el maestro y la política lo escala. Lo rechazado por formato queda como INVALID con su motivo, visible en el expediente, y la política escala. Un rechazo nunca se apoya solo en el modelo: si el número de pedido lo leyó únicamente el modelo y el ERP da ese pedido por pagado, la factura se consulta (ESCALAR), no se marca NO_PAGAR.
+
+Configuración por variables de entorno (en `.env`, fuera de Git): `LLM_BACKEND` (`cf_workers_ai` por defecto, `cf_anthropic` opcional vía AI Gateway), `CF_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CF_GATEWAY_ID`, `CF_AIG_TOKEN` o `LLM_ANTHROPIC_URL` para el backend Anthropic, `MODELO_EXTRACCION` y `LLM_TIMEOUT_S`. Los precios (`LLM_PRECIO_NEURONA_MIL`, `LLM_PRECIO_IN_MTOK`, `LLM_PRECIO_OUT_MTOK`) también son variables, nunca constantes en el código.
+
+Failover medido, no prometido: sin credenciales no se toca la red y cada escaneado sin resolver queda en ESCALAR con el aviso `MODELO_NO_DISPONIBLE: sin_clave` (lote 1 completo en 48,0 s en un MacBook Air M1, ERP con latencia real, reparto 433/9/58). Con un token inválido el proveedor responde 401 y las 26 páginas afectadas dejan el aviso `auth` con el mismo reparto prudente (85,7 s). Timeouts, 429 y 5xx tienen reintentos acotados y un cortacircuito por proceso: tras 3 errores de red seguidos, el resto del lote no llama al proveedor y sale en segundos con el aviso `circuito_abierto`; `process` lo rearma al arrancar. Cualquier fallo final es un aviso en la extracción, nunca una excepción ni un resultado inventado. La caché de extracción incluye backend, modelo y disponibilidad de credenciales: al recuperarlas, `reextract` + `process` reextrae el lote (los PDF con texto tardan segundos y no llaman al modelo) y solo los escaneados pendientes consultan el modelo.
+
+Coste: cada llamada queda registrada por documento en `costs` (etapa `modelo`) con tokens, neuronas de Workers AI y `external_eur` calculado con el precio configurado. Medido sobre el lote 1 completo desde la app (MacBook Air M1, ERP con latencia real, Workers AI `@cf/meta/llama-4-scout-17b-16e-instruct`, `response_format` json_schema aceptado por el endpoint): 25 páginas leídas por el modelo, 2.856 tokens de entrada y ≈ 300 de salida por página, 93,3 neuronas por página (2.332 en total), ≈ 0,026 $ el lote entero a 0,011 $/1.000 neuronas — dentro de la cuota gratuita de 10.000 neuronas/día. Latencia: 10,2 s por página de media (5,9–24,9 s), 255 s de modelo dentro de los 5 min 20 s del `process` completo. Reparto con modelo: 438 PAGAR / 9 NO_PAGAR / 53 ESCALAR (con OCR solo: 433/9/58); 6 de los 29 escaneados quedan en PAGAR y los 23 en ESCALAR llevan motivo campo a campo (lecturas OCR/modelo en conflicto, formatos rechazados o identidad/IBAN que no casan con el maestro).
 
 ## Revisión humana
 
@@ -180,7 +201,7 @@ python scripts/benchmark.py --pdfs ../500-sombras-de-alberto/facturas \
 
 El benchmark exige un directorio nuevo y mide importación, ERP HTTP con reintentos, extracción/OCR y decisiones. Incluye hardware, memoria máxima del proceso, p50/p95 de extracción y tiempo extremo a extremo. Consulta `docs/benchmark-lote1.json` para una ejecución medida, si está incluido.
 
-Coste externo de inferencia: 0 € porque no hay llamadas de pago. **No significa coste total cero**. Completa las tarifas reales de infraestructura y tiempo humano para usar:
+Coste externo de inferencia: 0 € con el método `modelo` apagado; activado, cada llamada queda en `costs` con neuronas/tokens y su `external_eur` según el precio configurado. **No significa coste total cero**. Completa las tarifas reales de infraestructura y tiempo humano para usar:
 
 `coste_por_factura = (coste_proveedores + horas_infraestructura × €/h + minutos_revisión × €/min) / facturas_procesadas`
 
@@ -211,13 +232,13 @@ El validador comprueba nombres exactos, unicidad, cobertura, valores permitidos 
 - Un worker y una máquina. El bloqueo serializa cambios para evitar carreras; no es un sistema distribuido.
 - OCR genérico, no perfecto. Escaneos borrosos, faxes, rotaciones o caracteres confusos pueden requerir revisión humana.
 - Extractor orientado a campos de factura ES/EN y pedidos `PO-año-número`. No hay extracción general de tablas/líneas, abonos complejos, varios tipos de IVA ni adaptación universal de formatos.
-- No incluye LLM ni orquestador multiagente. La IA implementada es el OCR neuronal local. No se demuestra failover de un proveedor LLM inexistente.
+- El LLM solo lee campos y siempre con evidencia literal validada; no hay orquestador multiagente. Si el proveedor cae, rate-limita o devuelve basura, la lectura degrada a OCR + consulta humana con aviso; el failover se demuestra retirando las credenciales.
 - No hay SSO, roles, cifrado de base de datos, almacenamiento WORM ni separación de tenants. No exponer a Internet ni usar datos reales sin endurecimiento.
 - El historial encadenado detecta modificaciones ordinarias; un administrador con acceso total puede reescribir base y cadena. Guardar el hash final fuera de la máquina reforzaría la evidencia.
 - «PAGAR» es coherencia con las fuentes registradas; no acredita autenticidad legal del PDF, cuenta bancaria o persona revisora.
 
 ## Estructura
 
-`factu/extract.py`: extracción; `master.py`: Excel; `erp.py`: integración; `policy.py`: reglas; `db.py`: estado/evidencias; `service.py`: flujo; `web.py`: interfaz/API; `cli.py`: terminal; `tests/`: pruebas; `scripts/`: demo, benchmark y validador; `docs/`: decisiones técnicas.
+`factu/extract.py`: extracción; `modelo.py`: lectura con modelo multimodal y validación de sus lecturas; `master.py`: Excel; `erp.py`: integración; `policy.py`: reglas; `db.py`: estado/evidencias; `service.py`: flujo; `web.py`: interfaz/API; `cli.py`: terminal; `tests/`: pruebas; `scripts/`: demo, benchmark y validador; `docs/`: decisiones técnicas.
 
 Las dependencias conservan sus licencias. En particular, revisa la licencia AGPL/comercial de PyMuPDF antes de redistribuir o desplegar un servicio propietario; este paquete no concede licencias sobre dependencias ni datos de terceros.
