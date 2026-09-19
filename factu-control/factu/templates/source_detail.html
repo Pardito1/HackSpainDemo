@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block title %}Fuente registrada · Alberto{% endblock %}{% block breadcrumb %}Fuentes y cambios / Copia registrada{% endblock %}{% block content %}
+{% extends "base.html" %}{% block title %}Fuente registrada · FactU{% endblock %}{% block breadcrumb %}Fuentes y cambios / Copia registrada{% endblock %}{% block content %}
 <a class="back" href="/sources{{ '?batch=' ~ selected_batch if selected_batch else '' }}">← Volver a fuentes y cambios</a>
 {% if kind=='master' %}
 <p class="eyebrow">EXCEL MAESTRO · COPIA REGISTRADA</p><h1>{{ data.filename }}</h1><p class="lede">{{ data.suppliers|length }} proveedores distintos · {{ data.orders|length }} pedidos · hojas usadas: {{ data.sheets|join(', ') }}</p>

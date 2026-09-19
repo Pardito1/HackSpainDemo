@@ -48,7 +48,7 @@ class Store:
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "blobs").mkdir(exist_ok=True)
-        self.path = self.root / "alberto.sqlite3"
+        self.path = self.root / "factu.sqlite3"
         with self.connect() as db:
             db.executescript(SCHEMA)
             # Additive migration for a base created before retraction existed;

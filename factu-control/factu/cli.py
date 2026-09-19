@@ -10,9 +10,9 @@ from .service import Service
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="alberto", description="ALBERTO Control - facturas con evidencia"
+        prog="factu", description="FactU Control - facturas con evidencia"
     )
-    parser.add_argument("--data", default=os.getenv("ALBERTO_DATA", "data"))
+    parser.add_argument("--data", default=os.getenv("FACTU_DATA", "data"))
     sub = parser.add_subparsers(dest="command", required=True)
     ingest = sub.add_parser(
         "ingest", help="Importa originales y registra un manifiesto"

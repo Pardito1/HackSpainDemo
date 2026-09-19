@@ -2,8 +2,8 @@ import json
 import sqlite3
 from pathlib import Path
 import pytest
-from alberto.service import Service
-from alberto.utils import canonical
+from factu.service import Service
+from factu.utils import canonical
 from conftest import make_pdf
 
 

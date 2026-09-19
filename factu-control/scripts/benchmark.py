@@ -7,7 +7,7 @@ import platform
 import resource
 import time
 from pathlib import Path
-from alberto.service import Service
+from factu.service import Service
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
         help="Modo declarado por quien arranca el ERP; no se autodetecta",
     )
     args = p.parse_args()
-    if (Path(args.data) / "alberto.sqlite3").exists():
+    if (Path(args.data) / "factu.sqlite3").exists():
         p.error(
             "Use an empty data directory; this benchmark must not overwrite previous runs"
         )

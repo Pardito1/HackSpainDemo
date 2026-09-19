@@ -1,9 +1,9 @@
 import copy
 from decimal import Decimal
 import pytest
-from alberto.utils import money, identifier, invoice_date, iban_checksum
-from alberto.policy import evaluate, validate_policy
-from alberto.extract import extract_pdf
+from factu.utils import money, identifier, invoice_date, iban_checksum
+from factu.policy import evaluate, validate_policy
+from factu.extract import extract_pdf
 from conftest import make_pdf, IBAN
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 import openpyxl
 import pymupdf as fitz
 import pytest
-from alberto.service import Service
+from factu.service import Service
 from scripts.validate_submission import check_jsonl, validate
 from conftest import make_pdf, make_workbook, IBAN
 

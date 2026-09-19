@@ -63,8 +63,8 @@ class ChangeRequest(BaseModel):
 
 
 def create_app(data_dir=None):
-    service = Service(data_dir or os.environ.get("ALBERTO_DATA", "data"))
-    app = FastAPI(title="Alberto · Mesa de trabajo", version="0.3.0")
+    service = Service(data_dir or os.environ.get("FACTU_DATA", "data"))
+    app = FastAPI(title="FactU · Mesa de trabajo", version="0.3.0")
     app.state.service = service
     app.add_middleware(
         TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]
@@ -73,7 +73,7 @@ def create_app(data_dir=None):
     templates = Jinja2Templates(directory=ROOT / "templates")
     templates.env.filters["euros"] = euros
     templates.env.globals.update(field_labels=FIELDS_ES, result_labels=RESULTS_ES, event_labels=EVENTS_ES)
-    executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="alberto-worker")
+    executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="factu-worker")
     active = {}
     lock = threading.Lock()
 
@@ -234,7 +234,7 @@ def create_app(data_dir=None):
     ):
         if len(files) > 2000:
             raise HTTPException(400, "Máximo 2000 documentos por lote")
-        with tempfile.TemporaryDirectory(prefix="alberto-import-") as temp:
+        with tempfile.TemporaryDirectory(prefix="factu-import-") as temp:
             folder = Path(temp) / "pdfs"
             folder.mkdir()
             master = Path(temp) / "master.xlsx"
@@ -323,7 +323,7 @@ def create_app(data_dir=None):
         content = await file.read(20 * 1024 * 1024 + 1)
         if len(content) > 20 * 1024 * 1024:
             raise ValueError("Archivo demasiado grande")
-        with tempfile.TemporaryDirectory(prefix="alberto-source-") as temp:
+        with tempfile.TemporaryDirectory(prefix="factu-source-") as temp:
             # Keep only a filename, never allow a client supplied path.
             suffix = ".xlsx" if kind == "master" else ".json"
             path = Path(temp) / (Path(file.filename or ("fuente"+suffix)).name)
