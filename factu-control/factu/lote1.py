@@ -22,10 +22,9 @@ def validate_materials(materials):
         raise ValueError(f"Se esperaban 500 PDFs con nombres únicos en {folder}; encontrados: {len(files)}. No uses demo-input.")
     manifest = {}
     for file in files:
-        content = file.read_bytes()
-        if not content.startswith(b"%PDF") or len(content) > 50 * 1024 * 1024:
-            raise ValueError(f"PDF inválido o demasiado grande: {file.name}")
-        manifest[file.name] = digest(content)
+        # Un fichero corrupto o que no es PDF se ingesta igualmente: la
+        # extracción lo marcará PDF_CORRUPT y la decisión será ESCALAR.
+        manifest[file.name] = digest(file.read_bytes())
     return folder, workbook, manifest
 
 

@@ -10,9 +10,17 @@ from functools import lru_cache
 import pymupdf as fitz
 
 from . import lote2_ocr, modelo
-from .utils import clean, digest, identifier, invoice_date, money
+from .utils import (
+    DATE_WORDS,
+    clean,
+    date_language,
+    digest,
+    identifier,
+    invoice_date,
+    money,
+)
 
-VERSION = "native-rapidocr-modelo-7"
+VERSION = "native-rapidocr-modelo-9"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -27,12 +35,52 @@ FIELDS = (
 _ocr = None
 _ocr_lock = threading.Lock()
 
+# La línea del cliente nunca aporta el NIF del proveedor: el lote 2 la rotula en
+# seis idiomas y sin estas etiquetas el CIF del banco entra como segundo candidato.
+CLIENT_LINE = (
+    r"client|destinatario|factura[rd]\s+a|facturé\s+à|faturar\s+a"
+    r"|rechnungsempfänger|bill\s+to"
+)
+# Formatos de identidad fiscal presentes en el maestro: español, francés/alemán
+# (país + dígitos), japonés (13 dígitos) y brasileño (CNPJ con puntos y barra).
+SUPPLIER_NIF = (
+    r"(?:NIF|CIF|Tax\s*ID|VAT\s*ID|N\.?\s*[º°]?\s*TVA|USt-?\s*ID|P\.\s*IVA)\s*[:.]?\s*"
+    r"([A-Z]\s*\d{7}\s*[A-Z0-9]|\d{8}[A-Z]|[A-Z]{2}\d{9,12}"
+    r"|\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}|\d{13})\b"
+)
+# IBAN de cualquier país, sensible a mayúsculas y siempre bajo etiqueta IBAN.
+IBAN_RUN = re.compile(r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ \u00a0]?[A-Z0-9]){11,40}")
+# Largo por pa\u00eds del registro ISO 13616. Un pa\u00eds que no est\u00e9 aqu\u00ed no produce
+# candidato: el campo queda MISSING y la factura escala, que es el lado seguro.
+IBAN_LENGTHS = {
+    "BE": 16, "BR": 29, "CH": 21, "DE": 22, "ES": 24, "FR": 27,
+    "GB": 22, "IT": 27, "JP": 23, "NL": 18, "PT": 25,
+}
+
+
+def iban_cut(run, start):
+    """Recorta la tirada al largo que el registro da a su pa\u00eds.
+
+    Una l\u00ednea puede pegar el IBAN con lo que sigue ("... 7890 TOTAL 121,00");
+    el largo por pa\u00eds es lo \u00fanico que los separa sin inventar nada.
+    """
+    expected = IBAN_LENGTHS.get(run[:2])
+    if expected is None:
+        return None
+    seen = 0
+    for i, character in enumerate(run):
+        seen += character.isalnum()
+        if seen == expected:
+            return run[: i + 1], (start, start + i + 1)
+    return None
+
 # A single OCR line can contain several labels. Never take its final number as
 # the amount for every label (e.g. "Base 100,00 IVA21%21,00 TOTAL121,00EUR").
 AMOUNT_LABEL = re.compile(
-    r"(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<base>importe\s+base|base(?:\s+imponible)?|subtotal)"
-    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<total>importe\s+total|total(?:\s+factura|\s+a\s+pagar)?)"
-    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<tax_amount>(?:cuota\s+)?(?:[I1l]\.?V\.?A\.?|VAT|tax))",
+    r"(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<base>importe\s+base|sous-total|zwischensumme"
+    r"|imponibile|valor\s+base|base(?:\s+imponible|\s+imposable)?|subtotal)"
+    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<total>importe\s+total|gesamt|total(?:\s+factura|\s+a\s+pagar)?)"
+    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<tax_amount>(?:cuota\s+)?(?:[I1l]\.?V\.?A\.?|VAT|TVA|MwSt\.?|tax))",
     re.I,
 )
 AMOUNT_TOKEN = re.compile(
@@ -49,7 +97,16 @@ def currency(value):
     value = clean(value).upper()
     if value == "$":
         raise ValueError("El símbolo $ no identifica por sí solo la moneda")
-    return {"€": "EUR", "EURO": "EUR", "EUROS": "EUR", "£": "GBP"}.get(value, value)
+    return {
+        "€": "EUR",
+        "EURO": "EUR",
+        "EUROS": "EUR",
+        "£": "GBP",
+        "¥": "JPY",
+        "R$": "BRL",
+        "MX$": "MXN",
+        "FR": "CHF",
+    }.get(value, value)
 
 
 def invoice_number(value):
@@ -90,6 +147,7 @@ def engine_versions():
             "backend": modelo.backend_activo(),
             "modelo": modelo.nombre_modelo(),
             "disponible": modelo.credenciales_completas(),
+            "paginas_texto": modelo.paginas_texto_activas(),
         }
     }
 
@@ -103,7 +161,7 @@ def union(boxes):
     ]
 
 
-def group_lines(tokens, page_number, method):
+def group_lines(tokens, page_number, method, warnings=None):
     groups = []
     for token in sorted(
         tokens, key=lambda t: ((t["bbox"][1] + t["bbox"][3]) / 2, t["bbox"][0])
@@ -128,6 +186,9 @@ def group_lines(tokens, page_number, method):
         text = ""
         for token in words:
             token["start"] = len(text)
+            if warnings is not None and re.search(r'[\u200b\u200c\u200d\ufeff\u2060\u00ad]', token["text"]):
+                if not any(w.get("code") == "ZERO_WIDTH_CHARS" and w.get("page") == page_number for w in warnings):
+                    warnings.append({"code": "ZERO_WIDTH_CHARS", "page": page_number, "message": "Caracteres invisibles limpiados."})
             text += clean(token["text"])
             token["end"] = len(text)
             text += " "
@@ -206,11 +267,26 @@ def parse_fields(lines):
             }
         )
 
-    date_pattern = r"\d{4}-\d{2}-\d{2}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4}"
+    date_pattern = r"\d{4}-\d{2}-\d{2}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}"
     for line in lines:
         s = line["text"]
-        for m in re.finditer(r"(?<![A-Z])(?:EUR|USD|GBP|CHF|euros?)(?![A-Z])|€|\$|£", s, re.I):
+        for m in re.finditer(
+            r"(?<![A-Z])(?:EUR|USD|GBP|CHF|JPY|MXN|BRL|euros?)(?![A-Z])"
+            r"|€|£|¥|MX\$|R\$"
+            r"|(?<![A-Z])(?-i:Fr)(?=\s*\d)"
+            r"|\$",
+            s,
+            re.I,
+        ):
             candidate("currency", m[0], line, m.span(), currency)
+        for m in re.finditer(
+            r"(?:divisa\s+de\s+facturaci[oó]n|billing\s+currency|rechnungsw[aä]hrung"
+            r"|moeda\s+de\s+fatura[cç][aã]o|devise\s+de\s+facturation)"
+            r"\s*[:.]?\s*([A-Z]{3})(?![A-Z])",
+            s,
+            re.I,
+        ):
+            candidate("currency", m[1], line, m.span(1), currency)
         for m in re.finditer(
             r"(?:ref\.?\s*factura|n[ºo°]?\s*(?:de\s*)?factura|factura(?:\s+simplificada)?(?:\s*n[ºo°])?|invoice\s*#?)\s*[:#]?\s*([A-Z0-9][A-Z0-9/_-]{2,})",
             s,
@@ -233,24 +309,32 @@ def parse_fields(lines):
                     candidates["invoice_number"][-1]["transformations"].append("split_adjacent_date_label")
         for m in re.finditer(r"\bPO\s*[-–]\s*\d{4}\s*[-–]\s*\d{3,6}\b", s, re.I):
             candidate("order", m[0], line, m.span(), identifier)
+        # La etiqueta admite cualquier idioma del lote ("Data de emissão",
+        # "Ausstellungsdatum"), pero el valor sale del patrón numérico o de las
+        # tablas de palabras: sin comodín, la prosa no produce candidatos.
         for m in re.finditer(
-            r"(?:fecha(?:\s+de\s+emisi[oó]n|\s+factura)?|date)\s*[:.]?\s*("
+            r"(?:fecha|date|data|datum)[^\d]{0,25}?[:.]?\s*("
             + date_pattern
+            + r"|"
+            + DATE_WORDS
             + r")",
             s,
             re.I,
         ):
             candidate("date", m[1], line, m.span(1), invoice_date)
-        if not re.search(r"cliente|destinatario|facturar\s+a|bill\s+to", s, re.I):
-            for m in re.finditer(
-                r"(?:NIF|CIF|Tax\s*ID|VAT\s*ID)\s*[:.]?\s*([A-Z]\s*\d{7}\s*[A-Z0-9]|\d{8}[A-Z])\b",
-                s,
-                re.I,
-            ):
+            language = date_language(m[1])
+            if language:
+                candidates["date"][-1]["transformations"].append(
+                    f"date_words:{language}"
+                )
+        if not re.search(CLIENT_LINE, s, re.I):
+            for m in re.finditer(SUPPLIER_NIF, s, re.I):
                 candidate("supplier_nif", m[1], line, m.span(1), identifier)
         if re.search(r"[I1l]BAN|cuenta\s+de\s+abono", s, re.I):
-            for m in re.finditer(r"\b(ES\s*\d{2}(?:\s*\d){20})(?!\d)", s, re.I):
-                candidate("iban", m[1], line, m.span(1), identifier)
+            for m in IBAN_RUN.finditer(s):
+                cut = iban_cut(m[0], m.start())
+                if cut:
+                    candidate("iban", cut[0], line, cut[1], identifier)
         labels = list(AMOUNT_LABEL.finditer(s))
         for i, label in enumerate(labels):
             # Labels must start a line or follow another amount, not occur in prose.
@@ -275,6 +359,15 @@ def parse_fields(lines):
                 if left.rstrip().endswith("(") and right.lstrip().startswith(")"):
                     raw = "-" + raw  # explicit accounting negative
                 candidate(field, raw, line, (start + m.start(), start + m.end()), printed_amount)
+    # "$" a secas solo es ambiguo si el documento no imprime ningún código ISO;
+    # con "USD ($)" el símbolo se ignora y manda el código.
+    if any(
+        re.fullmatch(r"[A-Za-z]{3}", clean(c["raw_value"]))
+        for c in candidates["currency"]
+    ):
+        candidates["currency"] = [
+            c for c in candidates["currency"] if clean(c["raw_value"]) != "$"
+        ]
     fields = {}
     for field in (*FIELDS, "currency"):
         choices = candidates[field]
@@ -377,53 +470,70 @@ def extract_pdf(path, ocr=True, profile="standard"):
         )
     start = time.monotonic()
     pages, lines, warnings = [], [], []
-    with fitz.open(path) as doc:
-        if doc.needs_pass or not 1 <= len(doc) <= 100:
-            raise ValueError("PDF protegido, vacío o con más de 100 páginas")
-        for i, page in enumerate(doc):
-            tokens = [
-                {"text": w[4], "bbox": list(w[:4]), "confidence": None}
-                for w in page.get_text("words")
-            ]
-            native_length = sum(len(t["text"]) for t in tokens)
-            image_area = sum(
-                r.width * r.height
-                for image in page.get_images()
-                for r in page.get_image_rects(image[0])
-            )
-            needs_ocr = (
-                native_length < 60
-                or image_area > page.rect.width * page.rect.height * 0.45
-            )
-            method = "pymupdf"
-            if needs_ocr and ocr:
-                try:
-                    ocr_tokens = ocr_page(page)
-                    if ocr_tokens:
-                        tokens, method = ocr_tokens, "rapidocr-onnxruntime"
-                    else:
-                        warnings.append({"code": "OCR_EMPTY", "page": i + 1})
-                except (ImportError, RuntimeError) as exc:
-                    warnings.append(
-                        {"code": "OCR_UNAVAILABLE", "page": i + 1, "message": str(exc)}
+    try:
+        with fitz.open(path) as doc:
+            if doc.needs_pass or not 1 <= len(doc) <= 100:
+                warnings.append(
+                    {
+                        "code": "PDF_CORRUPT",
+                        "page": 0,
+                        "message": "PDF protegido, vacío o con más de 100 páginas",
+                    }
+                )
+            else:
+                for i, page in enumerate(doc):
+                    tokens = [
+                        {"text": w[4], "bbox": list(w[:4]), "confidence": None}
+                        for w in page.get_text("words")
+                    ]
+                    native_length = sum(len(t["text"]) for t in tokens)
+                    image_area = sum(
+                        r.width * r.height
+                        for image in page.get_images()
+                        for r in page.get_image_rects(image[0])
                     )
-            elif needs_ocr:
-                warnings.append({"code": "OCR_DISABLED", "page": i + 1})
-            page_lines = group_lines(tokens, i + 1, method)
-            lines.extend(page_lines)
-            pages.append(
-                {
-                    "number": i + 1,
-                    "width": page.rect.width,
-                    "height": page.rect.height,
-                    "method": method,
-                    "text": "\n".join(l["text"] for l in page_lines),
-                    "needs_ocr": needs_ocr,
-                }
-            )
+                    needs_ocr = (
+                        native_length < 60
+                        or image_area > page.rect.width * page.rect.height * 0.45
+                    )
+                    method = "pymupdf"
+                    if needs_ocr and ocr:
+                        try:
+                            ocr_tokens = ocr_page(page)
+                            if ocr_tokens:
+                                tokens, method = ocr_tokens, "rapidocr-onnxruntime"
+                            else:
+                                warnings.append({"code": "OCR_EMPTY", "page": i + 1})
+                        except (ImportError, RuntimeError) as exc:
+                            warnings.append(
+                                {
+                                    "code": "OCR_UNAVAILABLE",
+                                    "page": i + 1,
+                                    "message": str(exc),
+                                }
+                            )
+                    elif needs_ocr:
+                        warnings.append({"code": "OCR_DISABLED", "page": i + 1})
+                    page_lines = group_lines(tokens, i + 1, method, warnings)
+                    lines.extend(page_lines)
+                    pages.append(
+                        {
+                            "number": i + 1,
+                            "width": page.rect.width,
+                            "height": page.rect.height,
+                            "method": method,
+                            "text": "\n".join(l["text"] for l in page_lines),
+                            "needs_ocr": needs_ocr,
+                        }
+                    )
+    except Exception as exc:
+        warnings.append({"code": "PDF_CORRUPT", "page": 0, "message": str(exc)})
     fields = parse_fields(lines)
     model_usage = None
-    pendientes = [p["number"] for p in pages if p["needs_ocr"]]
+    # Con MODELO_PAGINAS_TEXTO el modelo lee también páginas con texto nativo:
+    # sigue siendo un tercer lector que solo aporta candidatos validados.
+    texto_tambien = modelo.paginas_texto_activas()
+    pendientes = [p["number"] for p in pages if texto_tambien or p["needs_ocr"]]
     incompletos = [
         f for f in FIELDS if f != "invoice_number" and fields[f]["status"] != "OK"
     ]

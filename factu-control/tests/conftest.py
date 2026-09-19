@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 import json
 import pytest
@@ -62,8 +63,8 @@ def make_workbook(path):
     s.append(["P001", "Empresa de prueba", "B12345678", IBAN])
     s.append(["P001", "Empresa de prueba", "B12345678", IBAN])
     orders = book.create_sheet("Pedidos_2026")
-    orders.append(["Pedido", "ProveedorID", "NIF", "Importe", "Estado"])
-    orders.append(["PO-2026-0001", "P001", None, 121, "PENDIENTE"])
+    orders.append(["Pedido", "ProveedorID", "NIF", "Importe", "Estado", "Fecha_Pedido"])
+    orders.append(["PO-2026-0001", "P001", None, 121, "PENDIENTE", date(2026, 2, 1)])
     rules = book.create_sheet("Norma_Pagos_v3")
     rules.append(["Política sintética de pruebas"])
     stale = book.create_sheet("ANTIGUO_NO_USAR")

@@ -159,13 +159,18 @@ def test_model_fills_missing_field_and_policy_decides(lote_escaneado, monkeypatc
 
 
 def test_model_does_not_invent_currency(lote_escaneado, monkeypatch):
+    # El modelo sigue sin inventar moneda: la extracción queda MISSING. Con la
+    # norma v3-equipo-2 la regla currency pasa por inferencia de la política
+    # (IBAN ES leído y validado → EUR), así que la factura ahora es PAGAR.
     service, batch, _, _ = lote_escaneado
     finge_ocr(monkeypatch, [line for line in LINEAS if "Moneda" not in line and "IBAN" not in line])
     finge_modelo(monkeypatch, {"campos": {"iban": {
         "raw_value": IBAN_OK, "evidencia": f"IBAN: {IBAN_OK}", "page": 1}}, "uso": dict(USO)})
     service.process(batch, ocr=True)
-    assert detalle(service)["extraction"]["fields"]["currency"]["status"] == "MISSING"
-    assert service.export_rows(batch)[0]["result"] == "ESCALAR"
+    detail = detalle(service)
+    assert detail["extraction"]["fields"]["currency"]["status"] == "MISSING"
+    assert detail["decision"]["fields"]["currency"]["evidence"][0]["method"] == "policy"
+    assert service.export_rows(batch)[0]["result"] == "PAGAR"
 
 
 def test_model_error_warns_and_escalates(lote_escaneado, monkeypatch):

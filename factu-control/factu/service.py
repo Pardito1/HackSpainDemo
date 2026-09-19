@@ -20,7 +20,16 @@ from .extract import FIELDS, VERSION, engine_versions, extract_pdf, invoice_numb
 from .master import read_master
 from .policy import apply_reviews, evaluate, validate_policy
 from .presentation import invoice_issue
-from .utils import canonical, clean, digest, identifier, invoice_date, money, now
+from .utils import (
+    canonical,
+    clean,
+    digest,
+    file_name,
+    identifier,
+    invoice_date,
+    money,
+    now,
+)
 from .workspace import WorkspaceMixin
 
 
@@ -150,7 +159,7 @@ class Service(WorkspaceMixin):
             for p in Path(folder).rglob("*")
             if p.is_file() and p.suffix.lower() == ".pdf"
         )
-        if not files or len({p.name for p in files}) != len(files):
+        if not files or len({file_name(p.name) for p in files}) != len(files):
             raise ValueError("El lote debe contener PDFs y nombres de archivo únicos")
         workbook = Path(workbook)
         workbook_bytes = workbook.read_bytes()
@@ -159,6 +168,14 @@ class Service(WorkspaceMixin):
             raise ValueError("El maestro compuesto no tiene la estructura esperada")
         if master["sha256"] != digest(workbook_bytes):
             raise ValueError("El maestro compuesto no corresponde al Excel original registrado")
+        # No se puede evaluar "hoy" antes del último pedido conocido: con un
+        # as_of anterior toda factura posterior parecería futura y escalaría.
+        last_order = master.get("last_order_date")
+        if last_order and as_of < last_order:
+            raise ValueError(
+                f"as_of {as_of} es anterior al último pedido del maestro "
+                f"({last_order}); revisa la fecha de referencia"
+            )
         master["blob"] = str(self.store.blob(workbook_bytes, ".xlsx"))
         master_id = self.store.put_source("master", master)
         policy_id = self.policy(policy_path, actor)
@@ -166,10 +183,12 @@ class Service(WorkspaceMixin):
         manifest = []
         for file in files:
             data = file.read_bytes()
-            if len(data) > 50 * 1024 * 1024 or not data.startswith(b"%PDF"):
-                raise ValueError(f"PDF inválido o demasiado grande: {file.name}")
+            # Un fichero corrupto o que no es PDF se ingesta igualmente: la
+            # extracción lo marcará PDF_CORRUPT y la decisión será ESCALAR.
             blob = self.store.blob(data, ".pdf")
-            manifest.append((secrets.token_hex(10), file.name, digest(data), str(blob)))
+            manifest.append(
+                (secrets.token_hex(10), file_name(file.name), digest(data), str(blob))
+            )
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             # Until the new batch is read we cannot exclude cross-batch duplicates.
@@ -925,9 +944,9 @@ class Service(WorkspaceMixin):
         profile = validate_extraction_profile(batch.get("extraction_profile", "standard"))
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            db.execute("UPDATE documents SET latest_decision=NULL WHERE batch_id=?", (batch_id,))
             db.execute(
-                "UPDATE documents SET extraction=NULL,state='QUEUED' WHERE batch_id=?",
+                "UPDATE documents SET latest_decision=NULL,extraction=NULL,state='QUEUED'"
+                " WHERE batch_id=?",
                 (batch_id,),
             )
             changed = db.execute(

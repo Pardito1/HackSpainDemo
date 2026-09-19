@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import re
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -169,6 +170,7 @@ def validate_policy(policy):
         "iban_checksum_required",
         "reject_confirmed_paid",
         "allowed_currencies",
+        "default_currency",
         "extra_rules",
         "approved_by",
         "approved_at",
@@ -201,6 +203,23 @@ def validate_policy(policy):
         )
     ):
         raise ValueError("Faltan monedas permitidas")
+    if "default_currency" in policy:
+        default = policy["default_currency"]
+        if (
+            not isinstance(default, dict)
+            or set(default) != {"code", "iban_countries"}
+            or not isinstance(default["code"], str)
+            or not re.fullmatch(r"[A-Z]{3}", default["code"])
+            or not isinstance(default["iban_countries"], list)
+            or not default["iban_countries"]
+            or any(
+                not isinstance(c, str) or not re.fullmatch(r"[A-Z]{2}", c)
+                for c in default["iban_countries"]
+            )
+        ):
+            raise ValueError(
+                'default_currency debe tener la forma {"code": "<ISO3>", "iban_countries": ["ES", ...]}'
+            )
     if not isinstance(policy.get("extra_rules"), list):
         raise ValueError("extra_rules debe ser una lista")
     seen = set()
@@ -246,7 +265,9 @@ def apply_reviews(extraction, reviews):
 def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
     validate_policy(policy)
     date.fromisoformat(as_of)
-    fields = extraction["fields"]
+    # Copia: la decisión puede anotar la moneda inferida por la norma sin
+    # tocar nunca la extracción persistida.
+    fields = copy.deepcopy(extraction["fields"])
     rules = []
 
     def check(code, passed, message, question="", evidence=None):
@@ -381,6 +402,52 @@ def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
         "Confirma qué registro es correcto ante la contradicción de identidad.",
         {"excel": expected, "erp": erp},
     )
+    # La moneda se resuelve antes que los importes: `amount_matches_order` solo
+    # compara contra el ERP si la divisa es la del ERP, y la norma puede
+    # inferirla del país del IBAN cuando la factura no imprime ninguna.
+    printed = val("currency")
+    currency_ok = printed in policy["allowed_currencies"] if printed else None
+    currency_question = "Confirma la moneda y el tratamiento de conversión."
+    if printed and currency_ok is False:
+        currency_question = (
+            f"Moneda {printed} no prevista en la norma: "
+            "confirma tipo de cambio y fecha de conversión."
+        )
+    default = policy.get("default_currency")
+    if (
+        printed is None
+        and fields.get("currency", {}).get("status") == "MISSING"
+        and not fields.get("currency", {}).get("evidence")
+        and default
+        and iban
+        and identifier(iban)[:2] in default["iban_countries"]
+    ):
+        iban_line = next(
+            (
+                c.get("source_text")
+                for c in fields.get("iban", {}).get("evidence", [])
+                if c.get("value") == iban
+            ),
+            None,
+        )
+        fields["currency"] = {
+            "value": default["code"],
+            "status": "OK",
+            "evidence": [
+                {
+                    "method": "policy",
+                    "value": default["code"],
+                    "raw_value": None,
+                    "source_text": iban_line,
+                    "transformations": [
+                        f"default_currency:iban_country={identifier(iban)[:2]}"
+                    ],
+                    "policy_version": policy["version"],
+                }
+            ],
+            "inferred": True,
+        }
+        currency_ok = True
     tol = money(policy["tolerance_eur"])
     total, base, tax, rate = (
         val(f) for f in ("total", "base", "tax_amount", "tax_rate")
@@ -455,9 +522,9 @@ def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
     )
     check(
         "currency",
-        val("currency") in policy["allowed_currencies"] if val("currency") else None,
+        currency_ok,
         "Moneda permitida",
-        "Confirma la moneda y el tratamiento de conversión.",
+        currency_question,
         {"currency": fields.get("currency"), "allowed": policy["allowed_currencies"]},
     )
     check(

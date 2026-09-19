@@ -1,10 +1,11 @@
 {
-  "version": "v3-equipo-1",
-  "source": "Norma_Pagos_v3!A1:A8 + aclaración del organizador sobre criterios propios",
+  "version": "v3-equipo-2",
+  "source": "Norma_Pagos_v3!A1:A8 + aclaración del organizador sobre criterios propios. Criterio de moneda: el extractor nunca inventa moneda; si la factura no imprime ninguna y el IBAN leído es de un país de default_currency.iban_countries, la regla currency pasa como inferencia de la norma (EUR para cuentas ES). Cualquier otra moneda impresa o cuenta extranjera sin moneda requiere confirmación humana.",
   "tolerance_eur": "0.01",
   "identity_conflict": "ESCALAR",
   "iban_checksum_required": false,
   "reject_confirmed_paid": true,
   "allowed_currencies": ["EUR"],
+  "default_currency": {"code": "EUR", "iban_countries": ["ES"]},
   "extra_rules": []
 }

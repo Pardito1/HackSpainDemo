@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 import openpyxl
 from zipfile import BadZipFile, ZipFile
 from xml.etree.ElementTree import ParseError
 
-from .utils import clean, digest, iban_checksum, identifier, money
+from .utils import clean, digest, iban_checksum, identifier, invoice_date, money
 from .historical import read_history
 from .columns import ORDER_COLUMNS, resolve_columns
 
@@ -33,6 +33,21 @@ def read_master(path):
     except (BadZipFile, KeyError, IndexError, TypeError, ParseError, SyntaxError,
             openpyxl.utils.exceptions.InvalidFileException) as exc:
         raise ValueError("Excel dañado o con estructura inválida. Adjunta un archivo .xlsx válido con las hojas requeridas.") from exc
+
+
+def order_date(value):
+    """Fecha de un pedido del maestro; None si la celda está vacía o ilegible."""
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    text = clean(value)
+    if not text:
+        return None
+    try:
+        return invoice_date(text)
+    except ValueError:
+        return None
 
 
 def _read_lote2_csv(path, expected_columns, label):
@@ -200,7 +215,7 @@ def _read_master(path):
             }
             supplier["iban_checksum_diagnostic"] = iban_checksum(supplier["iban"])
             suppliers.setdefault(supplier["id"], []).append(supplier)
-        orders = {}
+        orders, order_dates = {}, []
         columns = resolve_columns(book["Pedidos_2026"], ORDER_COLUMNS,
                                   ("order", "supplier_id", "nif", "total", "state"))
         for source_row in book["Pedidos_2026"].iter_rows(min_row=2):
@@ -221,6 +236,10 @@ def _read_master(path):
                 },
             }
             orders.setdefault(order["id"], []).append(order)
+            if "date" in columns:
+                issued = order_date(source_row[columns["date"]].value)
+                if issued:
+                    order_dates.append(issued)
         rules = [
             {"cell": cell.coordinate, "text": clean(cell.value)}
             for row in book["Norma_Pagos_v3"]
@@ -230,6 +249,7 @@ def _read_master(path):
         return {
             "suppliers": suppliers,
             "orders": orders,
+            "last_order_date": max(order_dates) if order_dates else None,
             "historical": read_history(book),
             "rules": rules,
             "sha256": digest(path.read_bytes()),

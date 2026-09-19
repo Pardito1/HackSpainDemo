@@ -223,7 +223,7 @@ def decision_summary(decision):
         next_step = "No hemos seguido esa orden. Revisa el texto del original y confirma su legitimidad antes de continuar."
     if first and first["id"] == "currency" and decision["fields"]["currency"]["status"] == "MISSING":
         reasons[0] = "La factura no indica la moneda."
-        next_step = "Pide al proveedor que confirme la moneda y registra quién la ha confirmado. No asumimos que sean euros."
+        next_step = "Pide al proveedor que confirme la moneda y registra quién la ha confirmado. EUR por norma cuando la cuenta es española y la factura no imprime moneda; cualquier otra moneda o cuenta extranjera requiere confirmación."
     return {"title": reasons[0] if reasons else decision["reason"], "next": next_step, "others": reasons[1:]}
 
 def decorate_dashboard(service, data):
