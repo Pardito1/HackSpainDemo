@@ -1,10 +1,10 @@
-# alberto. · La mesa de las cuentas claras · v0.3
+# FactU · La mesa de las cuentas claras · v0.3
 
 Para subir el proyecto a GitHub, lee [GITHUB.md](GITHUB.md). El ZIP contiene la solución completa, pruebas, documentación y una demo reproducible; no contiene la base de datos local ni los materiales oficiales. El repositorio de entrega del concurso es distinto.
 
 Corrección 0.3: OCR sin mezclar número y fecha, etiquetas de procedencia, errores de entrada comprensibles, integridad de archivos/decisiones además de eventos y consulta obligatoria ante instrucciones sospechosas detectadas. 112 pruebas Python + 4 JavaScript pasan. La herramienta sigue siendo local, sin autenticación ni pagos reales; lote 2 y validación privada pendientes.
 
-Para actualizar datos de una versión anterior, conserva una copia de la carpeta `data` con la app parada. Después ejecuta `alberto --data data verify-audit`, `alberto --data data reextract ID_DEL_LOTE` y `alberto --data data process ID_DEL_LOTE`. Se conserva el historial; las respuestas cuyo contexto cambie requieren nueva revisión. No ignores una comprobación de integridad fallida ni borres el historial para hacerla pasar. Para pruebas del navegador: `node --test tests/test_frontend.mjs`.
+Para actualizar datos de una versión anterior, conserva una copia de la carpeta `data` con la app parada. Después ejecuta `factu --data data verify-audit`, `factu --data data reextract ID_DEL_LOTE` y `factu --data data process ID_DEL_LOTE`. Se conserva el historial; las respuestas cuyo contexto cambie requieren nueva revisión. No ignores una comprobación de integridad fallida ni borres el historial para hacerla pasar. Para pruebas del navegador: `node --test tests/test_frontend.mjs`.
 
 Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ERP y proponer `PAGAR`, `NO_PAGAR` o `ESCALAR`. Hecha para el track Maisa «500 sombras de Alberto».
 
@@ -62,7 +62,7 @@ El ERP suministrado utiliza Python 3. Consulta su `MANUAL_ERP_2009.md`. Usa el m
 En otra terminal, desde este proyecto, activa `.venv` e importa el lote. Ajusta las rutas al lugar donde guardaste el repositorio:
 
 ```bash
-alberto --data data ingest \
+factu --data data ingest \
   --pdfs ../500-sombras-de-alberto/facturas \
   --excel ../500-sombras-de-alberto/FINAL_v7_DEFINITIVO_ahorasi.xlsx \
   --name 'Lote 1' --as-of 2026-09-19
@@ -71,14 +71,14 @@ alberto --data data ingest \
 El comando devuelve `batch_id`. Sustituye `ID_DEL_LOTE` en los siguientes comandos:
 
 ```bash
-alberto --data data sync-erp ID_DEL_LOTE
-alberto --data data process ID_DEL_LOTE
-alberto --data data serve --port 8080
+factu --data data sync-erp ID_DEL_LOTE
+factu --data data process ID_DEL_LOTE
+factu --data data serve --port 8080
 ```
 
 Abre **http://127.0.0.1:8080**. También puedes importar PDFs y Excel desde la interfaz. Selecciona el lote y pulsa primero «Sincronizar ERP» y después «Procesar». La fecha `--as-of` es un contexto explícito de evaluación, no se toma del nombre del archivo.
 
-Variables opcionales: `ALBERTO_DATA`, `ERP_URL`, `ERP_USER`, `ERP_PASSWORD`. Por defecto usa el usuario y clave sintéticos documentados por el reto (`alberto` / `FACTURAS2009`), en `http://127.0.0.1:8009`. No reutilices esas claves en sistemas reales. No incluyas credenciales en URLs ni en Git.
+Variables opcionales: `FACTU_DATA`, `ERP_URL`, `ERP_USER`, `ERP_PASSWORD`. Por defecto usa el usuario y clave sintéticos documentados por el reto (`alberto` / `FACTURAS2009`), en `http://127.0.0.1:8009`. No reutilices esas claves en sistemas reales. No incluyas credenciales en URLs ni en Git.
 
 ### Demo independiente de tres casos
 
@@ -93,10 +93,10 @@ Deja esa terminal abierta. En otra, con el entorno activado:
 
 ```bash
 export ERP_URL=http://127.0.0.1:8019
-alberto --data demo-state ingest --pdfs demo-input/facturas --excel demo-input/maestro.xlsx --name 'Demo sintética' --as-of 2026-09-19
-alberto --data demo-state sync-erp ID_DEL_LOTE
-alberto --data demo-state process ID_DEL_LOTE
-alberto --data demo-state serve
+factu --data demo-state ingest --pdfs demo-input/facturas --excel demo-input/maestro.xlsx --name 'Demo sintética' --as-of 2026-09-19
+factu --data demo-state sync-erp ID_DEL_LOTE
+factu --data demo-state process ID_DEL_LOTE
+factu --data demo-state serve
 ```
 
 Resultado esperado de los datos generados: `demo-1.pdf → PAGAR`, `demo-2.pdf → ESCALAR` (IBAN distinto), `demo-3.pdf → NO_PAGAR` (ERP ya pagada). La demo sintética no sustituye la prueba del ERP oficial.
@@ -111,7 +111,7 @@ Resultado esperado de los datos generados: `demo-1.pdf → PAGAR`, `demo-2.pdf �
 
 Un fallo técnico que impide terminar el trabajo **no se disfraza de ESCALAR**: queda pendiente y bloquea la exportación. Una lectura completada pero incompleta sí puede requerir revisión humana. No se «rellena» un IBAN/NIF que falta usando el maestro para hacer que coincida.
 
-La norma v3 está implementada en `alberto/policy.py` y configurada en `alberto/policies/v3.json`. Los criterios de `NO_PAGAR` son decisiones explícitas del equipo, no reglas supuestamente publicadas por Maisa. El checksum del IBAN se conserva como diagnóstico, pero no bloquea: los IBAN sintéticos del maestro fallan ese checksum. La regla del reto es la igualdad con el maestro.
+La norma v3 está implementada en `factu/policy.py` y configurada en `factu/policies/v3.json`. Los criterios de `NO_PAGAR` son decisiones explícitas del equipo, no reglas supuestamente publicadas por Maisa. El checksum del IBAN se conserva como diagnóstico, pero no bloquea: los IBAN sintéticos del maestro fallan ese checksum. La regla del reto es la igualdad con el maestro.
 
 ## Revisión humana
 
@@ -141,15 +141,15 @@ Una previsualización ERP fallida conserva la fuente vigente y registra el error
 El adaptador Excel espera `Proveedores`, `Pedidos_2026`, `Norma_Pagos_v3` y las columnas del libro inicial. Si cambia ese esquema, adapta `master.py` con tests antes de importar. Versionar una política no es afirmar compatibilidad automática con una norma desconocida.
 
 ```bash
-alberto --data data policy ID_DEL_LOTE --file politica-v4.json --actor 'Equipo'
-alberto --data data evaluate ID_DEL_LOTE
+factu --data data policy ID_DEL_LOTE --file politica-v4.json --actor 'Equipo'
+factu --data data evaluate ID_DEL_LOTE
 ```
 
 Reevaluar una política reutiliza la extracción. Si cambia el extractor, incrementa `VERSION`, reinicia el servidor y solicita una nueva extracción:
 
 ```bash
-alberto --data data reextract ID_DEL_LOTE
-alberto --data data process ID_DEL_LOTE
+factu --data data reextract ID_DEL_LOTE
+factu --data data process ID_DEL_LOTE
 ```
 
 La caché incluye hash del PDF, versión de extractor, bibliotecas, modelos OCR y modo de lectura. Las decisiones incluyen hash del código, política y fuentes.
@@ -157,9 +157,9 @@ La caché incluye hash del PDF, versión de extractor, bibliotecas, modelos OCR 
 ## Fallos y recuperación
 
 ```bash
-alberto --data data retry ID_DEL_LOTE
-alberto --data data process ID_DEL_LOTE
-alberto --data data verify-audit
+factu --data data retry ID_DEL_LOTE
+factu --data data process ID_DEL_LOTE
+factu --data data verify-audit
 ```
 
 Los errores de extracción tienen reintentos acotados y espera creciente. Una ejecución no duerme esperando trabajos futuros: vuelve a ejecutar `process`/«Recuperar» tras la espera. Si se mata el proceso, una reserva viva no se roba: caduca a los 10 minutos y el siguiente worker recupera el trabajo. No se borra la base de datos para reanudar.
@@ -171,7 +171,7 @@ Una sincronización ERP fallida invalida la decisión actual de su lote, conserv
 ## Mediciones y costes
 
 ```bash
-alberto --data data metrics ID_DEL_LOTE
+factu --data data metrics ID_DEL_LOTE
 python scripts/benchmark.py --pdfs ../500-sombras-de-alberto/facturas \
   --excel ../500-sombras-de-alberto/FINAL_v7_DEFINITIVO_ahorasi.xlsx \
   --data benchmark-nuevo --as-of 2026-09-19 --erp-mode normal \
@@ -197,8 +197,8 @@ albertitos_plan.pdf
 ```
 
 ```bash
-alberto --data data export ID_LOTE1 --output ../entrega/outcomes.jsonl
-alberto --data data export ID_LOTE2 --output ../entrega/outcomes_lote2.jsonl
+factu --data data export ID_LOTE1 --output ../entrega/outcomes.jsonl
+factu --data data export ID_LOTE2 --output ../entrega/outcomes_lote2.jsonl
 python scripts/validate_submission.py ../entrega --lote1 ../datos/facturas --lote2 ../datos/lote2
 ```
 
@@ -218,6 +218,6 @@ El validador comprueba nombres exactos, unicidad, cobertura, valores permitidos 
 
 ## Estructura
 
-`alberto/extract.py`: extracción; `master.py`: Excel; `erp.py`: integración; `policy.py`: reglas; `db.py`: estado/evidencias; `service.py`: flujo; `web.py`: interfaz/API; `cli.py`: terminal; `tests/`: pruebas; `scripts/`: demo, benchmark y validador; `docs/`: decisiones técnicas.
+`factu/extract.py`: extracción; `master.py`: Excel; `erp.py`: integración; `policy.py`: reglas; `db.py`: estado/evidencias; `service.py`: flujo; `web.py`: interfaz/API; `cli.py`: terminal; `tests/`: pruebas; `scripts/`: demo, benchmark y validador; `docs/`: decisiones técnicas.
 
 Las dependencias conservan sus licencias. En particular, revisa la licencia AGPL/comercial de PyMuPDF antes de redistribuir o desplegar un servicio propietario; este paquete no concede licencias sobre dependencias ni datos de terceros.

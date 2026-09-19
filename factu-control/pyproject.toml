@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "alberto-control"
+name = "factu-control"
 version = "0.3.0"
 description = "Conciliación de facturas con evidencia, ERP, revisión humana y coste medible"
 readme = "README.md"
@@ -19,13 +19,13 @@ ocr = ["rapidocr-onnxruntime==1.4.4"]
 test = ["pytest>=8,<10"]
 
 [project.scripts]
-alberto = "alberto.cli:main"
+factu = "factu.cli:main"
 
 [tool.setuptools.package-data]
-alberto = ["templates/*.html", "static/*", "policies/*.json", "materials.json"]
+factu = ["templates/*.html", "static/*", "policies/*.json", "materials.json"]
 
 [tool.setuptools.packages.find]
-include = ["alberto*"]
+include = ["factu*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

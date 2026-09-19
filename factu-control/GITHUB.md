@@ -1,8 +1,8 @@
-# Subir Alberto Control a GitHub
+# Subir FactU Control a GitHub
 
 ## Qué subir
 
-Descomprime el ZIP. Entra en la carpeta `alberto-control` y usa **su contenido** como raíz del repositorio: el README debe aparecer directamente en la portada, no dentro de otra carpeta.
+Descomprime el ZIP. Entra en la carpeta `factu-control` y usa **su contenido** como raíz del repositorio: el README debe aparecer directamente en la portada, no dentro de otra carpeta.
 
 Incluye código Python, interfaz HTML/CSS/JavaScript, dependencias fijadas, pruebas Python/JavaScript, demo sintética, scripts y documentación. El PDF de arquitectura está en `docs/albertitos_plan.pdf`.
 
@@ -13,7 +13,7 @@ El revisor generativo de IA comentado como posible mejora **no está implementad
 ## Pasos
 
 1. Crea un repositorio vacío en GitHub. No inicialices allí otro README ni `.gitignore`. Elige su visibilidad; privado es suficiente para colaborar con el equipo.
-2. Abre una terminal dentro de la carpeta descomprimida `alberto-control`.
+2. Abre una terminal dentro de la carpeta descomprimida `factu-control`.
 3. Ejecuta:
 
 ```bash
@@ -27,7 +27,7 @@ git diff --cached --stat
 5. Guarda el primer commit:
 
 ```bash
-git commit -m "Alberto Control v0.3: app, pruebas y documentación"
+git commit -m "FactU Control v0.3: app, pruebas y documentación"
 ```
 
 6. Copia de GitHub la URL real del repositorio. Sustituye `URL_DE_TU_REPOSITORIO` y publica:

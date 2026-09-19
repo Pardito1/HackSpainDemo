@@ -16,7 +16,7 @@ def main():
         for name in ("README.md", "GITHUB.md", "pyproject.toml", "requirements.lock", ".gitignore")
     ]
     extensions = {".py", ".md", ".html", ".css", ".js", ".mjs", ".json", ".pdf"}
-    for folder in ("alberto", "docs", "tests", "scripts"):
+    for folder in ("factu", "docs", "tests", "scripts"):
         chosen.extend(
             p
             for p in (root / folder).rglob("*")
@@ -33,9 +33,9 @@ def main():
         for path in sorted(chosen):
             relative = path.relative_to(root).as_posix()
             content = path.read_bytes()
-            archive.writestr("alberto-control/" + relative, content)
+            archive.writestr("factu-control/" + relative, content)
             hashes.append(hashlib.sha256(content).hexdigest() + "  " + relative)
-        archive.writestr("alberto-control/MANIFEST.sha256", "\n".join(hashes) + "\n")
+        archive.writestr("factu-control/MANIFEST.sha256", "\n".join(hashes) + "\n")
     with ZipFile(target) as archive:
         if archive.testzip() is not None:
             raise RuntimeError("ZIP corrupto")

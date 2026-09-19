@@ -4,7 +4,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from alberto.web import create_app
+from factu.web import create_app
 from conftest import make_pdf
 
 
@@ -185,7 +185,7 @@ def test_selective_change_only_affected_document(bundle, tmp_path):
     # Register both synthetic originals through ingestion, including their manifests.
     erp=copy.deepcopy(service.store.source(service.batch(batch)["snapshot_id"]))
     import shutil
-    from alberto.service import Service
+    from factu.service import Service
     shutil.copyfile(tmp_path/"replacement.pdf", second)
     service=Service(tmp_path/"selective-state")
     batch=service.ingest(folder,workbook,"Selective","2026-09-19")["batch_id"]

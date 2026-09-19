@@ -1,6 +1,6 @@
 {% macro icon(name) -%}<svg class="icon" aria-hidden="true"><use href="#i-{{ name }}"/></svg>{%- endmacro %}
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="csrf-token" content="{{ csrf }}"><title>{% block title %}Alberto · Mesa de trabajo{% endblock %}</title>
+<meta name="csrf-token" content="{{ csrf }}"><title>{% block title %}FactU · Mesa de trabajo{% endblock %}</title>
 <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
 <body><a href="#main" class="skip-link">Saltar al contenido</a>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -17,7 +17,7 @@
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
 </defs></svg>
 {% set bquery = '?batch=' ~ selected_batch if selected_batch else '' %}
-<aside class="sidebar"><a class="brand" href="/">alberto<span>.</span></a><p class="brand-caption">La mesa de las cuentas claras.</p>
+<aside class="sidebar"><a class="brand" href="/">FactU<span>.</span></a><p class="brand-caption">La mesa de las cuentas claras.</p>
 <div class="workspace-label">ESPACIO DE TRABAJO</div>
 <nav aria-label="Navegación principal">
 <a href="/{{ bquery }}" class="{% if request.url.path=='/' %}active{% endif %}">{{ icon('inbox') }}<span>Bandeja</span>{% if metrics is defined and metrics.counts.ESCALAR %}<span class="nav-count">{{ metrics.counts.ESCALAR }}</span>{% endif %}</a>

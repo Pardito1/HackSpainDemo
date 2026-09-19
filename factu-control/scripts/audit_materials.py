@@ -3,12 +3,12 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from alberto.service import Service
+from factu.service import Service
 
 
 def audit(source, service, batch):
     source = Path(source)
-    manifest = json.loads((Path(__file__).parents[1] / "alberto/materials.json").read_text())
+    manifest = json.loads((Path(__file__).parents[1] / "factu/materials.json").read_text())
     files = []
     for item in manifest["files"]:
         path = source / item["name"]

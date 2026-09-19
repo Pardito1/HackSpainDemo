@@ -2,15 +2,15 @@ import json
 import httpx
 import pytest
 from fastapi.testclient import TestClient
-from alberto.erp import ERPClient, ERPUnavailable
-from alberto.web import create_app
+from factu.erp import ERPClient, ERPUnavailable
+from factu.web import create_app
 
 XML = """<?xml version="1.0" encoding="ISO-8859-1"?><erp><meta><total>1</total><paginas>1</paginas></meta><asientos><asiento><id>1</id><fecha>2026-01-01</fecha><proveedor>P001</proveedor><nif>B12345678</nif><pedido>PO-2026-0001</pedido><importe>121.00</importe><estado>PENDIENTE</estado></asiento></asientos></erp>"""
 
 
 @pytest.mark.parametrize("failure", [401, 429, 500, "timeout"])
 def test_erp_recovers(failure, monkeypatch):
-    monkeypatch.setattr("alberto.erp.time.sleep", lambda _: None)
+    monkeypatch.setattr("factu.erp.time.sleep", lambda _: None)
     hits = {"login": 0, "data": 0}
     events = []
 
@@ -43,7 +43,7 @@ def test_erp_recovers(failure, monkeypatch):
 
 
 def test_incomplete_snapshot_is_rejected(monkeypatch):
-    monkeypatch.setattr("alberto.erp.time.sleep", lambda _: None)
+    monkeypatch.setattr("factu.erp.time.sleep", lambda _: None)
     client = ERPClient("http://erp.test", "user", "pass", interval=0)
     client.token = "token"
     client.client.close()

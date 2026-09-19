@@ -4,9 +4,9 @@ import pytest
 import pymupdf as fitz
 import openpyxl
 
-from alberto.service import Service
-from alberto.extract import extract_pdf
-from alberto.master import read_master
+from factu.service import Service
+from factu.extract import extract_pdf
+from factu.master import read_master
 
 IBAN = (
     "ES4414650100951704302211"  # Deliberately synthetic checksum, as in the challenge.
