@@ -6,3 +6,6 @@ estado/*.json
 !estado/.gitkeep
 outputs/revisor.html
 .DS_Store
+.env
+.env.*
+!.env.example
