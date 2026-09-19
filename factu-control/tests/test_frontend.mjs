@@ -97,3 +97,60 @@ test('Cost estimate rejects nonfinite, negative and overflowing figures',()=>{
   for(const hours of ['Infinity','NaN','-1'])assert.match(estimate({hours}),/válidos/);
   assert.match(estimate({hours:'1e308',infra:'1e308'}),/demasiado grandes/);
 });
+
+// La pantalla «En vivo»: paint() con un DOM mínimo, que es donde vive la
+// decisión de qué se enseña en cada sondeo.
+const liveSource=fs.readFileSync(new URL('../factu/static/live.js',import.meta.url),'utf8');
+function element(){
+  const node={textContent:'',hidden:false,className:'',style:{},children:[],parent:null,
+    classList:{toggle(){},add(){},remove(){}},setAttribute(){},
+    append(...kids){for(const kid of kids){kid.parent=node;node.children.push(kid)}},
+    prepend(kid){kid.parent=node;node.children.unshift(kid)},
+    replaceChildren(...kids){for(const kid of node.children)kid.parent=null;node.children=kids},
+    get lastElementChild(){return node.children[node.children.length-1]},
+    remove(){if(node.parent)node.parent.children.splice(node.parent.children.indexOf(node),1)}};
+  return node;
+}
+function screen(){
+  const nodes={};
+  const sandbox={still:true,counters:new Map(),METHODS:{},RULES:{},
+    seen:new Set(),baseline:0,runStarted:undefined,
+    label:id=>id,count:(node,value)=>{node.textContent=value},
+    $:id=>nodes[id]??=element(),
+    text:(id,value)=>{(nodes[id]??=element()).textContent=value},
+    root:{classList:{toggle(){}},querySelector:()=>element(),querySelectorAll:()=>[]},
+    document:{createElement:()=>element()}};
+  vm.runInNewContext(liveSource.slice(liveSource.indexOf('function paint('),liveSource.indexOf('async function tick('))+';this.paint=paint;',sandbox);
+  return {paint:sandbox.paint,nodes};
+}
+const reading=(started,warnings={})=>({
+  run:{active:false,task:'Procesar',started,elapsed_s:1},
+  totals:{documents:2,extracted:2,decided:2,pending:0,running:0,human_review:0,failed:0},
+  results:{PAGAR:1,NO_PAGAR:0,ESCALAR:1},throughput_docs_per_s:2,stages:{},pipeline:[],
+  cost:{neurons:0,external_eur:0,model_pages:0},warnings,
+  recent:[{doc_id:'d1',file_id:'a.pdf',result:'PAGAR',first_failed_rule:null,seconds:1,method:'texto'},
+          {doc_id:'d2',file_id:'b.pdf',result:'ESCALAR',first_failed_rule:'currency',seconds:1,method:'texto'}]});
+
+test('Repeating a batch shows its decisions again instead of stale rows',()=>{
+  const {paint,nodes}=screen();
+  const list=()=>[...nodes['live-recent'].children];
+  paint(reading('2026-09-19T20:00:00'));
+  const first=list();
+  assert.equal(first.length,2);
+  paint(reading('2026-09-19T20:00:00'));
+  assert.deepEqual(list(),first,'El mismo trabajo no repite filas ya enseñadas');
+  // Un segundo trabajo sobre el mismo lote devuelve el mismo documento con el
+  // mismo resultado: sin estrenar lista, sus filas serían las de antes.
+  paint(reading('2026-09-19T21:00:00'));
+  assert.equal(list().length,2);
+  assert.notEqual(list()[0],first[0],'Un trabajo nuevo estrena lista');
+});
+test('Provider alert follows this job, not the warnings it inherited',()=>{
+  const {paint,nodes}=screen();
+  paint(reading('2026-09-19T20:00:00'));
+  assert.equal(nodes['live-provider'].hidden,true);
+  paint(reading('2026-09-19T20:00:00',{MODELO_NO_DISPONIBLE:3}));
+  assert.equal(nodes['live-provider'].hidden,false,'El proveedor cae durante el trabajo');
+  paint(reading('2026-09-19T21:00:00',{MODELO_NO_DISPONIBLE:3}));
+  assert.equal(nodes['live-provider'].hidden,true,'Los avisos heredados son historia');
+});

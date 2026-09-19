@@ -25,7 +25,7 @@ if (root) {
   const $ = id => document.getElementById(id);
   const text = (id, value) => { const n = $(id); if (n) n.textContent = value; };
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let baselineWarnings = null, seen = new Set(), timer;
+  let baseline = 0, seen = new Set(), timer, runStarted;
 
   // Conteo animado: el número sube en ~400 ms en vez de saltar. Con
   // prefers-reduced-motion el salto es inmediato.
@@ -44,6 +44,18 @@ if (root) {
   }
 
   function paint(d) {
+    // Cada trabajo estrena lista y estrena cuenta de avisos. Sin esto, una
+    // segunda pasada sobre el mismo lote no enseñaría ninguna fila: mismo
+    // documento, mismo resultado, ya visto.
+    if (d.run.started !== runStarted) {
+      // Si la pantalla se abre con el lote ya corriendo no hay historia que
+      // descontar y cualquier aviso cuenta; si el trabajo arranca con la
+      // pantalla abierta, los avisos que ya había son historia, no noticia.
+      baseline = runStarted === undefined && d.run.active ? 0 : (d.warnings.MODELO_NO_DISPONIBLE || 0);
+      runStarted = d.run.started;
+      seen.clear();
+      $('live-recent').replaceChildren();
+    }
     const total = d.totals.documents || 1;
     const percent = Math.round(100 * d.totals.decided / total);
     $('live-fill').style.width = percent + '%';
@@ -90,13 +102,8 @@ if (root) {
     text('live-warnings', warnings.length
       ? 'Avisos registrados en la extracción: ' + warnings.map(([c, n]) => `${c} (${n})`).join(' · ')
       : 'Sin avisos registrados en la extracción.');
-    // El indicador se enciende solo si el proveedor falla DURANTE este run:
-    // los avisos que ya estaban al abrir la pantalla son historia, no noticia.
-    // Si la pantalla se abre con el lote ya corriendo no hay historia que
-    // descontar, así que cualquier aviso cuenta.
-    const down = d.warnings.MODELO_NO_DISPONIBLE || 0;
-    if (baselineWarnings === null) baselineWarnings = d.run.active ? 0 : down;
-    $('live-provider').hidden = down <= baselineWarnings;
+    // El indicador se enciende solo si el proveedor falla DURANTE este trabajo.
+    $('live-provider').hidden = (d.warnings.MODELO_NO_DISPONIBLE || 0) <= baseline;
 
     const list = $('live-recent');
     for (const row of [...d.recent].reverse()) {
@@ -141,7 +148,6 @@ if (root) {
 
   $('live-process').addEventListener('click', async () => {
     $('live-process').disabled = true;
-    baselineWarnings = null;
     try {
       await api(`/api/batches/${batch}/process`);
       root.classList.add('running');

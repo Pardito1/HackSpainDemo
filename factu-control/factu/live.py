@@ -26,6 +26,11 @@ ACTIVE_STAGE = {
     "ERP": "enrich",
 }
 
+# Trabajos que deciden facturas. Sincronizar el ERP no decide ninguna, así que
+# dividir las 500 ya decididas entre sus 3,7 s daría 135 docs/s: un número que
+# no es el ritmo de nada y que se enseña en la pantalla del jurado.
+DECIDING = {"Procesar", "Recuperar", "Reevaluar"}
+
 # Las doce últimas se eligen ANTES de calcular las columnas derivadas: con las
 # subconsultas dentro del SELECT principal, SQLite las evalúa para las 1.000
 # decisiones del lote y la consulta pasa de 3,9 ms a 97,6 ms.
@@ -120,6 +125,7 @@ def live(service, batch_id, run):
     }
 
     elapsed = run.get("elapsed_s") or 0
+    deciding = run.get("task") in DECIDING
     return {
         "batch": {
             "id": batch["id"],
@@ -140,7 +146,7 @@ def live(service, batch_id, run):
             "human_review": totals["human_review"] or 0,
         },
         "results": results,
-        "throughput_docs_per_s": round(decided / elapsed, 2) if elapsed else None,
+        "throughput_docs_per_s": round(decided / elapsed, 2) if elapsed and deciding else None,
         "stages": stages,
         "pipeline": [
             {"id": key, "label": label, "active": run.get("active") and ACTIVE_STAGE.get(run.get("task")) == key}

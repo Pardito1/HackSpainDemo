@@ -3,6 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from factu.live import live
 from factu.service import Service
 from factu.web import create_app
 from conftest import make_pdf, make_workbook
@@ -65,6 +66,20 @@ def test_an_ingested_batch_with_no_decisions_still_answers(tmp_path):
     assert data["throughput_docs_per_s"] is None
     assert data["recent"] == [] and data["stages"] == {}
     assert data["cost"] == {"neurons": 0, "external_eur": 0, "model_pages": 0}
+
+
+def test_a_job_that_decides_nothing_does_not_claim_a_rhythm(client):
+    """Sincronizar el ERP no decide facturas: sus segundos no son un ritmo.
+
+    Con las 500 del lote 1 ya decididas, dividirlas entre los 3,7 s de la
+    descarga del ERP daría 135 docs/s en la tarjeta de rendimiento.
+    """
+    client, service, batch = client
+    decided = client.get(f"/api/batches/{batch}/live").json()["totals"]["decided"]
+    assert decided == 1
+    for task, rhythm in (("ERP", None), ("Procesar", 100.0)):
+        data = live(service, batch, {"active": False, "task": task, "elapsed_s": 0.01})
+        assert data["throughput_docs_per_s"] == rhythm
 
 
 def test_an_unknown_batch_is_rejected(client):
