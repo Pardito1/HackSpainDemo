@@ -1,0 +1,73 @@
+{
+  "code_sha256": "d0afe4401559f1f6fc40ca6fb3ba4ee12a312546e577d9e2dee7cb461a16370f",
+  "label": "v0.2 · ERP oficial normal · OCR local · caché fría",
+  "batch_id": "1650583c3e18",
+  "hardware": {
+    "platform": "macOS-15.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "logical_cpus": 12,
+    "python": "3.12.14",
+    "peak_rss_mib": 1413.88
+  },
+  "measurement": {
+    "cache": "cold",
+    "workers": 1,
+    "erp_mode_declared": "normal",
+    "end_to_end_seconds": 46.966629374997865,
+    "ingest_seconds": 0.19535441699554212,
+    "erp_seconds": 5.218867625000712,
+    "seconds_per_document": 0.09393325874999572,
+    "documents_per_minute": 638.7513943244594,
+    "pages_by_method": {
+      "pymupdf": 493,
+      "rapidocr-onnxruntime": 29
+    },
+    "erp": {
+      "snapshot_id": "c20d0f466358c8d7242a353ded2f12dab6e14e4a0f4e080949b7a34cdd951224",
+      "total": 516,
+      "attempts": 30,
+      "retries": 3
+    },
+    "run": {
+      "processed": 500,
+      "decisions": 500,
+      "pending_jobs": 0
+    },
+    "metrics": {
+      "documents": 500,
+      "decisions": 500,
+      "pending": 0,
+      "counts": {
+        "PAGAR": 431,
+        "NO_PAGAR": 9,
+        "ESCALAR": 60
+      },
+      "external_eur": 0.0,
+      "compute_seconds": 44.75657662723097,
+      "human_seconds": 0,
+      "human_responses": 0,
+      "extract_p50": 0.003290604003268527,
+      "extract_p95": 0.9148113330011256,
+      "worker_runs": [
+        {
+          "ocr": true,
+          "processed": 500,
+          "wall_seconds": 41.55088545900071
+        }
+      ],
+      "cost_note": "Sin llamadas de pago. Infraestructura y tiempo humano no valorados; no equivalen a coste cero.",
+      "accuracy": null,
+      "accuracy_note": "Pendiente de etiquetas humanas independientes."
+    },
+    "audit": {
+      "valid": true,
+      "head": "f577dd5211c4f6dd5d0c8c269c5284f249986bc7f45d6552c29f24c6c0696946"
+    }
+  },
+  "limitations": [
+    "Throughput measured on this batch and hardware, not a scale guarantee.",
+    "No independent reference labels: classification accuracy is unknown.",
+    "No paid inference calls; infrastructure and human costs are not valued.",
+    "OCR score is not a calibrated probability of correctness."
+  ]
+}

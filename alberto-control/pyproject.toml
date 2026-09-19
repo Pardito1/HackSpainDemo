@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alberto-control"
+version = "0.3.0"
+description = "Conciliación de facturas con evidencia, ERP, revisión humana y coste medible"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.30,<1", "jinja2>=3.1.6,<4",
+  "pymupdf>=1.24,<2", "openpyxl>=3.1.5,<4", "python-multipart>=0.0.20,<1",
+  "httpx>=0.28,<1",
+]
+
+[project.optional-dependencies]
+ocr = ["rapidocr-onnxruntime==1.4.4"]
+test = ["pytest>=8,<10"]
+
+[project.scripts]
+alberto = "alberto.cli:main"
+
+[tool.setuptools.package-data]
+alberto = ["templates/*.html", "static/*", "policies/*.json", "materials.json"]
+
+[tool.setuptools.packages.find]
+include = ["alberto*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

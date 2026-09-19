@@ -1,0 +1,71 @@
+{
+  "code_sha256": "69de7877c053ecffe6663827273219e275ca26cd2dd2a901f8cbe7ad4bf710f5",
+  "label": "ERP normal, OCR local",
+  "batch_id": "dfdf9c992fe2",
+  "hardware": {
+    "platform": "macOS-15.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "logical_cpus": 12,
+    "python": "3.12.14",
+    "peak_rss_mib": 1274.19
+  },
+  "measurement": {
+    "cache": "cold",
+    "workers": 1,
+    "erp_mode_declared": "normal",
+    "end_to_end_seconds": 45.63289354200242,
+    "ingest_seconds": 0.18265737500041723,
+    "erp_seconds": 5.248911124996084,
+    "seconds_per_document": 0.09126578708400485,
+    "documents_per_minute": 657.4205068189846,
+    "pages_by_method": {
+      "pymupdf": 493,
+      "rapidocr-onnxruntime": 29
+    },
+    "erp": {
+      "snapshot_id": "f0033821409bd812d93d9f1a10f1be16ad7748405e13721515150a97fab27b4b",
+      "total": 516,
+      "attempts": 30,
+      "retries": 3
+    },
+    "run": {
+      "processed": 500,
+      "decisions": 500,
+      "pending_jobs": 0
+    },
+    "metrics": {
+      "documents": 500,
+      "decisions": 500,
+      "pending": 0,
+      "counts": {
+        "PAGAR": 431,
+        "NO_PAGAR": 9,
+        "ESCALAR": 60
+      },
+      "external_eur": 0.0,
+      "compute_seconds": 43.61719228097354,
+      "extract_p50": 0.002952688006189419,
+      "extract_p95": 0.8855144159970223,
+      "worker_runs": [
+        {
+          "ocr": true,
+          "processed": 500,
+          "wall_seconds": 40.19927637500223
+        }
+      ],
+      "cost_note": "Sin llamadas de pago. Infraestructura y tiempo humano no valorados; no equivalen a coste cero.",
+      "accuracy": null,
+      "accuracy_note": "Pendiente de etiquetas humanas independientes."
+    },
+    "audit": {
+      "valid": true,
+      "head": "0d75cd81f4bb12d81d5f547db7cd24820c4ad7489075dcead466aee9bfbdfac4"
+    }
+  },
+  "limitations": [
+    "Throughput measured on this batch and hardware, not a scale guarantee.",
+    "No independent reference labels: classification accuracy is unknown.",
+    "No paid inference calls; infrastructure and human costs are not valued.",
+    "OCR score is not a calibrated probability of correctness."
+  ]
+}

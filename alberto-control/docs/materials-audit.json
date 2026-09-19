@@ -1,0 +1,59 @@
+{
+  "files": [
+    {
+      "file": "alberto_erp.py",
+      "sha256": "0ff3215c8d59d2774967aacd9a4eece289dc8252a8cbd246c64e2d72865d1f4f",
+      "matches_reviewed": true
+    },
+    {
+      "file": "FINAL_v7_DEFINITIVO_ahorasi.xlsx",
+      "sha256": "d7729db76ec7501f35e5cf4ef3383344c5b2bea4c6ea9ece36723663ca2a87ae",
+      "matches_reviewed": true
+    },
+    {
+      "file": "MANUAL_ERP_2009.md",
+      "sha256": "5ba720dcf49aae2440027526c8a9b294ff89a13b87db999429aad5a2a3732263",
+      "matches_reviewed": true
+    },
+    {
+      "file": "Makefile",
+      "sha256": "c0c1eec67d8b28bb90563c5f0483dc3c3e7104184957857fa929bb02274e5676",
+      "matches_reviewed": true
+    },
+    {
+      "file": "README.md",
+      "sha256": "4d6d5af71cd6ebc08878c373c33b9c7cfab97d7800205e3db058aad079ecf76f",
+      "matches_reviewed": true
+    }
+  ],
+  "pdfs_supplied": 500,
+  "pdfs_ingested": 500,
+  "pdfs_extracted": 500,
+  "current_decisions": 500,
+  "missing": [],
+  "hash_mismatches": [],
+  "master_sha256": "d7729db76ec7501f35e5cf4ef3383344c5b2bea4c6ea9ece36723663ca2a87ae",
+  "sheets": [
+    "Proveedores",
+    "Pedidos_2026",
+    "Norma_Pagos_v3",
+    "Pedidos_2025_OLD",
+    "NO_TOCAR",
+    "backup_marzo",
+    "Hoja1",
+    "Hoja1 (2)",
+    "notas_alberto",
+    "pendiente_revisar",
+    "MACROS_ROTAS",
+    "v6_deprecated",
+    "tablas_dinamicas",
+    "Sheet3"
+  ],
+  "supplier_rows": 12,
+  "supplier_ids": 11,
+  "orders": 516,
+  "audit": {
+    "valid": true,
+    "head": "e2c36d487cee6176c09932b6b5a9291780420dd9c4c6a43d158f9c88fa4c1ca8"
+  }
+}

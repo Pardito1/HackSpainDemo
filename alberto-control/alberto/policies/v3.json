@@ -1,0 +1,10 @@
+{
+  "version": "v3-equipo-1",
+  "source": "Norma_Pagos_v3!A1:A8 + aclaración del organizador sobre criterios propios",
+  "tolerance_eur": "0.01",
+  "identity_conflict": "ESCALAR",
+  "iban_checksum_required": false,
+  "reject_confirmed_paid": true,
+  "allowed_currencies": ["EUR"],
+  "extra_rules": []
+}

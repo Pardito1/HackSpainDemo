@@ -1,0 +1,12 @@
+{
+  "checked_at": "19/09/2026",
+  "files": [
+    {"name":"alberto_erp.py","sha256":"0ff3215c8d59d2774967aacd9a4eece289dc8252a8cbd246c64e2d72865d1f4f","use":"Se ejecuta como servicio independiente. La app consulta su bridge HTTP/XML; no accede a sus datos internos.","check":"Misma versión que el ERP probado. Python 3.9+, paginación, sesiones y reintentos."},
+    {"name":"FINAL_v7_DEFINITIVO_ahorasi.xlsx","sha256":"d7729db76ec7501f35e5cf4ef3383344c5b2bea4c6ea9ece36723663ca2a87ae","use":"Maestro de proveedores y pedidos; texto de la norma v3. Copia inalterada con referencias a hoja, fila y celda.","check":"14 hojas revisadas. Tres gobiernan el flujo; las otras once no deciden."},
+    {"name":"MANUAL_ERP_2009.md","sha256":"5ba720dcf49aae2440027526c8a9b294ff89a13b87db999429aad5a2a3732263","use":"Contrato del conector: endpoints, XML ISO-8859-1, sesión, paginación, errores y autoridad contable.","check":"Aplicado en el cliente ERP y en las pruebas. No se envía a un modelo."},
+    {"name":"Makefile","sha256":"c0c1eec67d8b28bb90563c5f0483dc3c3e7104184957857fa929bb02274e5676","use":"Guía de arranque equivalente a ejecutar el ERP con Python. Incluye las opciones para el lote 2.","check":"Revisado; no es una fuente de datos ni debe importarse en el motor."},
+    {"name":"README.md","sha256":"4d6d5af71cd6ebc08878c373c33b9c7cfab97d7800205e3db058aad079ecf76f","use":"Contrato del reto: salidas, elegibilidad, arquitectura, ADRs, demo y entrega separada.","check":"Requisitos contrastados con las capturas nuevas y la aclaración sobre revisión humana."}
+  ],
+  "deadline_note":"El README adjunto aún indica domingo 10:30; las capturas actualizadas indican 11:00, hora de Madrid. Confirmad con organización. Usad 10:30 como margen interno.",
+  "pending_note":"La validación privada del jurado no está disponible. El lote adicional de 40 PDFs y su nueva norma deben procesarse y verificarse cuando se reciban. La entrega solo estará completa con los dos JSONL y albertitos_plan.pdf."
+}
