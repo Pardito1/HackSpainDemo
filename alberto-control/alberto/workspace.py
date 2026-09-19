@@ -62,6 +62,44 @@ class WorkspaceMixin:
         self.evaluate_batch(doc["batch_id"], [doc_id])
         return preview
 
+    def retract_human_answer(self, doc_id, actor, reason):
+        """Retira la ultima respuesta humana sin borrarla: no se toca ni una
+        fila existente de human_decisions, solo se sellan tres columnas
+        nuevas (retracted_at/by/reason) que no forman parte de ningun
+        anclaje ya sellado -- verify_audit() solo compara las columnas que
+        existian cuando el evento "alberto_answered" se sello, asi que
+        marcar la retractacion no rompe esa comprobacion.
+        """
+        doc = self.document(doc_id)
+        if not clean(actor) or len(clean(reason)) < 10:
+            raise ValueError("Indica quién retira la respuesta y por qué (10 caracteres)")
+        answer = self.store.one(
+            "SELECT * FROM human_decisions WHERE document_id=? AND retracted_at IS NULL ORDER BY id DESC LIMIT 1",
+            (doc_id,),
+        )
+        if not answer:
+            raise ValueError("No hay ninguna respuesta vigente que retirar")
+        with self.store.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            current = db.execute(
+                "SELECT retracted_at FROM human_decisions WHERE id=?", (answer["id"],)
+            ).fetchone()
+            if current["retracted_at"] is not None:
+                raise ValueError("Esa respuesta ya se retiró; recarga y compruébalo")
+            db.execute(
+                "UPDATE human_decisions SET retracted_at=?,retracted_by=?,retracted_reason=? WHERE id=?",
+                (now(), clean(actor), clean(reason), answer["id"]),
+            )
+            db.execute("UPDATE documents SET latest_decision=NULL WHERE id=?", (doc_id,))
+            self.store.event(
+                "human_answer_retracted",
+                {"original_actor": answer["actor"], "original_result": answer["result"],
+                 "retracted_by": clean(actor), "reason": clean(reason)},
+                doc_id, doc["batch_id"], db, records=[("human_decisions", answer["id"])],
+            )
+        self.evaluate_batch(doc["batch_id"], [doc_id])
+        return {"retracted_id": answer["id"]}
+
     def _change_dependencies(self, doc, kind, source):
         fields = self.effective(doc)["fields"]
         def value(name):

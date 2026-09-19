@@ -54,6 +54,7 @@ def exclusive(function):
 class Service(WorkspaceMixin):
     human_preview = exclusive(WorkspaceMixin.human_preview)
     human_commit = exclusive(WorkspaceMixin.human_commit)
+    retract_human_answer = exclusive(WorkspaceMixin.retract_human_answer)
     preview_source = exclusive(WorkspaceMixin.preview_source)
     prepare_upload = exclusive(WorkspaceMixin.prepare_upload)
     prepare_erp = exclusive(WorkspaceMixin.prepare_erp)
@@ -476,7 +477,7 @@ class Service(WorkspaceMixin):
         result["engine_result"] = result["result"]
         if with_human:
             answer = self.store.one(
-                "SELECT * FROM human_decisions WHERE document_id=? ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM human_decisions WHERE document_id=? AND retracted_at IS NULL ORDER BY id DESC LIMIT 1",
                 (document["id"],),
             )
             if answer and answer["anchor"] == result["human_anchor"]:

@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS reviews(id INTEGER PRIMARY KEY, document_id TEXT NOT 
  actor TEXT NOT NULL, reason TEXT NOT NULL, corrections TEXT NOT NULL, created TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS human_decisions(id INTEGER PRIMARY KEY, document_id TEXT NOT NULL REFERENCES documents(id),
  anchor TEXT NOT NULL, result TEXT NOT NULL CHECK(result IN ('PAGAR','NO_PAGAR','ESCALAR')), actor TEXT NOT NULL,
- reason TEXT NOT NULL, evidence TEXT NOT NULL, acknowledged TEXT NOT NULL, seconds REAL NOT NULL, created TEXT NOT NULL);
+ reason TEXT NOT NULL, evidence TEXT NOT NULL, acknowledged TEXT NOT NULL, seconds REAL NOT NULL, created TEXT NOT NULL,
+ retracted_at TEXT, retracted_by TEXT, retracted_reason TEXT);
 CREATE TABLE IF NOT EXISTS source_changes(id TEXT PRIMARY KEY, batch_id TEXT NOT NULL REFERENCES batches(id),
  kind TEXT NOT NULL, old_id TEXT NOT NULL, new_id TEXT NOT NULL REFERENCES sources(id), payload TEXT NOT NULL,
  status TEXT NOT NULL DEFAULT 'PREVIEW', created TEXT NOT NULL);
@@ -50,6 +51,12 @@ class Store:
         self.path = self.root / "alberto.sqlite3"
         with self.connect() as db:
             db.executescript(SCHEMA)
+            # Additive migration for a base created before retraction existed;
+            # CREATE TABLE IF NOT EXISTS does not add columns to an old table.
+            existing = {r[1] for r in db.execute("PRAGMA table_info(human_decisions)")}
+            for column in ("retracted_at", "retracted_by", "retracted_reason"):
+                if column not in existing:
+                    db.execute(f"ALTER TABLE human_decisions ADD COLUMN {column} TEXT")
         token_path = self.root / ".csrf-token"
         try:
             with token_path.open("x") as handle:
