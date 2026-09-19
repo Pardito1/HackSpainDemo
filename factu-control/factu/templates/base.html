@@ -23,7 +23,7 @@
 <a href="/{{ bquery }}" class="{% if request.url.path=='/' %}active{% endif %}">{{ icon('inbox') }}<span>Bandeja</span>{% if metrics is defined and metrics.counts.ESCALAR %}<span class="nav-count" aria-label="{{ metrics.counts.ESCALAR }} pendientes de revisión">{{ metrics.counts.ESCALAR }}</span>{% endif %}</a>
 <a href="/sources{{ bquery }}" class="{% if request.url.path=='/sources' %}active{% endif %}">{{ icon('source') }}<span>Datos y actualizaciones</span></a>
 <a href="/groups{{ bquery }}" class="{% if request.url.path=='/groups' %}active{% endif %}">{{ icon('group') }}<span>Consultas a proveedores</span></a>
-
+<a href="/operations{{ bquery }}" class="{% if request.url.path=='/operations' %}active{% endif %}">{{ icon('chart') }}<span>Actividad y coste</span></a>
 </nav>
 <div class="sidebar-note"><span class="small-rule"></span><p>El trabajo avanza.<br>El criterio sigue siendo tuyo.</p><small>Los casos dudosos se consultan.<br>Los originales se conservan.</small></div>
 </aside>
