@@ -1,6 +1,8 @@
 # Verificación realizada · 19 septiembre 2026
 
-## Actualización 0.10.0 · Lote 2 público
+> Nota de vigencia (2026-09-20): este documento registra la verificación del 19/09. Tras el merge de moneda por IBAN ES y fechas en letras, la ejecución vigente del Lote 2 es 24 PAGAR / 1 NO_PAGAR / 15 ESCALAR y la suite tiene 345 pruebas Python + 15 de Node en verde. Ver README y `docs/CHANGELOG.md`.
+
+## Actualización 0.10.0 · Lote 2 público (histórico del 19/09)
 
 La ejecución integrada contra el bridge oficial arrancado con
 `--lote2 erp_export_lote2.csv` validó 40 originales, Excel v7, proveedores y
@@ -27,7 +29,7 @@ independiente. El informe trazable es
 
 Comprobación en navegador: fuente Excel, campos condicionales de política, carga y comparación de actualización, confirmación e historial. Se corrige el refresco después de aplicar. Texto aumentado y vista a 390 px sin desbordamiento horizontal de página. El PDF refleja 0.7.0; los datos y benchmarks que siguen son históricos, no mediciones nuevas de rendimiento ni precisión.
 
-## Actualización 0.4.0
+## Actualización 0.4.0 (histórico)
 
 127 pruebas Python y 4 JavaScript pasan. Prueba real: 500 PDFs / 522 páginas, 500 resultados únicos, 273 PAGAR / 9 NO_PAGAR / 218 ESCALAR, cero pendientes. 192 facturas tienen moneda MISSING: ya no se completa EUR sin evidencia. La auditoría comprueba originales, fuentes y decisiones sin incidencias. Las 500 rutas de expediente, las rutas de bandeja/fuentes/auditoría/operaciones/grupos y la exportación han respondido correctamente.
 

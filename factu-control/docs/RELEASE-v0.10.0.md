@@ -1,5 +1,7 @@
 # FactU 0.10.0 · Lote 2, OCR aislado y decisiones seguras
 
+> Nota de vigencia (2026-09-20): las cifras de esta nota corresponden a la ejecución de la release. Tras el PR #28 (moneda por IBAN ES, fechas en letras), la ejecución vigente del Lote 2 es 24 PAGAR / 1 NO_PAGAR / 15 ESCALAR y la suite tiene 345+15 pruebas. Ver README.
+
 ## Resultado
 
 Se incorpora el lote público de 40 facturas sin alterar el recorrido del lote

@@ -23,7 +23,7 @@ Conserva tu carpeta de estado y haz una copia con la app parada. Git no incluye 
 
 - `factu-control/`: código, interfaz, pruebas y documentación de la app.
 - `500-sombras-de-alberto-main/`: materiales oficiales que el equipo ya incorporó; se conservan.
-- `pipeline/`, `main.py`, `tests/`, `outputs/`: prototipo anterior, no el motor de la web.
+- `legacy/` (incluye `pipeline/`, `main.py`, `tests/`, `outputs/`): prototipo anterior archivado, no el motor de la web.
 - `referencia/`: referencias del equipo, sin sobrescribirlas con nuevos resultados.
 - `entrega-parcial-v0.9.1/`: 500 resultados y plan históricos. No es una entrega final ni una ejecución del motor integrado.
 

@@ -1,6 +1,6 @@
-# Procesar las 500 facturas reales · v0.9.2
+# Procesar las 500 facturas reales · v0.10.0
 
-Actualización 0.9.2: se conserva la carpeta `factu-control` del equipo y los comandos `python -m factu`. El lector integrado tiene una nueva versión de caché; si necesitas aplicar sus cambios a lecturas anteriores, sigue [la actualización con copia de seguridad](docs/RELEASE-v0.9.2.md). Los resultados al final de esta guía son históricos de 0.4, no del motor integrado.
+Actualización 0.10.0: se conserva la carpeta `factu-control` del equipo y los comandos `python -m factu`. El lector integrado tiene una nueva versión de caché; si necesitas aplicar sus cambios a lecturas anteriores, sigue [la actualización con copia de seguridad](docs/RELEASE-v0.9.2.md). Los resultados al final de esta guía son la ejecución vigente en M1 con ERP a latencia real y sin modelo externo.
 
 Si ya tenías las 500 procesadas con una versión anterior, conserva tu carpeta de estado. Arranca la versión nueva con esa misma carpeta y vuelve a cargar el Excel original en **Datos y actualizaciones → Ver facturas afectadas → Aplicar actualización**. Así se incorpora `Pedidos_2025_OLD` sin repetir OCR ni borrar el historial. Reanudar `lote1` por sí solo no vuelve a importar un Excel ya registrado.
 
@@ -91,6 +91,6 @@ El ERP solo necesita estar encendido si quieres volver a consultar datos contabl
 - **0 € de gasto externo**, en el área técnica, es correcto sin APIs de pago. No incluye el coste del ordenador ni el tiempo humano.
 - **Moneda no indicada** no se convierte en EUR: pide confirmación y regístrala, con autor y motivo. La app distingue un dato leído de uno confirmado por una persona.
 
-Prueba local 19/09/2026, primer lote y ERP oficial: **273 PAGAR, 9 NO_PAGAR, 218 ESCALAR; 500 resultados y 0 pendientes**. La distribución puede cambiar con una política, datos o revisiones diferentes. No es una medición de exactitud ni garantiza APTO del concurso.
+Prueba local 20/09/2026, primer lote y ERP oficial (MacBook Air M1, ERP con latencia real, sin modelo externo): **435 PAGAR, 9 NO_PAGAR, 56 ESCALAR; 500 resultados y 0 pendientes**, extremo a extremo en 53,8 s. La distribución puede cambiar con una política, datos o revisiones diferentes. No es una medición de exactitud ni garantiza APTO del concurso. (Ejecuciones antiguas daban 273/9/218 por reglas y extractor anteriores.)
 
 El ZIP es de código: no contiene el estado, las 500 facturas ni el ERP oficial. No subas `estado-500-v04` a GitHub. El repositorio de entrega del concurso es independiente y contiene únicamente los dos JSONL y `albertitos_plan.pdf` exigidos.

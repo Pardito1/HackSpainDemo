@@ -7,7 +7,7 @@
 Sistema que decide `PAGAR` / `NO_PAGAR` / `ESCALAR` para facturas PDF cruzándolas con un Excel y un ERP legado, con traza auditable. **El producto es `factu-control/`** (app local FastAPI + CLI, SQLite, OCR local, política en JSON, revisión humana, benchmark, validador de entrega). Lee primero `factu-control/README.md` y `factu-control/docs/ARCHITECTURE.md`.
 
 - `500-sombras-de-alberto-main/`: material oficial del reto (500 PDFs, Excel, `alberto_erp.py`, manual). **No se modifica.**
-- `pipeline/`, `main.py`, `outputs/`, `estado/`, `entradas/`: esqueleto anterior del equipo, superado por `factu-control/`. No construir encima; se archivará.
+- `legacy/`: esqueleto anterior del equipo completo (`pipeline/`, `main.py`, `outputs/`, `tests/`, `ver.py`, `requirements.txt`, `entradas/`, `estado/`), superado por `factu-control/`. No construir encima.
 - Rama `funcionalidad/extraccion-p1`: lector de facturas con modelo de visión (`pipeline/extraccion_lib/llm.py`). Se reutiliza su cliente y su prompt para el método `modelo` de `factu-control` (ver tareas).
 - Repo de **entrega** (otro): `manchadito09/HackSpain`, solo `outcomes.jsonl`, `outcomes_lote2.jsonl`, `albertitos_plan.pdf`. Nunca código ahí.
 

@@ -1,77 +1,88 @@
-# Defensa de 10 minutos · v0.10.0
+# Defensa de 5 minutos + 5 de preguntas · v0.10.0
 
 Frase de apertura: **«FactU no decide por intuición: cada pago conserva la
 prueba, y cuando una fuente cambia sabemos exactamente qué vuelve a revisar
 Alberto.»**
 
-## 0:00–2:00 · Resultado y bandeja
+## 0:00–0:30 · El problema, en vocabulario Maisa
 
-Abrir el Lote 2 ya procesado: **40 documentos, 19 `PAGAR`, 1 `NO_PAGAR`, 20
-`ESCALAR`**, con auditoría íntegra. Aclarar inmediatamente que el reparto no
-es una métrica de precisión ni un pago real: muestra la aplicación de la
-política v3 a un snapshot y fuentes concretos.
+Alberto tiene 540 facturas y un ERP legado. El trabajo no es «leer PDFs»: es
+un **proceso** con **excepciones** que se resuelven a mano y una obligación de
+**cumplimiento**: por qué se paga o no se paga cada factura debe quedar
+trazable. FactU convierte ese proceso en propuestas revisables, con la
+excepción como salida legítima y la traza como evidencia auditable.
 
-Elegir un `ESCALAR` breve y visual, por ejemplo una factura sin moneda o una
-en JPY con la dirección `Tokyo, España`. Enseñar que FactU conserva `JPY` si
-está impreso y **no** lo transforma a EUR por el idioma, NIF, IBAN o dirección.
-La pregunta es accionable: falta una conversión autorizada, no un porcentaje
-opaco.
+## 0:30–1:15 · Camino feliz, corto
 
-## 2:00–4:00 · Extracción que ayuda sin decidir
+Abrir la bandeja del Lote 2 ya procesado: **40 documentos, 24 `PAGAR`, 1
+`NO_PAGAR`, 15 `ESCALAR`**, con auditoría íntegra. Elegir un `PAGAR` con
+maestro, ERP y aritmética en verde y abrir la evidencia por campo: página,
+caja, método y valor normalizado. Recordar que el reparto es aplicación de la
+política v3 a un snapshot; no es métrica de precisión ni un pago real.
 
-Mostrar el expediente y su recorrido: PDF original → lectura nativa → segundo
-testigo RapidOCR cuando un defecto crítico lo justifica → campos con
-página/caja/método → reglas.
-El perfil `lote2_ocr_v1` solo se usa en los 40 nuevos; Lote 1 conserva su ruta
-original. RapidOCR se activó en 3 de 42 páginas, no en todo el lote.
+## 1:15–2:30 · El caso difícil
 
-Decir la métrica con precisión: «contra transcripciones manuales internas
-revisadas, el holdout interno agrupado de 10 documentos da 99,0 % de exact
-match macro de campos y 8/10 expedientes con campos de riesgo autoaceptados y
-correctos frente a etiqueta». Añadir de inmediato: «no es accuracy de pagos,
-de RapidOCR aislado ni validación privada; el split actual solo separa
-proveedores». Esto demuestra medición seria, no un número publicitario.
+Tres expedientes concretos, sin adornos:
 
-Abrir `e16`, `e17` o `e18` y remarcar el criterio: fecha manuscrita, factura
-entera manuscrita o importe tachado/corregido se detecta como riesgo y bloquea
-`PAGAR`, aunque otro campo parezca legible.
+- Factura en **JPY** sin conversión trazable: FactU conserva `JPY` si está
+  impreso, no lo transforma a EUR por idioma, NIF, IBAN o dirección; la
+  política v3 escala hasta que exista FX autorizada.
+- Factura con **importe tachado o corregido a mano**: el detector de riesgo
+  bloquea `PAGAR` aunque el resto parezca legible.
+- Historial ERP de `PO-2026-0071`: hay dos asientos (`PENDIENTE` y una
+  actualización posterior `PAGADA`). FactU conserva ambos, selecciona el más
+  reciente porque pedido, proveedor, NIF e importe coinciden y la fecha máxima
+  es única, y propone `NO_PAGAR`. Un empate o cualquier contradicción escala.
 
-## 4:00–6:00 · Fuentes, cambios y ERP
+## 2:30–3:30 · La traza y el cambio de fuente
 
-Abrir el caso `PO-2026-0071`. El ERP tiene dos registros: `PENDIENTE` y una
-actualización posterior `PAGADA`. FactU conserva ambos y solo selecciona el
-último porque pedido, proveedor, NIF e importe coinciden y la fecha máxima es
-única; por eso propone `NO_PAGAR`. Un empate o cualquier contradicción escala.
+Abrir el expediente completo del `PAGAR` anterior y recorrer la evidencia por
+campo (valor leído, valor normalizado, página, caja, método, versión de
+reglas, versión de fuentes). Después, en una copia de estado, preparar una
+actualización del Excel o de la política y enseñar la **previsualización de
+impacto antes de aplicar**: qué facturas cambian, cuáles se conservan, cuáles
+reutilizan OCR sin volver a leer. No se toca la ejecución que se vaya a
+entregar.
 
-Después, en una copia de estado, preparar una actualización del Excel o de la
-política y enseñar **antes de aplicar** el alcance: facturas afectadas,
-decisiones que cambian y decisiones que se conservan. No modificar los
-originales ni la ejecución que se vaya a entregar. Recalcular usa evidencias y
-OCR existente; no vuelve a cobrar/leer sin necesidad.
+Ensayo verificado (20/09, copia `estado-revision`, ERP oficial con lote 2): en
+«Datos y actualizaciones» → «Comparar una actualización» → «Datos contables
+(ERP)» → «Consultar ERP y ver facturas afectadas», el preview responde **«39
+mantienen su resultado / 0 pasan a revisión / 1 cambia a otro resultado»** y
+«Revisar cambios» señala `2026-08-22_P010.pdf`: Requiere revisión → No pagar,
+porque el pedido compartido `PO-2026-0071` ya consta pagado. Es la frase clave
+del bloque: *el sistema te dice qué va a cambiar antes de que cambie nada*.
 
-## 6:00–8:00 · Seguridad y trabajo humano útil
+## 3:30–4:30 · Límites honestos y coste medido
 
-Mostrar un documento con una instrucción impresa para el agente o un cambio de
-IBAN no autorizado. El PDF es dato no fiable: no puede editar política,
-proveedor, salida ni invocar ERP. El extractor devuelve campos cerrados; las
-reglas versionadas y `Decimal` deciden.
+- Sin llamadas al proveedor `modelo` operativo: el coste externo de inferencia
+  es **0 €** en las cifras vigentes. RapidOCR y las reglas corren en local.
+- End-to-end del Lote 1 (500 facturas) en **53,8 s** sobre MacBook Air M1,
+  ERP con latencia real, sin modelo externo.
+- `ESCALAR` no es un cajón de sastre: se reserva para evidencia
+  ausente/contradictoria, moneda sin conversión, historia ERP ambigua, IBAN
+  fuera de maestro, duplicado no exacto o anotación manual. Un fallo técnico
+  sigue siendo técnico, nunca se disfraza de `ESCALAR`.
+- No hay orquestador multiagente, ni SSO, ni WORM: no exponer a Internet ni
+  usar datos reales sin endurecimiento.
 
-Las revisiones no son un cajón de sastre. `ESCALAR` se reserva para evidencia
-ausente/contradictoria, moneda sin conversión, historia ERP ambigua, IBAN fuera
-de maestro, duplicado no exacto o anotación manual. En «Consultas a
-proveedores», agrupar las dudas por proveedor crea un borrador descargable;
-nunca envía correo ni aprueba facturas en bloque.
+## 4:30–5:00 · Cierre
 
-## 8:00–10:00 · Resiliencia y límite honesto
+**«El OCR aumenta cobertura; el código limita qué puede automatizarse. Cuando
+no hay prueba, FactU explica la duda y conserva el contexto para resolverla.»**
 
-En la demo sintética (no sobre la entrega), ejecutar `process --fault-after 0`
-para cortar entre extracción y commit. Enseñar estado persistente, lease y
-reanudación sin duplicar. Mencionar reintentos 401/429/500/timeout del ERP y
-que un fallo técnico sigue siendo técnico, no se disfraza de `ESCALAR`.
+## Si la demo muestra ambos lotes juntos
 
-Cerrar: **«El OCR aumenta cobertura; el código limita qué puede automatizarse.
-Cuando no hay prueba, FactU explica la duda y conserva el contexto para
-resolverla.»**
+Contarlo antes de que pregunten: el estado conjunto de los dos lotes da **458
+propuestas de pago / 9 no pagar / 73 en revisión** (verificado el 20/09 en la
+base de `estado-entrega`), no 435+24 y 9+1 y 56+15, porque `factura_4635.pdf`
+(Lote 1) comparte el pedido `PO-2026-0071` con `2026-08-22_P010.pdf` (Lote 2)
+y, cuando ambas conviven, la detección de duplicados **interlote** escala las
+**dos caras del mismo pedido** para que Alberto decida cuál corresponde al
+pago. Las entregas se generaron por separado y también son coherentes:
+`outcomes.jsonl` (Lote 1, antes de existir el Lote 2) dice `PAGAR`, y
+`outcomes_lote2.jsonl` dice `NO_PAGAR` porque el pedido ya constaba `PAGADA`
+en el ERP — regla 5, nunca pagar dos veces. Es un punto a favor de la
+arquitectura si se explica en el momento adecuado.
 
 ## Guion histórico · v0.2
 

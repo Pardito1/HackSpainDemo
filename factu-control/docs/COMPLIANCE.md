@@ -4,9 +4,9 @@
 
 El runner dedicado valida los 40 PDFs oficiales, el Excel v7, los dos CSV
 incrementales y la actualización ERP antes de publicar resultados. La ejecución
-end-to-end contra el bridge oficial produjo 19 `PAGAR`, 1 `NO_PAGAR` y 20
+end-to-end contra el bridge oficial produjo 24 `PAGAR`, 1 `NO_PAGAR` y 15
 `ESCALAR`, con auditoría válida. El resultado es un corte local de fuentes,
-política v3 y fecha `2026-09-19`; no es una certificación APTO ni precisión
+política v3 y fecha `2026-09-20`; no es una certificación APTO ni precisión
 frente a la referencia privada.
 
 El perfil `lote2_ocr_v1` está aislado del lote de 500. Se evaluó como perfil de
@@ -18,14 +18,13 @@ privada ni evidencia independiente de layout visual. No se vende como accuracy
 de pagos ni de RapidOCR aislado. Moneda ausente/ambigua, no-EUR sin FX
 trazable, inconsistencias, anotaciones y texto no fiable se escalan.
 
-**279 pruebas Python pasan** (dos avisos de deprecación de dependencias). Las
-cifras y descripciones que siguen son históricas de versiones anteriores.
+**345 pruebas Python y 15 de Node pasan** (dos avisos de deprecación de dependencias, medido 2026-09-20 en M1). Las cifras y descripciones que siguen son históricas de versiones anteriores.
 
 ## Histórico de versiones anteriores
 
-Actualización 0.3.1: corregido el generador de demo, ampliado su ERP a cuatro pedidos y aclarados los filtros de la bandeja. 115 pruebas Python y 4 JavaScript pasan. El nuevo recorrido completo verifica cuatro casos sintéticos separados, incluida la instrucción engañosa como única causa de una consulta. Las cifras del lote oficial en el párrafo y la tabla siguientes proceden de la verificación 0.3; no son una ejecución nueva del lote ni una certificación de precisión.
+Actualización 0.3.1 (histórico): corregido el generador de demo, ampliado su ERP a cuatro pedidos y aclarados los filtros de la bandeja. 115 pruebas Python y 4 JavaScript pasan. El nuevo recorrido completo verifica cuatro casos sintéticos separados, incluida la instrucción engañosa como única causa de una consulta. Las cifras del lote oficial en el párrafo y la tabla siguientes proceden de la verificación 0.3; no son una ejecución nueva del lote ni una certificación de precisión.
 
-Correcciones verificadas: campo OCR contiguo, etiquetas OCR, errores de Excel/JSON, errores de conexión del navegador y comprobación de integridad ampliada. 112 tests Python y 4 JavaScript pasan. Las 500 facturas se han reprocesado: 430 propuestas de pago, 9 negativas y 61 consultas; no es una medida de precisión. Las cinco facturas con instrucciones sospechosas detectadas quedan en ESCALAR. Originales e intervenciones humanas conservados con copia de seguridad previa.
+Correcciones verificadas (histórico): campo OCR contiguo, etiquetas OCR, errores de Excel/JSON, errores de conexión del navegador y comprobación de integridad ampliada. 112 tests Python y 4 JavaScript pasan. Las 500 facturas se han reprocesado: 430 propuestas de pago, 9 negativas y 61 consultas; no es una medida de precisión. Las cinco facturas con instrucciones sospechosas detectadas quedan en ESCALAR. Originales e intervenciones humanas conservados con copia de seguridad previa.
 
 | Requisito | Estado comprobado |
 |---|---|

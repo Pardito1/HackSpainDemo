@@ -111,5 +111,4 @@ política FX versionada.
 el informe con 99,0 % exact match macro de campos en el holdout interno
 agrupado, 8/10 expedientes con campos de riesgo autoaceptados y correctos
 frente a etiqueta, 31/38 de cobertura segura elegible y 31/40 (77,50 %) sobre
-el lote completo. La ejecución E2E guarda 19 `PAGAR`, 1 `NO_PAGAR`, 20
-`ESCALAR` y auditoría íntegra; no se vende ese reparto como accuracy.
+el lote completo. La ejecución E2E guarda 24 `PAGAR`, 1 `NO_PAGAR` y 15 `ESCALAR` (ejecución vigente tras el merge de moneda/fechas; una ejecución anterior de 0.10.0 dio 19/1/20) y auditoría íntegra; no se vende ese reparto como accuracy.

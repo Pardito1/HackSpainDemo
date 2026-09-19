@@ -31,7 +31,7 @@ from .utils import canonical, now
 from .source_view import source_view
 from .consultations import workspace as consultations_workspace
 from .sheets import sheet_view, workbook_path
-from .presentation import FIELDS_ES, RESULTS_ES, EVENTS_ES, euros, decorate_dashboard, decision_summary, invoice_activity, human_actions, readable_date, greeting
+from .presentation import FIELDS_ES, RESULTS_ES, EVENTS_ES, euros, decorate_dashboard, decision_summary, invoice_activity, human_actions, readable_date, greeting, rule_explanation
 
 ROOT = Path(__file__).parent
 
@@ -93,7 +93,7 @@ def create_app(data_dir=None):
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
     templates = Jinja2Templates(directory=ROOT / "templates")
     templates.env.filters["euros"] = euros
-    templates.env.globals.update(field_labels=FIELDS_ES, result_labels=RESULTS_ES, event_labels=EVENTS_ES, greeting=greeting)
+    templates.env.globals.update(field_labels=FIELDS_ES, result_labels=RESULTS_ES, event_labels=EVENTS_ES, greeting=greeting, rule_explanation=rule_explanation)
     templates.env.filters["readable_date"] = readable_date
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="factu-worker")
     active = {}
