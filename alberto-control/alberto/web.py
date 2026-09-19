@@ -341,6 +341,26 @@ def create_app(data_dir=None):
         data.pop("blob", None)
         return data
 
+    @app.get("/sources/{source_id}", response_class=HTMLResponse)
+    def source_detail(request: Request, source_id: str, batch: str | None = None):
+        data = service.store.source(source_id)
+        if "suppliers" in data and "orders" in data:
+            kind = "master"
+        elif "rows" in data and "pages" in data:
+            kind = "erp"
+        elif "tolerance_eur" in data:
+            kind = "policy"
+        else:
+            kind = "unknown"
+        return render(
+            request,
+            "source_detail.html",
+            source_id=source_id,
+            kind=kind,
+            data=data,
+            selected_batch=batch,
+        )
+
     @app.get("/api/documents/{doc_id}/original")
     def original(doc_id: str):
         doc = service.document(doc_id)
