@@ -2,13 +2,20 @@
 
 import argparse
 import json
+import sys
 from pathlib import Path
 import pymupdf
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from factu.utils import file_name  # noqa: E402
+
 
 def check_jsonl(path, pdfs):
+    # macOS lista los nombres con tilde en NFD y el reto los publica en NFC:
+    # las dos listas se comparan en la misma forma o los 65 acentuados fallan.
     originals = [
-        p.name
+        file_name(p.name)
         for p in Path(pdfs).rglob("*")
         if p.is_file() and p.suffix.lower() == ".pdf"
     ]

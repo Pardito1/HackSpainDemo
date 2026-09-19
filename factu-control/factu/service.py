@@ -19,7 +19,16 @@ from .extract import FIELDS, VERSION, engine_versions, extract_pdf, invoice_numb
 from .master import read_master
 from .policy import apply_reviews, evaluate, validate_policy
 from .presentation import invoice_issue
-from .utils import canonical, clean, digest, identifier, invoice_date, money, now
+from .utils import (
+    canonical,
+    clean,
+    digest,
+    file_name,
+    identifier,
+    invoice_date,
+    money,
+    now,
+)
 from .workspace import WorkspaceMixin
 
 
@@ -99,7 +108,7 @@ class Service(WorkspaceMixin):
             for p in Path(folder).rglob("*")
             if p.is_file() and p.suffix.lower() == ".pdf"
         )
-        if not files or len({p.name for p in files}) != len(files):
+        if not files or len({file_name(p.name) for p in files}) != len(files):
             raise ValueError("El lote debe contener PDFs y nombres de archivo únicos")
         workbook = Path(workbook)
         master = read_master(workbook)
@@ -121,7 +130,9 @@ class Service(WorkspaceMixin):
             # Un fichero corrupto o que no es PDF se ingesta igualmente: la
             # extracción lo marcará PDF_CORRUPT y la decisión será ESCALAR.
             blob = self.store.blob(data, ".pdf")
-            manifest.append((secrets.token_hex(10), file.name, digest(data), str(blob)))
+            manifest.append(
+                (secrets.token_hex(10), file_name(file.name), digest(data), str(blob))
+            )
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             # Until the new batch is read we cannot exclude cross-batch duplicates.

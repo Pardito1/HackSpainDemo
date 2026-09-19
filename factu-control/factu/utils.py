@@ -40,6 +40,17 @@ def identifier(value) -> str:
     return re.sub(r"\s+", "", clean(value)).upper()
 
 
+def file_name(value) -> str:
+    """El nombre del fichero en la forma que publica el reto: NFC.
+
+    macOS devuelve los 65 nombres con tilde descompuestos (NFD) y Linux los
+    devuelve compuestos. El `file_id` de la entrega se compara carácter a
+    carácter contra la referencia, así que no puede depender del sistema donde
+    se ejecute el proceso.
+    """
+    return unicodedata.normalize("NFC", str(value))
+
+
 def money(value) -> Decimal:
     """Two decimal locales; reject ambiguous thousands-only strings, never guess."""
     if isinstance(value, (int, float, Decimal)):

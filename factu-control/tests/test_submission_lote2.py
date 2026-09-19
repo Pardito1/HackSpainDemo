@@ -1,4 +1,5 @@
 import json
+import unicodedata
 from pathlib import Path
 import openpyxl
 import pymupdf as fitz
@@ -70,3 +71,33 @@ def test_delivery_contract_and_duplicates(tmp_path):
     (delivery / "extra.txt").write_text("no corresponde")
     with pytest.raises(ValueError, match="exactamente"):
         validate(delivery, pdfs, pdfs)
+
+
+NFD = unicodedata.normalize("NFD", "factura_informática.pdf")
+NFC = unicodedata.normalize("NFC", NFD)
+
+
+def test_the_file_id_is_nfc_even_when_the_disk_says_nfd(tmp_path):
+    pdfs = tmp_path / "pdfs"
+    pdfs.mkdir()
+    make_pdf(pdfs / NFD)
+    workbook = tmp_path / "master.xlsx"
+    make_workbook(workbook)
+    service = Service(tmp_path / "state")
+    batch = service.ingest(pdfs, workbook, "acentos", "2026-09-19")["batch_id"]
+    stored = service.store.all(
+        "SELECT file_id FROM documents WHERE batch_id=?", (batch,)
+    )
+    assert [row["file_id"] for row in stored] == [NFC]
+
+
+def test_the_validator_reads_an_nfc_export_against_nfd_filenames(tmp_path):
+    pdfs = tmp_path / "pdfs"
+    pdfs.mkdir()
+    make_pdf(pdfs / NFD)
+    outcomes = tmp_path / "outcomes.jsonl"
+    outcomes.write_text(
+        json.dumps({"file_id": NFC, "result": "PAGAR"}, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    assert check_jsonl(outcomes, pdfs) == 1
