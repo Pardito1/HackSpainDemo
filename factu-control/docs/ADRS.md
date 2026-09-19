@@ -4,7 +4,11 @@ Estos ADRs describen el código, no capacidades futuras como si estuvieran termi
 
 Actualización 0.3 de ADR-01/02/04/05: las instrucciones sospechosas detectadas obligan a consulta y su resolución requiere confirmación humana explícita; los controles bancarios siguen protegidos. La extracción separa etiquetas de fecha adyacentes y rechaza identificadores mezclados. El verificador comprueba originales, fuentes, decisiones y registros sellados además de la cadena de eventos, y bloquea operaciones si detecta alteraciones. Se acepta cobertura parcial de registros antiguos sin sello y se comunica; no se promete firma externa ni detector universal. Evidencia: `test_regressions_v03.py` y `test_frontend.mjs`.
 
+Actualización 0.4.0: no se asume moneda cuando no está impresa. Se conserva la ausencia y se solicita confirmación con autor, motivo y fuente; el valor humano no se presenta como leído. La interfaz de Alberto se separa de la auditoría técnica sin eliminar evidencia ni añadir una falsa barrera de permisos. Evidencia: `test_currency_and_alberto_ui.py` y `test_lote1_runner.py`. Trade-off aceptado: más consultas (218 en el lote medido) a cambio de no inventar divisas.
+
 ## ADR-01 · Reglas explícitas y abstención; sin decisor LLM
+
+Actualización 0.7 de ADR-01/03/05: se contrasta el ID completo de pedido con `Pedidos_2025_OLD`. Alternativas descartadas: ignorar el histórico o rechazar por importe coincidente. Se elige alerta revisable con celdas de origen, sin confundir un archivo parcial de dos pedidos con un registro de pagos. La vista previa invalida únicamente dependencias históricas coincidentes; duplicados entre lotes se indexan una vez por comparación. Alberto puede resolver la alerta con evidencia y confirmación expresa; la aplicación no autentica al revisor. Evidencia: `test_history_and_sources_ui.py` y comprobación del lote de 500 sin repetir OCR. Consecuencia aceptada: más consultas si aparecen coincidencias, y cobertura limitada al histórico aportado.
 
 **Contexto:** las facturas contienen texto engañoso; la norma deja parte de los criterios al equipo. Un resultado muy seguro sin evidencia puede producir un pago indebido.
 

@@ -1,0 +1,54 @@
+{
+  "version": "0.4.0",
+  "date": "2026-09-19",
+  "batch_id": "2534260c3eb3",
+  "code_sha256": "a8469a528edd777b93e83143e106b3da11bcf8ded015c18fd6738ef6b35014b0",
+  "documents": 500,
+  "pages": 522,
+  "counts": {
+    "ESCALAR": 218,
+    "PAGAR": 273,
+    "NO_PAGAR": 9
+  },
+  "currency_status": {
+    "MISSING": 192,
+    "OK": 308
+  },
+  "pending": 0,
+  "http_routes": {
+    "/": 200,
+    "/sources": 200,
+    "/sources/audit": 200,
+    "/operations": 200,
+    "/groups": 200,
+    "/api/health": 200
+  },
+  "invoice_pages_rendered_ok": 500,
+  "export_unique_records": 500,
+  "audit": {
+    "valid": true,
+    "chain_valid": true,
+    "head": "aded89ecd8d702021f021a357bd8620e1edd466b7eafb006d1c2b1013cb9261b",
+    "issues": [],
+    "warnings": [],
+    "checked": {
+      "documents": 500,
+      "decisions": 1500,
+      "sources": 4,
+      "blobs": 501
+    },
+    "scope": "Eventos, manifiestos, originales, fuentes, decisiones y registros sellados; no identidad autenticada ni firma externa"
+  },
+  "unit_tests": {
+    "python_passed": 127,
+    "javascript_passed": 4,
+    "dependency_deprecation_warnings": 7
+  },
+  "accuracy": null,
+  "limitations": [
+    "Sin etiquetas independientes ni validador privado",
+    "Lote 2 oficial pendiente",
+    "Windows requiere WSL2; no probado aquí",
+    "Separación visual de auditoría, no roles ni autenticación"
+  ]
+}

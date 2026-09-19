@@ -11,6 +11,8 @@ from .erp import ERPClient
 from .master import read_master
 from .policy import validate_policy
 from .utils import canonical, clean, digest, identifier, now
+from .human_guards import payment_blockers
+from .historical import history_dependency
 
 
 class WorkspaceMixin:
@@ -32,8 +34,7 @@ class WorkspaceMixin:
         if result == "PAGAR":
             # A business answer may resolve source precedence / an extra business rule.
             # It cannot invent unreadable fields or bypass account, amount, duplicate or paid checks.
-            protected = [r for r in blockers if r["state"] == "UNKNOWN" or
-                         not (r["id"] in ("source_identity_conflict", "document_instructions") or r["id"].startswith("extra:"))]
+            protected = payment_blockers(engine)
             if engine["result"] == "NO_PAGAR" or protected:
                 raise ValueError("No se puede proponer pagar: corrige primero las fuentes o lecturas. No se omiten controles de cuenta, identidad, importe, duplicados ni pagos previos.")
             if set(acknowledged) != {r["id"] for r in blockers}:
@@ -63,21 +64,19 @@ class WorkspaceMixin:
         return preview
 
     def retract_human_answer(self, doc_id, actor, reason):
-        """Retira la ultima respuesta humana sin borrarla: no se toca ni una
-        fila existente de human_decisions, solo se sellan tres columnas
-        nuevas (retracted_at/by/reason) que no forman parte de ningun
-        anclaje ya sellado -- verify_audit() solo compara las columnas que
-        existian cuando el evento "alberto_answered" se sello, asi que
-        marcar la retractacion no rompe esa comprobacion.
+        """Retain the response and append an event sealing its withdrawal.
+
+        The original answer event stays immutable; the verifier checks the
+        latest sealed state of the row, including the withdrawal metadata.
         """
         doc = self.document(doc_id)
         if not clean(actor) or len(clean(reason)) < 10:
             raise ValueError("Indica quién retira la respuesta y por qué (10 caracteres)")
         answer = self.store.one(
-            "SELECT * FROM human_decisions WHERE document_id=? AND retracted_at IS NULL ORDER BY id DESC LIMIT 1",
+            "SELECT * FROM human_decisions WHERE document_id=? ORDER BY id DESC LIMIT 1",
             (doc_id,),
         )
-        if not answer:
+        if not answer or answer["retracted_at"]:
             raise ValueError("No hay ninguna respuesta vigente que retirar")
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -114,7 +113,8 @@ class WorkspaceMixin:
             return {"complete": source.get("complete"), "rows": sorted(
                 [r for r in source["rows"] if identifier(r["pedido"]) == identifier(order)], key=canonical)}
         return {"suppliers": sorted([s for rows in source["suppliers"].values() for s in rows if s["nif"] == identifier(nif)], key=canonical),
-                "orders": source["orders"].get(identifier(order), []), "rules": source["rules"]}
+                "orders": source["orders"].get(identifier(order), []), "rules": source["rules"],
+                "historical": history_dependency(source, order)}
 
     def _change_guard(self, batch_id):
         return digest({"batch": self.batch(batch_id), "code": self.code_sha256,
@@ -126,8 +126,10 @@ class WorkspaceMixin:
     def preview_source(self, batch_id, kind, new_id, actor, reason, rules_ack=False):
         if kind not in ("master", "erp", "policy"):
             raise ValueError("Tipo de fuente desconocido")
-        if not clean(actor) or len(clean(reason)) < 10:
-            raise ValueError("Indica responsable y motivo del cambio")
+        actor = clean(actor) or "Sesión local (sin identificar)"
+        reason = clean(reason) or "Actualización de fuente sin nota adicional."
+        if len(actor) > 120 or len(reason) > 2000:
+            raise ValueError("Responsable o nota demasiado largos")
         if self.store.one("SELECT count(*) n FROM jobs WHERE state!='DONE'")["n"]:
             raise ValueError("Termina los trabajos pendientes antes de cambiar fuentes")
         batch = self.batch(batch_id)
@@ -143,6 +145,15 @@ class WorkspaceMixin:
             raise ValueError("La norma del Excel ha cambiado. Revisa primero la política implementada y confirma su correspondencia; no se traduce automáticamente.")
         documents = self.store.all("SELECT * FROM documents WHERE batch_id=? ORDER BY file_id", (batch_id,))
         affected, reused = [], []
+        # Source updates never change extracted order IDs. Build the cross-batch
+        # duplicate index once, under the workflow lock, instead of N full scans.
+        effective, by_order = {}, {}
+        for item in self.store.all("SELECT * FROM documents WHERE extraction IS NOT NULL ORDER BY created,id"):
+            read = self.effective(item)
+            effective[item["id"]] = read
+            order_field = read["fields"]["order"]
+            if order_field["status"] == "OK":
+                by_order.setdefault(order_field["value"], []).append((item, read))
         for doc in documents:
             if not doc["latest_decision"]:
                 raise ValueError("Reevalúa el lote antes de preparar un cambio")
@@ -151,7 +162,11 @@ class WorkspaceMixin:
             old_code = json.loads(before["payload"])["context"].get("code_sha256")
             changed = self._change_dependencies(doc, kind, old) != self._change_dependencies(doc, kind, new) or old_code != self.code_sha256
             if changed:
-                after = self.evaluation(doc, overrides={key: new_id})
+                read = effective[doc["id"]]
+                order_field = read["fields"]["order"]
+                candidates = by_order.get(order_field["value"], []) if order_field["status"] == "OK" else []
+                duplicate = self.duplicate_context(doc, read, candidates=candidates)
+                after = self.evaluation(doc, read, duplicate, overrides={key: new_id})
                 affected.append({"id": doc["id"], "file_id": doc["file_id"], "before": before["result"],
                                  "after": after["result"], "questions": after["questions"],
                                  "human_response_stale": after.get("human_response_stale", False)})
@@ -176,7 +191,9 @@ class WorkspaceMixin:
             payload["blob"] = str(self.store.blob(path.read_bytes(), ".xlsx"))
         elif kind == "policy":
             payload = validate_policy(json.loads(path.read_text()))
-            payload["approved_by"] = clean(actor)
+            if not rules_ack:
+                raise ValueError("Confirma que has revisado las reglas antes de ver las facturas afectadas.")
+            payload["approved_by"] = clean(actor) or "Sesión local (sin identificar)"
         else:
             raise ValueError("Carga un Excel maestro o una política JSON")
         new_id = self.store.put_source(kind, payload)
@@ -231,28 +248,5 @@ class WorkspaceMixin:
                     "SELECT * FROM source_changes WHERE batch_id=? ORDER BY created DESC", (batch_id,))]}
 
     def consultation_drafts(self, batch_id=None):
-        """Communication aid only: grouping never authorizes bulk payment/correction."""
-        from .presentation import decorate_dashboard
-        data = decorate_dashboard(self, self.dashboard(batch_id))
-        batches = {b["id"]: b["name"] for b in data["batches"]}
-        groups = {}
-        for doc in data["documents"]:
-            if doc["result"] != "ESCALAR":
-                continue
-            key = digest({"nif":doc["nif"] or doc["id"], "batch": batch_id})[:16]
-            group = groups.setdefault(key, {"id":key, "supplier":doc["supplier"], "nif":doc["nif"], "documents":[], "questions":{}})
-            group["documents"].append({"id":doc["id"], "file_id":doc["file_id"], "batch":batches[doc["batch_id"]]})
-            for question in doc["questions"]:
-                group["questions"].setdefault(question, []).append(doc["file_id"])
-        for group in groups.values():
-            lines = ["BORRADOR PARA REVISAR — NO ENVIADO", "",
-                     "Asunto: Información pendiente para conciliar facturas — " + group["supplier"], "", "Hola,", "",
-                     "Necesitamos aclarar estos puntos antes de cerrar la conciliación:", ""]
-            for question, files in group["questions"].items():
-                lines.extend(["• " + question, "  Facturas: " + ", ".join(files), ""])
-            lines.extend(["Expedientes incluidos:"] + ["- " + d["file_id"] + " (" + d["batch"] + ")" for d in group["documents"]])
-            lines.extend(["", "Por favor, indicad la referencia o documentación que respalda la aclaración.",
-                          "Este mensaje no autoriza pagos ni cambios de cuenta.", "", "Gracias,", "Administración", "",
-                          "Revisión pendiente: adaptar destinatario, contexto y datos antes de enviar."])
-            group["draft"] = "\n".join(lines)
-        return sorted(groups.values(), key=lambda g: (-len(g["documents"]), g["supplier"]))
+        from .consultations import workspace
+        return workspace(self, batch_id)["drafts"]

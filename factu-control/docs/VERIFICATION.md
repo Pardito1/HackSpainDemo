@@ -1,6 +1,26 @@
 # Verificación realizada · 19 septiembre 2026
 
-## Actualización verificada 0.3
+## Actualización 0.7.0
+
+153 pruebas Python y 6 JavaScript pasan. 500 documentos reevaluados con el histórico parcial incorporado, sin repetir lecturas ni aprobar pagos: 273 PAGAR, 9 NO_PAGAR, 218 ESCALAR. Se comprueban las 500 páginas de expediente, las pantallas principales y exportación de 500 nombres únicos. Integridad válida sobre 500 documentos, 3000 decisiones históricas, cinco fuentes y 501 blobs. El Excel original no se modifica. Los dos pedidos históricos no coinciden con los del lote, y no contienen identidad, número de factura ni estado de pago.
+
+Comprobación en navegador: fuente Excel, campos condicionales de política, carga y comparación de actualización, confirmación e historial. Se corrige el refresco después de aplicar. Texto aumentado y vista a 390 px sin desbordamiento horizontal de página. El PDF refleja 0.7.0; los datos y benchmarks que siguen son históricos, no mediciones nuevas de rendimiento ni precisión.
+
+## Actualización 0.4.0
+
+127 pruebas Python y 4 JavaScript pasan. Prueba real: 500 PDFs / 522 páginas, 500 resultados únicos, 273 PAGAR / 9 NO_PAGAR / 218 ESCALAR, cero pendientes. 192 facturas tienen moneda MISSING: ya no se completa EUR sin evidencia. La auditoría comprueba originales, fuentes y decisiones sin incidencias. Las 500 rutas de expediente, las rutas de bandeja/fuentes/auditoría/operaciones/grupos y la exportación han respondido correctamente.
+
+La vista de Alberto no contiene JSON ni hashes. El motivo se presenta antes del documento. Las evidencias técnicas se conservan en pantallas separadas. La comprobación visual se ha realizado en navegador y no se han registrado errores de consola en esa sesión. `albertitos_plan.pdf` ha sido actualizado a 0.4.0 y revisado visualmente en sus cuatro páginas. Guía: `../PROCESAR-500.md`.
+
+## Registro histórico 0.3.1
+
+115 pruebas Python y 4 JavaScript pasan. La prueba nueva ejecuta el generador distribuido, inicia el ERP sintético real por HTTP en un puerto local temporal, importa las facturas y verifica resultados, motivos, integridad y exportación. Casos: demo-1 PAGAR, demo-2 ESCALAR por IBAN, demo-3 NO_PAGAR por pago previo, demo-4 ESCALAR exclusivamente por instrucciones sospechosas. Las pruebas anteriores no cubrían el generador y no detectaron que añadía la frase maliciosa en las tres facturas.
+
+Se verifican la tabla filtrada, sus contadores y la opción de quitar filtros. El generador sigue rechazando directorios existentes para conservar sus datos. El conjunto completo pasó en 9,07 segundos en el entorno macOS/Python 3.12; hay siete avisos de obsolescencia de dependencias. La conectividad de las nuevas pruebas es solo localhost.
+
+La demo no modifica el primer lote oficial. Los recuentos de 500 facturas que siguen corresponden a verificaciones históricas. En aquella entrega el PDF era versión 0.3; ahora ha sido sustituido por el plan 0.4.0.
+
+## Registro histórico 0.3 (conservado)
 
 112 pruebas Python y 4 JavaScript pasan. Correcciones: campo OCR adyacente, etiquetas OCR, Excel dañado, JSON inválido (incluidos tipos anidados), respuesta no JSON/desconexión, errores ERP en vista previa y verificador de integridad. Pruebas de alteración aisladas comprueban originales, maestro, fuentes, decisiones, extracción/caché y respuestas humanas; las operaciones quedan bloqueadas.
 
@@ -40,5 +60,5 @@ El paquete no incluye base de datos de usuario, credenciales reales, PDFs oficia
 1. Aprobar con el equipo los criterios de decisión y las precedencias de fuentes.
 2. Revisar una muestra independiente de propuestas PAGAR y todos los escalados críticos; medir precisión por categoría y tiempo humano.
 3. Incorporar datos/ERP/norma oficiales del lote 2 y ejecutar regresiones.
-4. El `docs/albertitos_plan.pdf` refleja la versión 0.3. Actualizarlo de nuevo tras el lote 2 y cualquier cambio posterior.
+4. El `docs/albertitos_plan.pdf` refleja la versión 0.4.0. Actualizarlo de nuevo tras el lote 2 y cualquier cambio posterior.
 5. Confirmar plazo y comprobar el repositorio de entrega separado.

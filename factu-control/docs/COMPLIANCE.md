@@ -1,4 +1,12 @@
-# Cumplimiento y pendientes · v0.3
+# Cumplimiento y pendientes · v0.7.0
+
+Actualización vigente 0.7.0: 500 facturas comprobadas, 273 PAGAR / 9 NO_PAGAR / 218 ESCALAR y cero pendientes de proceso. Se incorporan dos pedidos del histórico parcial, sin coincidencias en el lote. 153 pruebas Python y 6 JavaScript pasan. Auditoría válida, 500 páginas de expediente responden correctamente y exportación con 500 registros únicos. PDF de arquitectura actualizado a 0.7.0. Siguen pendientes lote 2 oficial y validación privada; no es una certificación APTO. Las cifras siguientes describen versiones anteriores.
+
+Actualización vigente: 500 facturas procesadas con ERP y OCR habilitado; 273 PAGAR, 9 NO_PAGAR, 218 ESCALAR, cero pendientes. No se asume EUR, motivo arriba y auditoría separada. 127 pruebas Python y 4 JavaScript pasan; plan PDF 0.4.0 de cuatro páginas. Sigue pendiente el lote 2 oficial y la validación privada. Las cifras y descripciones de las versiones anteriores se conservan debajo como histórico, no como resultados actuales.
+
+## Histórico de versiones anteriores
+
+Actualización 0.3.1: corregido el generador de demo, ampliado su ERP a cuatro pedidos y aclarados los filtros de la bandeja. 115 pruebas Python y 4 JavaScript pasan. El nuevo recorrido completo verifica cuatro casos sintéticos separados, incluida la instrucción engañosa como única causa de una consulta. Las cifras del lote oficial en el párrafo y la tabla siguientes proceden de la verificación 0.3; no son una ejecución nueva del lote ni una certificación de precisión.
 
 Correcciones verificadas: campo OCR contiguo, etiquetas OCR, errores de Excel/JSON, errores de conexión del navegador y comprobación de integridad ampliada. 112 tests Python y 4 JavaScript pasan. Las 500 facturas se han reprocesado: 430 propuestas de pago, 9 negativas y 61 consultas; no es una medida de precisión. Las cinco facturas con instrucciones sospechosas detectadas quedan en ESCALAR. Originales e intervenciones humanas conservados con copia de seguridad previa.
 

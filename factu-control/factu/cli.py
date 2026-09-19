@@ -14,6 +14,13 @@ def main(argv=None):
     )
     parser.add_argument("--data", default=os.getenv("FACTU_DATA", "data"))
     sub = parser.add_subparsers(dest="command", required=True)
+    lote1 = sub.add_parser("lote1", help="Importa/reanuda las 500 facturas oficiales, consulta el ERP y procesa todo")
+    lote1.add_argument("--materials", required=True, help="Carpeta oficial con facturas/ y FINAL_v7_DEFINITIVO_ahorasi.xlsx")
+    lote1.add_argument("--as-of", required=True, help="Fecha de referencia explícita YYYY-MM-DD")
+    lote1.add_argument("--url", default=os.getenv("ERP_URL", "http://127.0.0.1:8009"))
+    lote1.add_argument("--user", default=os.getenv("ERP_USER", "alberto"))
+    lote1.add_argument("--serve", action="store_true", help="Abre el servidor web con el mismo estado al terminar")
+    lote1.add_argument("--port", type=int, default=8089)
     ingest = sub.add_parser(
         "ingest", help="Importa originales y registra un manifiesto"
     )
@@ -58,7 +65,19 @@ def main(argv=None):
     args = parser.parse_args(argv)
     service = Service(args.data)
     try:
-        if args.command == "ingest":
+        if args.command == "lote1":
+            from .lote1 import run_lote1
+            result = run_lote1(service, args.materials, args.as_of, args.url, args.user,
+                               os.getenv("ERP_PASSWORD", "FACTURAS2009"))
+            print(json.dumps(result, ensure_ascii=False, indent=2), flush=True)
+            print(f"Bandeja: http://127.0.0.1:{args.port}/?batch={result['batch_id']}", flush=True)
+            if args.serve:
+                import uvicorn
+                from .web import create_app
+                os.environ["ERP_URL"] = args.url
+                uvicorn.run(create_app(args.data), host="127.0.0.1", port=args.port)
+            return
+        elif args.command == "ingest":
             result = service.ingest(
                 args.pdfs, args.excel, args.name, args.as_of, args.policy, args.actor
             )

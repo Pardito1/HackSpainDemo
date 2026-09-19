@@ -1,7 +1,7 @@
 {% macro icon(name) -%}<svg class="icon" aria-hidden="true"><use href="#i-{{ name }}"/></svg>{%- endmacro %}
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf }}"><title>{% block title %}FactU · Mesa de trabajo{% endblock %}</title>
-<link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/readable.css"><script src="/static/app.js" defer></script><script src="/static/consultations.js" defer></script></head>
 <body><a href="#main" class="skip-link">Saltar al contenido</a>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
 <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 14h5l1 3h4l1-3h5M8 8h8"/></symbol>
@@ -20,15 +20,14 @@
 <aside class="sidebar"><a class="brand" href="/">FactU<span>.</span></a><p class="brand-caption">La mesa de las cuentas claras.</p>
 <div class="workspace-label">ESPACIO DE TRABAJO</div>
 <nav aria-label="Navegación principal">
-<a href="/{{ bquery }}" class="{% if request.url.path=='/' %}active{% endif %}">{{ icon('inbox') }}<span>Bandeja</span>{% if metrics is defined and metrics.counts.ESCALAR %}<span class="nav-count">{{ metrics.counts.ESCALAR }}</span>{% endif %}</a>
-<a href="/sources{{ bquery }}" class="{% if request.url.path=='/sources' %}active{% endif %}">{{ icon('source') }}<span>Fuentes y cambios</span></a>
-<a href="/groups{{ bquery }}" class="{% if request.url.path=='/groups' %}active{% endif %}">{{ icon('group') }}<span>Consultas por proveedor</span></a>
-<a href="/operations{{ bquery }}" class="{% if request.url.path=='/operations' %}active{% endif %}">{{ icon('chart') }}<span>Actividad y coste</span></a>
+<a href="/{{ bquery }}" class="{% if request.url.path=='/' %}active{% endif %}">{{ icon('inbox') }}<span>Bandeja</span>{% if metrics is defined and metrics.counts.ESCALAR %}<span class="nav-count" aria-label="{{ metrics.counts.ESCALAR }} pendientes de revisión">{{ metrics.counts.ESCALAR }}</span>{% endif %}</a>
+<a href="/sources{{ bquery }}" class="{% if request.url.path=='/sources' %}active{% endif %}">{{ icon('source') }}<span>Datos y actualizaciones</span></a>
+<a href="/groups{{ bquery }}" class="{% if request.url.path=='/groups' %}active{% endif %}">{{ icon('group') }}<span>Consultas a proveedores</span></a>
+
 </nav>
 <div class="sidebar-note"><span class="small-rule"></span><p>El trabajo avanza.<br>El criterio sigue siendo tuyo.</p><small>Los casos dudosos se consultan.<br>Los originales se conservan.</small></div>
-<div class="operator"><span class="avatar">A</span><div><strong>Mesa de Alberto</strong><small>Sesión local · sin autenticación</small></div></div>
-<div class="sidebar-foot">HackSpain 2026 <span>v0.3</span></div></aside>
-<div class="app-shell"><header class="topbar"><div class="breadcrumb">{% block breadcrumb %}Conciliación{% endblock %}</div><div class="local-status"><span></span>En tu equipo <i>Solo consulta al ERP</i></div></header>
+</aside>
+<div class="app-shell"><header class="topbar"><div class="breadcrumb">FactU <span>/</span> {% block breadcrumb %}Conciliación{% endblock %}</div></header>
 <main id="main">{% block content %}{% endblock %}</main>
-<footer><span>Preparado para revisar, no para mover dinero.</span><span>Originales, evidencias y decisiones conservados.</span></footer></div>
+<footer><span>Preparado para revisar, no para mover dinero.</span><a href="/operations{{ bquery }}">Área técnica · auditoría y coste</a></footer></div>
 <div id="toast" role="status" aria-live="polite" hidden></div></body></html>

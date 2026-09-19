@@ -5,6 +5,7 @@ import json
 import os
 import secrets
 import statistics
+import math
 import time
 import threading
 from functools import wraps
@@ -17,6 +18,7 @@ from . import modelo
 from .extract import FIELDS, VERSION, engine_versions, extract_pdf, invoice_number
 from .master import read_master
 from .policy import apply_reviews, evaluate, validate_policy
+from .presentation import invoice_issue
 from .utils import canonical, clean, digest, identifier, invoice_date, money, now
 from .workspace import WorkspaceMixin
 
@@ -169,15 +171,10 @@ class Service(WorkspaceMixin):
                     db=db,
                 )
             started = time.monotonic()
-            client = ERPClient(
-                url,
-                user,
-                password,
-                callback=lambda kind, payload: self.store.event(
-                    kind, payload, batch_id=batch_id
-                ),
-            )
+            client = None
             try:
+                client = ERPClient(url, user, password, callback=lambda kind, payload:
+                                   self.store.event(kind, payload, batch_id=batch_id))
                 snapshot = client.snapshot()
                 source_id = self.store.put_source("erp", snapshot)
                 with self.store.connect() as db:
@@ -213,18 +210,18 @@ class Service(WorkspaceMixin):
                     "retries": client.retries,
                 }
             except Exception as exc:
-                self.store.cost(
-                    "erp_sync_failed",
-                    time.monotonic() - started,
-                    batch_id=batch_id,
-                    payload={"error": str(exc)},
-                )
-                self.store.event(
-                    "erp_sync_failed", {"error": str(exc)}, batch_id=batch_id
-                )
+                with self.store.connect() as db:
+                    db.execute("BEGIN IMMEDIATE")
+                    db.execute("UPDATE documents SET state='ERP_ERROR' WHERE batch_id=?", (batch_id,))
+                    self.store.cost("erp_sync_failed", time.monotonic() - started,
+                                    batch_id=batch_id, payload={"error": str(exc)}, db=db)
+                    self.store.event("erp_sync_failed", {"error": str(exc), "state": "ERP_ERROR",
+                        "previous_snapshot": old["snapshot_id"], "recovery": "manual_sync_then_evaluate"},
+                        batch_id=batch_id, db=db)
                 raise
             finally:
-                client.close()
+                if client is not None:
+                    client.close()
 
     def claim(self, batch_id):
         with self.store.connect() as db:
@@ -427,17 +424,17 @@ class Service(WorkspaceMixin):
             else None
         )
 
-    def duplicate_context(self, document, extraction):
+    def duplicate_context(self, document, extraction, candidates=None):
         related = []
         order = extraction["fields"]["order"]
         if order["status"] != "OK":
             return {"state": "none", "related": [], "canonical_id": None}
-        for other in self.store.all(
-            "SELECT * FROM documents WHERE extraction IS NOT NULL ORDER BY created,id"
-        ):
+        if candidates is None:
+            candidates = ((d, self.effective(d)) for d in self.store.all(
+                "SELECT * FROM documents WHERE extraction IS NOT NULL ORDER BY created,id"))
+        for other, effective in candidates:
             if other["id"] == document["id"]:
                 continue
-            effective = self.effective(other)
             other_order = effective["fields"]["order"]
             if other_order["status"] == "OK" and other_order["value"] == order["value"]:
                 related.append(
@@ -502,9 +499,12 @@ class Service(WorkspaceMixin):
         result["engine_result"] = result["result"]
         if with_human:
             answer = self.store.one(
-                "SELECT * FROM human_decisions WHERE document_id=? AND retracted_at IS NULL ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM human_decisions WHERE document_id=? ORDER BY id DESC LIMIT 1",
                 (document["id"],),
             )
+            # Withdrawing the latest response must not reactivate an older one.
+            if answer and answer["retracted_at"]:
+                answer = None
             if answer and answer["anchor"] == result["human_anchor"]:
                 result["human_decision"] = answer
                 result["result"] = answer["result"]
@@ -526,10 +526,12 @@ class Service(WorkspaceMixin):
         if pending:
             return {"decisions": 0, "pending_jobs": pending}
         if not batch["snapshot_id"]:
+            last_sync = self.store.one("SELECT kind FROM events WHERE batch_id=? AND kind IN ('erp_sync_started','erp_sync_failed','erp_snapshot_published') ORDER BY id DESC LIMIT 1", (batch_id,))
+            state = "ERP_ERROR" if last_sync and last_sync["kind"] == "erp_sync_failed" else "WAITING_ERP"
             with self.store.connect() as db:
                 db.execute(
-                    "UPDATE documents SET state='WAITING_ERP' WHERE batch_id=?",
-                    (batch_id,),
+                    "UPDATE documents SET state=? WHERE batch_id=?",
+                    (state, batch_id),
                 )
             return {"decisions": 0, "waiting_erp": True}
         docs = self.store.all(
@@ -918,6 +920,7 @@ class Service(WorkspaceMixin):
                     "invoice_number": fields.get("invoice_number", {}).get("value"),
                     "human": bool(decision and decision.get("human_decision")),
                     "human_stale": bool(decision and decision.get("human_response_stale")),
+                    "issue": invoice_issue(decision),
                 }
             )
         counts = {
@@ -933,7 +936,7 @@ class Service(WorkspaceMixin):
             if not times:
                 return None, None
             p50 = statistics.median(times)
-            p95 = times[min(len(times) - 1, int(len(times) * 0.95))]
+            p95 = times[math.ceil(len(times) * 0.95) - 1]
             return p50, p95
 
         extraction_costs = [c for c in costs if c["stage"] in ("extract", "extract_cache")]
@@ -972,7 +975,7 @@ class Service(WorkspaceMixin):
             "extract_text_p95": text_p95,
             "extract_text_count": len(text_times),
             "worker_runs": run_records,
-            "cost_note": "Sin llamadas de pago. Infraestructura y tiempo humano no valorados; no equivalen a coste cero.",
+            "cost_note": ("Hay lecturas con modelo; comprueba sus tarifas y consumo registrados. " if any(c["stage"] == "modelo" for c in costs) else "Sin llamadas de pago registradas. ") + "Infraestructura y tiempo humano no valorados; no equivalen a coste cero.",
             "accuracy": None,
             "accuracy_note": "Pendiente de etiquetas humanas independientes.",
         }
@@ -1045,3 +1048,15 @@ class Service(WorkspaceMixin):
                 )
                 group["documents"].append({"id": d["id"], "file_id": d["file_id"]})
         return sorted(groups.values(), key=lambda g: -len(g["documents"]))
+
+    @exclusive
+    def supplier_response_preview(self, **body):
+        from .consultations import response_preview
+        return response_preview(self, **body)
+
+    @exclusive
+    def supplier_response_commit(self, preview_token, **body):
+        preview = self.supplier_response_preview(**body)
+        if preview_token != preview["preview_token"]:
+            raise ValueError("La consulta o su evidencia cambió. Revisa el efecto otra vez.")
+        return self.commit_review(preview["ids"], preview["field"], preview["value"], preview["actor"], preview["reason"], preview["review_token"])

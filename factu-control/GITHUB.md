@@ -1,60 +1,50 @@
-# Subir FactU Control a GitHub
+# FactU en GitHub
 
-## Qué subir
+El repositorio compartido es `Pardito1/HackSpainDemo`. La app está en `factu-control/`; no muevas su contenido a la raíz ni borres los módulos de tus compañeros.
 
-Descomprime el ZIP. Entra en la carpeta `factu-control` y usa **su contenido** como raíz del repositorio: el README debe aparecer directamente en la portada, no dentro de otra carpeta.
+## Actualizar tu copia
 
-Incluye código Python, interfaz HTML/CSS/JavaScript, dependencias fijadas, pruebas Python/JavaScript, demo sintética, scripts y documentación. El PDF de arquitectura está en `docs/albertitos_plan.pdf`.
-
-No incluye datos oficiales del reto, el ERP de terceros, base de datos de trabajo, entornos virtuales, sesiones ni credenciales personales. Se conservan únicamente los valores sintéticos públicos del ERP de demostración, identificados como tales en el README. Para ejecutar sin los materiales oficiales, utiliza la demo de tres facturas descrita en el README; para las 500 originales, descarga el paquete del organizador por separado.
-
-El revisor generativo de IA comentado como posible mejora **no está implementado**. La versión 0.3 incluye OCR neuronal local, reglas deterministas y revisión humana.
-
-## Pasos
-
-1. Crea un repositorio vacío en GitHub. No inicialices allí otro README ni `.gitignore`. Elige su visibilidad; privado es suficiente para colaborar con el equipo.
-2. Abre una terminal dentro de la carpeta descomprimida `factu-control`.
-3. Ejecuta:
+Con el trabajo local guardado en un commit o respaldado:
 
 ```bash
-git init -b main
-git add .
-git status --short
-git diff --cached --stat
+git switch main
+git pull --ff-only
+cd factu-control
+source .venv/bin/activate
+python -m pip install -e '.[ocr,test]'
+python -m pytest -q
 ```
 
-4. Revisa los archivos preparados. No deben aparecer bases de datos, datos de clientes, `.env`, sesiones o claves. `.gitignore` evita los casos habituales, pero no sustituye esta revisión si has añadido archivos por tu cuenta.
-5. Guarda el primer commit:
+Si Git avisa de divergencias o cambios locales, no uses `reset --hard` ni `push --force`. Revisa e integra ese trabajo. Para Windows usa Ubuntu/WSL2 y su propio entorno virtual.
 
-```bash
-git commit -m "FactU Control v0.3: app, pruebas y documentación"
-```
+Conserva tu carpeta de estado y haz una copia con la app parada. Git no incluye las bases de datos, las credenciales, las sesiones ni los entornos virtuales. Consulta [la actualización 0.9.2](docs/RELEASE-v0.9.2.md) antes de reprocesar una versión anterior.
 
-6. Copia de GitHub la URL real del repositorio. Sustituye `URL_DE_TU_REPOSITORIO` y publica:
+## Qué contiene cada parte
 
-```bash
-git remote add origin URL_DE_TU_REPOSITORIO
-git push -u origin main
-```
+- `factu-control/`: código, interfaz, pruebas y documentación de la app.
+- `500-sombras-de-alberto-main/`: materiales oficiales que el equipo ya incorporó; se conservan.
+- `pipeline/`, `main.py`, `tests/`, `outputs/`: prototipo anterior, no el motor de la web.
+- `referencia/`: referencias del equipo, sin sobrescribirlas con nuevos resultados.
+- `entrega-parcial-v0.9.1/`: 500 resultados y plan históricos. No es una entrega final ni una ejecución del motor integrado.
 
-Estos pasos no se han ejecutado por ti: el ZIP está preparado, pero no se ha publicado ningún repositorio.
+El script `scripts/package.py` genera un ZIP solo de la app (sin materiales ni estado), con manifiesto SHA-256. El PDF en `docs/albertitos_plan.pdf` describe la ejecución local 0.9.1; la arquitectura integrada con modelo opcional está en `docs/ARCHITECTURE.md`.
 
-## Instalación y comprobación
-
-Sigue el README para crear el entorno e instalar las dependencias. Dentro del entorno:
+## Verificar antes de publicar cambios
 
 ```bash
 python -m pytest -q
 node --test tests/test_frontend.mjs
+git diff --check
+git status --short
 ```
 
-Node solo es necesario para las pruebas JavaScript. La app funciona con Python y sirve su interfaz sin compilación de frontend. Los paquetes y modelos OCR se instalan por separado; no se incluyen en el ZIP. Consulta compatibilidad y límites en el README.
+Node solo es necesario para las pruebas JavaScript. Revisa lo preparado para commit: no debe incluir `.env`, tokens, bases SQLite, sesiones, datos de clientes ajenos al reto o carpetas de estado. Las claves del modelo se configuran fuera de Git.
 
-Subir el código a GitHub **no despliega la web**. Esta versión está diseñada para ejecutarse en local y no tiene autenticación de producción: no la expongas directamente a Internet.
+Subir el código a GitHub **no despliega la web**. Esta versión local no tiene autenticación de producción: no la expongas directamente a Internet.
 
-## Importante: no confundir con la entrega del concurso
+## Entrega del concurso: otro repositorio
 
-El repositorio de resultados debe ser **otro repositorio**, con exactamente estos tres archivos en la raíz:
+Su raíz debe contener exclusivamente:
 
 ```text
 outcomes.jsonl
@@ -62,6 +52,4 @@ outcomes_lote2.jsonl
 albertitos_plan.pdf
 ```
 
-Los JSONL se generan después de procesar y revisar ambos lotes. No se incluye un resultado inventado para el segundo lote pendiente. El PDF actual documenta la versión 0.3; actualízalo si cambian datos, reglas o arquitectura antes de entregar.
-
-No se añade una licencia elegida arbitrariamente para vuestro código. El equipo debe decidirla si desea conceder permisos de reutilización; las dependencias conservan sus propias licencias.
+Faltan las 40 facturas oficiales del segundo lote y sus resultados. No uses una copia del primer lote ni un archivo vacío para sustituirlo. Las nuevas reglas del Excel v8 de prueba tampoco están implementadas por marcar una casilla: debe comprobarse y actualizarse la política ejecutable antes de aplicarlas.

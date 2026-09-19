@@ -1,12 +1,41 @@
-# FactU · La mesa de las cuentas claras · v0.3
+# FactU · La mesa de las cuentas claras · v0.9.2
+
+**Integración 0.9.2:** interfaz 0.9.1 y funciones del equipo en `main`, sin sustituir su motor opcional de lectura con modelo. **251 pruebas Python y 13 JavaScript superadas**. Se conservan la ordenación de tabla, la retirada de respuestas y el historial. [Cambios y límites de esta integración](docs/RELEASE-v0.9.2.md).
+
+La aplicación se ejecuta con `python -m factu`, dentro de `factu-control`. Conserva tu carpeta de estado: se admite tanto `factu.sqlite3` como una única base antigua `alberto.sqlite3`; si están ambas, se pide elegir sin borrar ninguna. Haz copia de seguridad con la app parada antes de actualizar.
+
+El repositorio completo contiene los materiales oficiales ya aportados por el equipo. El ZIP creado por `scripts/package.py` contiene solo la app. Los resultados y el plan de la ejecución local 0.9.1 están separados en `../entrega-parcial-v0.9.1/`; no se han regenerado ni atribuido al motor integrado 0.9.2.
+
+## Historial de versiones y documentación
+
+**Actualización 0.9.1:** corregida la lectura de `Importe` / `Importe_Total` y el historial repetitivo, sin borrar auditoría. **207 tests Python y 13 JavaScript superados.** v7 y v8 se leen correctamente; las reglas nuevas del Excel v8 de prueba NO se han implementado ni aplicado al lote real. [Cambios, límites y actualización](docs/RELEASE-v0.9.1.md).
+
+El ZIP completo incluye esta app y, en carpetas separadas, los materiales del primer lote y la entrega parcial. `outcomes.jsonl` contiene 500 resultados; el plan está actualizado. **Falta el segundo lote oficial: no hay `outcomes_lote2.jsonl` inventado.** No subas el ZIP completo al repositorio de entrega del jurado.
+
+**Ajuste de interfaz UI1:** la ficha muestra solo «Aprobar para pago» y «No pagar», sin solicitar minutos dedicados. Las dudas siguen pendientes de revisión. Excel, ERP y política se eligen desde un único selector; el ERP no requiere archivo y conserva la vista previa antes de aplicar. [Detalle del ajuste](docs/INTERFAZ-v0.9.0-UI1.md).
+
+**Nuevo en 0.9.0:** extracción de importes unidos por OCR corregida; avisos importantes en amarillo; error del ERP persistente y recuperable; percentil y validación de costes corregidos. **197 pruebas Python y 10 JavaScript superadas.** En el lote comprobado: 275 propuestas de pago, 9 no pagar, 216 para revisión y 0 pendientes de procesar. Estos resultados sustituyen las cifras históricas de versiones anteriores; no son una medida de precisión. [Verificación y actualización](docs/RELEASE-v0.9.0.md).
+
+**Una sola Bandeja:** todas las facturas y sus consultas pendientes, con una columna «Fallo detectado» separada de «Qué falta por hacer». Ya no existe la sección «Para Alberto». Las acciones de revisión se conservan al abrir cada expediente. [Cambios y actualización 0.6.0](docs/RELEASE-v0.6.0.md).
+
+**Nuevo en 0.8.0:** marca FactU, hojas del Excel consultables y consultas a proveedores con temas desplegables, borrador editable y confirmación de moneda con evidencia. [Cambios y actualización 0.8.0](docs/RELEASE-v0.8.0.md).
+
+**Desde 0.7.0:** letra más grande, «Datos y actualizaciones» con comparación antes de aplicar, notas opcionales y comprobación de `Pedidos_2025_OLD` como histórico parcial. Una coincidencia de pedido pide revisión; no prueba que esté pagado. [Cambios y actualización 0.7.0](docs/RELEASE-v0.7.0.md).
+
+El uso habitual es con el lote oficial mediante PROCESAR-500.md. Los generadores sintéticos se conservan exclusivamente como herramientas de prueba: no se ejecutan ni se cargan al arrancar la aplicación, y sus bases de datos no se incluyen en el ZIP.
+
+Histórico 0.5.0: revisiones humanas destacadas e historial que explica quién cambió cada dato, sin selector de lotes ni panel de fuentes/versiones en el expediente. UI1 simplifica las acciones visibles a «Aprobar para pago» y «No pagar». La auditoría completa se conserva aparte. Consulta [cómo actualizar conservando tus datos](docs/RELEASE-v0.5.0.md). Una corrección no es una aprobación y ningún botón mueve dinero.
+
+**Para las 500 facturas reales: [PROCESAR-500.md](PROCESAR-500.md).** Incluye comandos para Mac y Windows con WSL2; no uses el generador de demo para importar el lote oficial.
+
+Novedades 0.4.0: carga/reanudación `lote1` sin copiar identificadores; 500 documentos procesados con ERP HTTP; moneda ausente sin EUR inventado; motivo destacado al principio; auditoría técnica en una pantalla separada. Ver [docs/RELEASE-v0.4.0.md](docs/RELEASE-v0.4.0.md). Los resultados medidos son 273 PAGAR, 9 NO_PAGAR y 218 ESCALAR, con cero documentos pendientes. No son una medición de precisión.
+
 
 Para subir el proyecto a GitHub, lee [GITHUB.md](GITHUB.md). El ZIP contiene la solución completa, pruebas, documentación y una demo reproducible; no contiene la base de datos local ni los materiales oficiales. El repositorio de entrega del concurso es distinto.
 
-Corrección 0.3: OCR sin mezclar número y fecha, etiquetas de procedencia, errores de entrada comprensibles, integridad de archivos/decisiones además de eventos y consulta obligatoria ante instrucciones sospechosas detectadas. 112 pruebas Python + 4 JavaScript pasan. La herramienta sigue siendo local, sin autenticación ni pagos reales; lote 2 y validación privada pendientes.
+Histórico — corrección 0.3.1: demo y ERP sintéticos coherentes con cuatro casos independientes, prueba de recorrido completo y filtros que explican cuántos resultados se muestran. **115 pruebas Python y 4 JavaScript pasan**. Se mantienen las correcciones 0.3 de OCR, integridad, entradas inválidas y consulta ante instrucciones sospechosas. Consulta [ACTUALIZAR-DEMO.md](ACTUALIZAR-DEMO.md) si ya tenías la demo antigua. La herramienta sigue siendo local, sin autenticación ni pagos reales; lote 2 y validación privada pendientes.
 
-Método `modelo` (nuevo): tercer paso de lectura para páginas escaneadas cuyos campos el OCR local no resuelve. Un modelo multimodal **solo lee** valores con su evidencia literal; nunca decide, y cada lectura pasa una validación propia antes de aceptarse (ver «Lectura con modelo»). Cualquier fallo del proveedor deja el aviso `MODELO_NO_DISPONIBLE` y la factura en ESCALAR. 151 pruebas Python + 4 JavaScript pasan.
-
-Para actualizar datos de una versión anterior, conserva una copia de la carpeta `data` con la app parada. Después ejecuta `factu --data data verify-audit`, `factu --data data reextract ID_DEL_LOTE` y `factu --data data process ID_DEL_LOTE`. Se conserva el historial; las respuestas cuyo contexto cambie requieren nueva revisión. No ignores una comprobación de integridad fallida ni borres el historial para hacerla pasar. Para pruebas del navegador: `node --test tests/test_frontend.mjs`.
+Para actualizar desde 0.4-0.6, conserva una copia de la carpeta `data` con la app parada. Verifica con `factu --data data verify-audit`, arranca la versión nueva con el mismo estado y vuelve a cargar el Excel original en «Datos y actualizaciones». Compara y aplica para incorporar el histórico, sin repetir OCR. Si vienes de 0.3 o anterior, actualiza primero la extracción siguiendo PROCESAR-500.md. Las respuestas cuyo contexto cambie requieren nueva revisión. No ignores una comprobación de integridad fallida ni borres el historial para hacerla pasar. Pruebas del navegador: `node --test tests/test_frontend.mjs`.
 
 Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ERP y proponer `PAGAR`, `NO_PAGAR` o `ESCALAR`. Hecha para el track Maisa «500 sombras de Alberto».
 
@@ -17,11 +46,11 @@ Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ER
 - Bandeja web con filtros, carga de lotes y estados operativos.
 - Lectura en embudo: texto nativo con PyMuPDF → OCR local RapidOCR/ONNX en páginas escaneadas → modelo multimodal solo para los campos que el OCR deja sin resolver (lee, nunca decide).
 - Evidencia por campo: texto original, valor normalizado, página, coordenadas, método, transformaciones y candidatos contradictorios.
-- Maestro Excel con referencias a celdas; hojas antiguas y fórmulas fuera de la fuente aprobada no deciden.
+- Maestro Excel con referencias a celdas e histórico parcial de pedidos como alerta revisable. Las otras hojas y las fórmulas no se ejecutan ni se toman como instrucciones.
 - ERP por HTTP/XML: autenticación, paginación completa, renovación de sesión y reintentos acotados. Se conservan las respuestas XML, sin guardar el token.
 - Reglas deterministas, importes `Decimal`, identidad y política versionadas. El PDF nunca puede ordenar al sistema cambiar las reglas.
 - Corrección humana con autor, motivo, previsualización y comprobación de que la evidencia no ha cambiado. No borra el dato original.
-- Respuesta de Alberto separada de la corrección de lectura: autor, motivo, evidencia, tiempo dedicado y doble confirmación. La respuesta caduca si cambia su fundamento; vuelve a consulta.
+- Respuesta humana separada de la corrección de lectura: autor, motivo, evidencia y doble confirmación. La ficha no solicita minutos; el tiempo declarado anteriormente se conserva en auditoría, sin inventar mediciones nuevas. La respuesta caduca si cambia su fundamento; vuelve a consulta.
 - Cambios de Excel, ERP o política con vista previa de impacto, confirmación y reevaluación selectiva sin repetir OCR. Historial y decisiones no afectadas conservados.
 - Mejora adicional implementada: borradores de consulta por proveedor con preguntas y facturas afectadas. Se descargan para revisar, nunca se envían ni autorizan pagos.
 - SQLite con estados persistentes, leases recuperables, caché y control de duplicados entre lotes. Auditoría encadenada por hashes.
@@ -47,7 +76,7 @@ Instalación alternativa, resolviendo dependencias de tu plataforma:
 python -m pip install -e '.[ocr,test]'
 ```
 
-La descarga inicial de paquetes/modelos necesita Internet; los documentos se procesan localmente. Sin claves de LLM la app funciona igualmente: el método `modelo` es opcional y, si faltan credenciales, los escaneados sin resolver quedan en ESCALAR con aviso (ver «Lectura con modelo»). En Linux, OpenCV puede requerir las bibliotecas de sistema `libGL`/`libglib`. No se instala nada automáticamente fuera del entorno virtual.
+La descarga inicial de paquetes/modelos necesita Internet. Texto y OCR se procesan localmente. Si configuras credenciales para el método `modelo`, las páginas escaneadas pendientes se envían al proveedor elegido; revisa sus condiciones antes de usar datos reales. Sin claves de LLM la app funciona igualmente y los escaneados sin resolver quedan en ESCALAR con aviso (ver «Lectura con modelo»). En Linux, OpenCV puede requerir `libGL`/`libglib`. No se instala nada automáticamente fuera del entorno virtual.
 
 ### Con el repositorio oficial
 
@@ -82,12 +111,12 @@ Abre **http://127.0.0.1:8080**. También puedes importar PDFs y Excel desde la i
 
 Variables opcionales: `FACTU_DATA`, `ERP_URL`, `ERP_USER`, `ERP_PASSWORD`. Por defecto usa el usuario y clave sintéticos documentados por el reto (`alberto` / `FACTURAS2009`), en `http://127.0.0.1:8009`. No reutilices esas claves en sistemas reales. No incluyas credenciales en URLs ni en Git.
 
-### Demo independiente de tres casos
+### Demo independiente de cuatro casos
 
 Para probar el producto sin los materiales oficiales:
 
 ```bash
-python scripts/make_demo.py --output demo-input
+python scripts/make_demo.py --output demo-input-v031
 python scripts/demo_erp.py
 ```
 
@@ -95,13 +124,17 @@ Deja esa terminal abierta. En otra, con el entorno activado:
 
 ```bash
 export ERP_URL=http://127.0.0.1:8019
-factu --data demo-state ingest --pdfs demo-input/facturas --excel demo-input/maestro.xlsx --name 'Demo sintética' --as-of 2026-09-19
-factu --data demo-state sync-erp ID_DEL_LOTE
-factu --data demo-state process ID_DEL_LOTE
-factu --data demo-state serve
+python -m factu --data demo-state-v031 ingest --pdfs demo-input-v031/facturas --excel demo-input-v031/maestro.xlsx --name 'Demo sintética v0.3.1' --as-of 2026-09-19
+python -m factu --data demo-state-v031 sync-erp ID_DEL_LOTE
+python -m factu --data demo-state-v031 process ID_DEL_LOTE
+python -m factu --data demo-state-v031 serve --port 8080
 ```
 
-Resultado esperado de los datos generados: `demo-1.pdf → PAGAR`, `demo-2.pdf → ESCALAR` (IBAN distinto), `demo-3.pdf → NO_PAGAR` (ERP ya pagada). La demo sintética no sustituye la prueba del ERP oficial.
+Resultado esperado: `demo-1.pdf → PAGAR`, `demo-2.pdf → ESCALAR` (IBAN distinto), `demo-3.pdf → NO_PAGAR` (ERP ya pagada), `demo-4.pdf → ESCALAR` (instrucción sospechosa, resto de controles correctos). Contadores: **4 facturas, 1 propuesta de pago, 1 no pagar, 2 consultas y 0 pendientes de procesar**. La demo sintética no sustituye la prueba del ERP oficial.
+
+Si ejecutaste una versión anterior, detén y reinicia el ERP de demo con el script actualizado: debe anunciar «v0.3.1 · 4 pedidos». Genera los documentos e importa un estado nuevo como en estos comandos. Actualizar el código no cambia los PDFs que ya habías generado ni las decisiones guardadas. Conserva las carpetas anteriores.
+
+La tabla refleja los filtros; los contadores superiores resumen el lote. «0 pendientes» significa procesamiento terminado. «0,00 €» es gasto externo registrado, no coste total: si activas un proveedor, configura sus tarifas y comprueba su consumo. El OCR local no hace llamadas de pago.
 
 ## Cómo decide
 
@@ -116,6 +149,8 @@ Un fallo técnico que impide terminar el trabajo **no se disfraza de ESCALAR**: 
 La norma v3 está implementada en `factu/policy.py` y configurada en `factu/policies/v3.json`. Los criterios de `NO_PAGAR` son decisiones explícitas del equipo, no reglas supuestamente publicadas por Maisa. El checksum del IBAN se conserva como diagnóstico, pero no bloquea: los IBAN sintéticos del maestro fallan ese checksum. La regla del reto es la igualdad con el maestro.
 
 ## Lectura con modelo (tercer método)
+
+Las mediciones de esta sección son **históricas del `main` anterior** (extractor `native-rapidocr-modelo-2`). No se han repetido en 0.9.2. Esta integración conserva moneda ausente como MISSING y añade histórico de pedidos, por lo que esos repartos no describen las decisiones actuales. Las pruebas del proveedor en esta integración usan respuestas simuladas, sin llamadas facturables.
 
 El embudo de lectura es texto nativo → OCR local → modelo, y cada paso solo actúa donde el anterior no llega. El modelo multimodal se consulta únicamente si una página necesitó OCR **y** algún campo distinto del número de factura sigue sin lectura firme. Devuelve, por campo, el valor, la **línea literal del documento de la que lo copió** y la página; entra como un candidato más (`method="modelo"`) junto a los del OCR: sin lectura previa firme resuelve el campo, y si contradice una lectura OK del OCR el campo queda en CONFLICT y la factura se consulta. El modelo **nunca decide**: `PAGAR`/`NO_PAGAR`/`ESCALAR` sale siempre del motor de reglas.
 
@@ -140,11 +175,11 @@ Abre una factura y pulsa una evidencia para verla sobre el PDF. En «Resolver un
 
 Solo corrige errores de lectura con evidencia. No pongas el IBAN del maestro si el PDF muestra otro. En «Registrar una respuesta» Alberto puede mantener la consulta, justificar NO_PAGAR o respaldar PAGAR. Este último exige todos los controles técnicos: solo permite resolver expresamente un conflicto de precedencia Excel/ERP o una regla adicional de negocio, con referencia de evidencia. No admite saltarse cuentas, importes, identidad, duplicados ni pagos previos. El resultado del motor y la respuesta humana se conservan por separado. Si cambia su fundamento, la respuesta anterior deja de aplicarse y el caso vuelve a ESCALAR.
 
-En «En común» se agrupan preguntas por proveedor y se descarga un borrador de consulta. La agrupación no significa que una sola validación autorice todos los pagos. La corrección compartida de lecturas exige misma causa/evidencia/versiones y selección explícita. Autor escrito no equivale a identidad autenticada: esta versión es local, de operador único.
+En «Consultas a proveedores» se muestran solo dudas externas permitidas por reglas explícitas. Seguridad, identidad incierta, contabilidad y cambios bancarios se revisan internamente. El borrador es editable, copiable y descargable; nunca se envía desde la app. Solo la moneda admite confirmación compartida: respuesta verificada, referencia, autor, facturas seleccionadas, vista previa y confirmación. Cada expediente se recalcula sin aprobar pagos. Importes, IBAN, fechas y referencias se revisan individualmente. Autor escrito no equivale a identidad autenticada: esta versión es local, de operador único.
 
 ## Cuando cambia una fuente
 
-En «Fuentes y cambios», selecciona el lote, prepara un Excel/política nueva o consulta una nueva versión del ERP. Indica quién introduce el cambio y por qué. La vista previa muestra decisiones afectadas, resultado antes/después y trabajo reutilizado. Solo al confirmar cambia la fuente vigente; se conserva el historial. Un cambio de norma requiere revisar expresamente su correspondencia con la política implementada. No se convierte texto libre en reglas automáticamente.
+En «Datos y actualizaciones», carga un Excel/reglas o pulsa «Actualizar datos del ERP». «Ver facturas afectadas» compara sin aplicar: distingue resultados que se mantienen, pasan a revisión o cambian de otra forma, y decisiones reutilizadas. «Revisar cambios» permite ver cada factura antes de «Aplicar actualización». La nota y el nombre son opcionales; sin nombre se registra «Sesión local (sin identificar)», no una identidad autenticada. Un cambio de reglas requiere confirmación expresa, también si una nueva norma viene dentro del Excel. No se convierte texto libre en reglas automáticamente.
 
 Los cambios del ERP se comparan por pedido; los del maestro por proveedor/pedido/norma. Una dependencia desconocida invalida conservadoramente. Una nueva política o versión de código puede afectar a todo el lote. Cero repeticiones de OCR en estos cambios. Si se interrumpe tras aplicar la fuente, las decisiones afectadas quedan pendientes y se recuperan con «Reevaluar».
 

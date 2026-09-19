@@ -13,9 +13,9 @@ def main():
     root = Path(__file__).resolve().parents[1]
     chosen = [
         root / name
-        for name in ("README.md", "GITHUB.md", "pyproject.toml", "requirements.lock", ".gitignore")
+        for name in ("README.md", "GITHUB.md", "ACTUALIZAR-DEMO.md", "PROCESAR-500.md", "pyproject.toml", "requirements.lock", ".gitignore")
     ]
-    extensions = {".py", ".md", ".html", ".css", ".js", ".mjs", ".json", ".pdf"}
+    extensions = {".py", ".md", ".html", ".css", ".js", ".mjs", ".json", ".pdf", ".svg"}
     for folder in ("factu", "docs", "tests", "scripts"):
         chosen.extend(
             p
@@ -36,6 +36,7 @@ def main():
             archive.writestr("factu-control/" + relative, content)
             hashes.append(hashlib.sha256(content).hexdigest() + "  " + relative)
         archive.writestr("factu-control/MANIFEST.sha256", "\n".join(hashes) + "\n")
+    (root / "MANIFEST.sha256").write_text("\n".join(hashes) + "\n", encoding="utf-8")
     with ZipFile(target) as archive:
         if archive.testzip() is not None:
             raise RuntimeError("ZIP corrupto")

@@ -5,6 +5,8 @@ from zipfile import BadZipFile, ZipFile
 from xml.etree.ElementTree import ParseError
 
 from .utils import clean, digest, iban_checksum, identifier, money
+from .historical import read_history
+from .columns import ORDER_COLUMNS, resolve_columns
 
 
 def read_master(path):
@@ -49,7 +51,10 @@ def _read_master(path):
             supplier["iban_checksum_diagnostic"] = iban_checksum(supplier["iban"])
             suppliers.setdefault(supplier["id"], []).append(supplier)
         orders = {}
-        for row in book["Pedidos_2026"].iter_rows(min_row=2, max_col=5):
+        columns = resolve_columns(book["Pedidos_2026"], ORDER_COLUMNS,
+                                  ("order", "supplier_id", "nif", "total", "state"))
+        for source_row in book["Pedidos_2026"].iter_rows(min_row=2):
+            row = [source_row[columns[key]] for key in ("order", "supplier_id", "nif", "total", "state")]
             if not row[0].value:
                 continue
             order = {
@@ -61,12 +66,8 @@ def _read_master(path):
                 "source": {
                     "sheet": "Pedidos_2026",
                     "row": row[0].row,
-                    "cells": {
-                        "order": f"A{row[0].row}",
-                        "supplier_id": f"B{row[0].row}",
-                        "nif": f"C{row[0].row}",
-                        "total": f"D{row[0].row}",
-                    },
+                    "cells": {key: f"{openpyxl.utils.get_column_letter(columns[key] + 1)}{row[0].row}"
+                              for key in ("order", "supplier_id", "nif", "total")},
                 },
             }
             orders.setdefault(order["id"], []).append(order)
@@ -79,6 +80,7 @@ def _read_master(path):
         return {
             "suppliers": suppliers,
             "orders": orders,
+            "historical": read_history(book),
             "rules": rules,
             "sha256": digest(path.read_bytes()),
             "filename": path.name,

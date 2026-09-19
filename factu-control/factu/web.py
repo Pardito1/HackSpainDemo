@@ -25,7 +25,10 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .service import Service
 from .erp import ERPUnavailable
 from .utils import canonical
-from .presentation import FIELDS_ES, RESULTS_ES, EVENTS_ES, euros, greeting, decorate_dashboard
+from .source_view import source_view
+from .consultations import workspace as consultations_workspace
+from .sheets import sheet_view, workbook_path
+from .presentation import FIELDS_ES, RESULTS_ES, EVENTS_ES, euros, decorate_dashboard, decision_summary, invoice_activity, human_actions, readable_date, greeting
 
 ROOT = Path(__file__).parent
 
@@ -59,13 +62,27 @@ class RetractRequest(BaseModel):
 
 class ChangeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    actor: str = Field(default="", max_length=120)
+    reason: str = Field(default="", max_length=2000)
+
+
+class SupplierResponseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    group_id: str = Field(max_length=64)
+    topic_id: str = Field(max_length=40)
+    batch_id: str | None = None
+    document_ids: list[str] = Field(min_length=1, max_length=500)
+    value: str = Field(min_length=3, max_length=3, pattern=r"^[A-Za-z]{3}$")
     actor: str = Field(min_length=1, max_length=120)
-    reason: str = Field(min_length=10, max_length=2000)
+    response: str = Field(min_length=10, max_length=1200)
+    reference: str = Field(min_length=5, max_length=400)
+    verified: bool
+    preview_token: str | None = None
 
 
 def create_app(data_dir=None):
     service = Service(data_dir or os.environ.get("FACTU_DATA", "data"))
-    app = FastAPI(title="FactU · Mesa de trabajo", version="0.3.0")
+    app = FastAPI(title="FactU · Mesa de trabajo", version="0.9.2")
     app.state.service = service
     app.add_middleware(
         TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]
@@ -74,6 +91,7 @@ def create_app(data_dir=None):
     templates = Jinja2Templates(directory=ROOT / "templates")
     templates.env.filters["euros"] = euros
     templates.env.globals.update(field_labels=FIELDS_ES, result_labels=RESULTS_ES, event_labels=EVENTS_ES, greeting=greeting)
+    templates.env.filters["readable_date"] = readable_date
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="factu-worker")
     active = {}
     lock = threading.Lock()
@@ -127,8 +145,9 @@ def create_app(data_dir=None):
         # El total llega como texto ("9221.75") porque Decimal no es JSON-serializable;
         # se reconstruye aqui para poder comparar por valor, no por orden de caracteres.
         try:
-            return Decimal(d["total"]) if d["total"] is not None else None
-        except InvalidOperation:
+            amount = Decimal(str(d["total"])) if d["total"] is not None else None
+            return amount if amount is not None and amount.is_finite() else None
+        except (InvalidOperation, TypeError, ValueError):
             return None
 
     SORTERS = {
@@ -187,16 +206,26 @@ def create_app(data_dir=None):
     @app.get("/documents/{doc_id}", response_class=HTMLResponse)
     def detail(request: Request, doc_id: str):
         data = service.detail(doc_id)
-        return render(request, "detail.html", **data, selected_batch=data["document"]["batch_id"])
+        busy = service.store.one("SELECT count(*) n FROM jobs WHERE state!='DONE'")["n"]
+        return render(request, "detail.html", **data, **invoice_activity(data),
+                      actions=human_actions(data["decision"], busy),
+                      summary=decision_summary(data["decision"]), selected_batch=data["document"]["batch_id"])
 
+    @app.get("/documents/{doc_id}/audit", response_class=HTMLResponse)
+    def document_audit(request: Request, doc_id: str):
+        data = service.detail(doc_id)
+        return render(request, "audit.html", **data, selected_batch=data["document"]["batch_id"])
+
+    @app.get("/sources/audit", response_class=HTMLResponse)
     @app.get("/sources", response_class=HTMLResponse)
     def sources(request: Request, batch: str | None = None, change: str | None = None):
         batches = service.store.all("SELECT * FROM batches ORDER BY created DESC")
         batch = batch or (batches[0]["id"] if batches else None)
         data = service.source_workspace(batch) if batch else {}
         material_path = ROOT / "materials.json"
-        return render(request, "sources.html", **data, batches=batches, selected_batch=batch,
-                      focused_change=change, materials=json.loads(material_path.read_text()) if material_path.exists() else None)
+        view = source_view(service, data, change) if batch else {}
+        return render(request, "sources.html", **data, **view, batches=batches, selected_batch=batch,
+                      focused_change=change, technical=request.url.path.endswith("/audit"), materials=json.loads(material_path.read_text()) if material_path.exists() else None)
 
     @app.get("/operations", response_class=HTMLResponse)
     def operations(request: Request, batch: str | None = None):
@@ -215,10 +244,32 @@ def create_app(data_dir=None):
         return render(
             request,
             "groups.html",
-            groups=[g for g in service.groups(batch) if len(g["documents"]) > 1],
-            drafts=service.consultation_drafts(batch),
+            **consultations_workspace(service, batch),
             selected_batch=batch,
         )
+
+    @app.post("/api/consultations/response/preview")
+    def supplier_preview(body: SupplierResponseRequest):
+        return service.supplier_response_preview(**body.model_dump(exclude={"preview_token"}))
+
+    @app.post("/api/consultations/response/commit")
+    def supplier_commit(body: SupplierResponseRequest):
+        if not body.preview_token:
+            raise ValueError("Primero revisa el efecto de la respuesta.")
+        return service.supplier_response_commit(**body.model_dump())
+
+    @app.get("/sources/{source_id}/sheet", response_class=HTMLResponse)
+    def source_sheet(request: Request, source_id: str, sheet: str, batch: str | None = None,
+                     page: int = 1, columns: int = 1):
+        if batch:
+            service.batch(batch)
+        return render(request, "sheet.html", **sheet_view(service, source_id, sheet, page, columns), selected_batch=batch)
+
+    @app.get("/sources/{source_id}/original")
+    def source_original(source_id: str):
+        path, master = workbook_path(service, source_id)
+        return FileResponse(path, filename="excel-maestro-original.xlsx",
+                            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     @app.get("/api/consultations/{draft_id}/draft")
     def consultation_draft(draft_id: str, batch: str | None = None):
@@ -230,7 +281,7 @@ def create_app(data_dir=None):
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "version": "0.3.0"}
+        return {"status": "ok", "version": "0.8.0"}
 
     @app.get("/api/batches/{batch_id}/status")
     def status(batch_id: str):
@@ -338,8 +389,8 @@ def create_app(data_dir=None):
         return service.retract_human_answer(doc_id, body.actor, body.reason)
 
     @app.post("/api/batches/{batch_id}/changes/upload")
-    async def change_upload(batch_id: str, kind: str = Form(...), actor: str = Form(...),
-                            reason: str = Form(...), rules_ack: bool = Form(False), file: UploadFile = File(...)):
+    async def change_upload(batch_id: str, kind: str = Form(...), actor: str = Form(""),
+                            reason: str = Form(""), rules_ack: bool = Form(False), file: UploadFile = File(...)):
         if kind not in ("master", "policy") or len(actor) > 120 or len(reason) > 2000:
             raise ValueError("Tipo, responsable o motivo inválido")
         content = await file.read(20 * 1024 * 1024 + 1)

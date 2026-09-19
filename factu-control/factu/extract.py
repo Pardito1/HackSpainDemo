@@ -12,7 +12,7 @@ import pymupdf as fitz
 from . import modelo
 from .utils import clean, digest, identifier, invoice_date, money
 
-VERSION = "native-rapidocr-modelo-2"
+VERSION = "native-rapidocr-modelo-7"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -26,6 +26,30 @@ FIELDS = (
 )
 _ocr = None
 _ocr_lock = threading.Lock()
+
+# A single OCR line can contain several labels. Never take its final number as
+# the amount for every label (e.g. "Base 100,00 IVA21%21,00 TOTAL121,00EUR").
+AMOUNT_LABEL = re.compile(
+    r"(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<base>importe\s+base|base(?:\s+imponible)?|subtotal)"
+    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<total>importe\s+total|total(?:\s+factura|\s+a\s+pagar)?)"
+    r"|(?<![A-Za-zÁÉÍÓÚáéíóú])(?P<tax_amount>(?:cuota\s+)?(?:[I1l]\.?V\.?A\.?|VAT|tax))",
+    re.I,
+)
+AMOUNT_TOKEN = re.compile(
+    r"(?<![\d.,])(?:[+\-−]\s*)?\d[\d.,]*(?:[ \u00a0\u202f]\d[\d.,]*)*"
+)
+
+
+def printed_amount(raw):
+    """Normalize only explicit printed syntax, not an amount inferred from ERP."""
+    return money(raw.replace("−", "-"))
+
+
+def currency(value):
+    value = clean(value).upper()
+    if value == "$":
+        raise ValueError("El símbolo $ no identifica por sí solo la moneda")
+    return {"€": "EUR", "EURO": "EUR", "EUROS": "EUR", "£": "GBP"}.get(value, value)
 
 
 def invoice_number(value):
@@ -185,6 +209,8 @@ def parse_fields(lines):
     date_pattern = r"\d{4}-\d{2}-\d{2}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4}"
     for line in lines:
         s = line["text"]
+        for m in re.finditer(r"(?<![A-Z])(?:EUR|USD|GBP|CHF|euros?)(?![A-Z])|€|\$|£", s, re.I):
+            candidate("currency", m[0], line, m.span(), currency)
         for m in re.finditer(
             r"(?:ref\.?\s*factura|n[ºo°]?\s*(?:de\s*)?factura|factura(?:\s+simplificada)?(?:\s*n[ºo°])?|invoice\s*#?)\s*[:#]?\s*([A-Z0-9][A-Z0-9/_-]{2,})",
             s,
@@ -225,26 +251,32 @@ def parse_fields(lines):
         if re.search(r"[I1l]BAN|cuenta\s+de\s+abono", s, re.I):
             for m in re.finditer(r"\b(ES\s*\d{2}(?:\s*\d){20})(?!\d)", s, re.I):
                 candidate("iban", m[1], line, m.span(1), identifier)
-        for field, label in (
-            ("base", r"^(?:base(?:\s+imponible)?|importe\s+base|subtotal)\b"),
-            ("total", r"^(?:importe\s+total|total(?:\s+factura|\s+a\s+pagar)?)\b"),
-            ("tax_amount", r"^(?:cuota\s+)?(?:I\.?V\.?A\.?|VAT|tax)(?=\s|[(:.\d]|$)"),
-        ):
-            label_match = re.search(label, s, re.I)
-            if not label_match:
+        labels = list(AMOUNT_LABEL.finditer(s))
+        for i, label in enumerate(labels):
+            # Labels must start a line or follow another amount, not occur in prose.
+            if i == 0 and s[:label.start()].strip():
                 continue
-            # A payable amount must be printed as an amount, not a year/rate in prose.
-            amounts = list(
-                re.finditer(r"(?<![\w.,])[+-]?\d[\d.,]*[.,]\d{2}(?![\d.,])", s)
-            )
-            if amounts:
-                m = amounts[-1]
-                candidate(field, m[0], line, m.span(), money)
+            field = label.lastgroup
+            start, end = label.end(), labels[i + 1].start() if i + 1 < len(labels) else len(s)
+            segment = s[start:end]
+            rates = list(re.finditer(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*%", segment))
             if field == "tax_amount":
-                for m in re.finditer(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*%", s):
-                    candidate("tax_rate", m[1], line, m.span(1), money)
+                for m in rates:
+                    candidate("tax_rate", m[1], line, (start + m.start(1), start + m.end(1)), money)
+            for m in AMOUNT_TOKEN.finditer(segment):
+                if any(m.start() < r.end() and m.end() > r.start() for r in rates):
+                    continue  # A percentage is not a tax amount.
+                raw = m[0]
+                # Require printed cents. Integers in prose and lost OCR separators
+                # remain missing, never reconstructed from a plausible total.
+                if not re.search(r"[.,]\d{2}$", raw):
+                    break  # Do not skip a damaged amount and borrow a later one.
+                left, right = segment[:m.start()], segment[m.end():]
+                if left.rstrip().endswith("(") and right.lstrip().startswith(")"):
+                    raw = "-" + raw  # explicit accounting negative
+                candidate(field, raw, line, (start + m.start(), start + m.end()), printed_amount)
     fields = {}
-    for field in FIELDS:
+    for field in (*FIELDS, "currency"):
         choices = candidates[field]
         distinct = {c["value"] for c in choices if c["value"] is not None}
         errors = [c for c in choices if c["error"]]
@@ -263,25 +295,6 @@ def parse_fields(lines):
             "status": status,
             "evidence": choices,
         }
-    # EUR is a declared task context, not an invented visible symbol; other printed currencies block.
-    currencies = sorted(
-        set(
-            re.findall(
-                r"\b(?:EUR|USD|GBP|CHF)\b|€|\$|£", "\n".join(l["text"] for l in lines)
-            )
-        )
-    )
-    normalized = sorted(
-        {{"€": "EUR", "$": "USD", "£": "GBP"}.get(v, v) for v in currencies}
-    )
-    fields["currency"] = {
-        "value": (
-            normalized[0] if len(normalized) == 1 else "EUR" if not normalized else None
-        ),
-        "status": "OK" if len(normalized) <= 1 else "CONFLICT",
-        "evidence": [],
-        "assumption": "moneda EUR del caso" if not normalized else None,
-    }
     return fields
 
 

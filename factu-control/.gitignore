@@ -30,6 +30,9 @@ htmlcov/
 # Datos del reto y resultados: repositorio separado de la solución
 demo-input/
 demo-state/
+demo-input-*/
+demo-state-*/
+estado-500*/
 benchmark-nuevo/
 benchmark.json
 500-sombras-de-alberto/
@@ -37,3 +40,5 @@ facturas/
 lote2/
 entrega/
 outcomes*.jsonl
+qa-evidence/
+qa-demo/

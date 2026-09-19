@@ -29,17 +29,17 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(404, "<error/>")
         records = "".join(
             f'<asiento><id>{i}</id><fecha>2026-02-01</fecha><proveedor>P001</proveedor><nif>B12345678</nif><pedido>PO-2026-{i:04}</pedido><importe>121.00</importe><estado>{"PAGADA" if i==3 else "PENDIENTE"}</estado></asiento>'
-            for i in range(1, 4)
+            for i in range(1, 5)
         )
         self.reply(
             200,
-            f"<erp><meta><total>3</total><paginas>1</paginas></meta><asientos>{records}</asientos></erp>",
+            f"<erp><meta><total>4</total><paginas>1</paginas></meta><asientos>{records}</asientos></erp>",
         )
 
 
 if __name__ == "__main__":
     print(
-        "ERP SINTÉTICO en http://127.0.0.1:8019. No sustituye las pruebas con el ERP oficial.",
+        "ERP SINTÉTICO v0.3.1 · 4 pedidos · http://127.0.0.1:8019. No sustituye las pruebas con el ERP oficial.",
         flush=True,
     )
     HTTPServer(("127.0.0.1", 8019), Handler).serve_forever()

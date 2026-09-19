@@ -48,7 +48,12 @@ class Store:
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "blobs").mkdir(exist_ok=True)
-        self.path = self.root / "factu.sqlite3"
+        current = self.root / "factu.sqlite3"
+        legacy = self.root / "alberto.sqlite3"
+        if current.exists() and legacy.exists():
+            raise ValueError("Hay dos bases de datos en esta carpeta. Conserva una copia y elige una carpeta con una sola base antes de continuar.")
+        # Reuse previous installations without silently opening an empty desk.
+        self.path = legacy if legacy.exists() else current
         with self.connect() as db:
             db.executescript(SCHEMA)
             # Additive migration for a base created before retraction existed;

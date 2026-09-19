@@ -1,4 +1,4 @@
-# Arquitectura implementada · 0.3
+# Arquitectura implementada · 0.9.2
 
 ## Alcance
 
@@ -11,13 +11,15 @@ Flujo: **originales → extracción con evidencia → contexto Excel/ERP → reg
 | Componente | Responsabilidad y estado |
 |---|---|
 | `extract.py` | PyMuPDF por palabras, página y cajas. OCR RapidOCR/ONNX cuando falta texto o hay imagen dominante. No tiene herramientas de pago ni interpreta instrucciones documentales. |
-| `master.py` | Adaptador del libro inicial; identifica proveedores/pedidos y conserva celdas. No recalcula fórmulas ni busca una supuesta respuesta en hojas antiguas. |
+| `modelo.py` | Lectura multimodal opcional si OCR deja campos sin resolver. Validación de candidatos y evidencia, conflictos conservados, reintentos y cortacircuito. No decide ni ejecuta pagos. Sin credenciales no consulta la red. |
+| `master.py` / `historical.py` | Adaptadores de proveedores, pedidos actuales e histórico parcial de pedidos. Conservan celdas; no recalculan fórmulas ni toman una coincidencia histórica como pago confirmado. |
 | `erp.py` | HTTP real, sesión, ISO-8859-1, XML, paginación y reintentos. Publica únicamente snapshots completos. |
 | `policy.py` | Función determinista de hechos y contexto. Todas las comparaciones monetarias usan Decimal. Produce reglas PASS/FAIL/UNKNOWN y preguntas concretas. |
 | `db.py` | SQLite WAL, blobs por hash, caché, trabajos, decisiones, revisiones, costes y eventos append-only. |
 | `service.py` | Flujo compartido por web/CLI, bloqueo entre procesos, reclamación de trabajo, índice de duplicados y exportación. |
 | `workspace.py` | Respuestas humanas, borradores de consulta y cambios de fuentes con impacto, confirmación y caducidad de respuestas. |
 | `web.py` | FastAPI/Jinja, interfaz local, CSRF, CSP y validación de Host. Un executor de un worker. |
+| `lote1.py` | Carga/reanudación del lote inicial: exige 500 nombres únicos, comprueba originales/Excel/fecha al reanudar, consulta ERP y procesa con OCR. No mezcla la demo ni valida el lote 2. |
 | `scripts/` | Demo sintética separada, benchmark con ERP y comprobación de la entrega. |
 
 Las pantallas muestran procedencia sin ofrecer un razonamiento inventado por un LLM. Una justificación es la lista de controles ejecutados y las fuentes que usaron.
@@ -40,11 +42,13 @@ El ERP es la referencia del importe/estado contable. Esa precedencia no permite 
 
 Para documentos que comparten pedido: copias byte a byte conservan un representante canónico y el resto se propone NO_PAGAR; versiones de distinto contenido requieren revisión de ambas. No hay pagos reales y, por tanto, no se afirma exactamente-una-vez bancario.
 
+`Pedidos_2025_OLD` aporta dos pedidos e importes y una nota explícita de archivo parcial. No contiene NIF, número de factura ni estado de pago. Se compara el ID completo de pedido, incluido el año; un importe igual no basta. Una coincidencia requiere ESCALAR salvo evidencia independiente concluyente. Resolverla necesita motivo, evidencia y reconocimiento explícito de la discrepancia, manteniendo los controles críticos. Una fuente antigua aún sin esta lectura se marca pendiente. En las 500 facturas revisadas no hay coincidencias con esos dos pedidos.
+
 ## Extracción y confianza
 
 Se conserva valor leído, normalizado, transformaciones y bbox en puntos PDF con origen superior izquierdo. Valores contradictorios no se reducen a uno sin intervención. El score OCR se usa como señal conservadora de calidad (umbral heurístico 0,85), **no como probabilidad calibrada**.
 
-La cadena nativa/OCR no completa los campos usando el maestro. La moneda EUR sin símbolo se registra como supuesto del caso, no como texto visible. El parser no tiene entradas por nombre/hash de factura ni una tabla de resultados esperados.
+La cadena nativa/OCR no completa los campos usando el maestro. La moneda necesita una mención explícita, con página y coordenadas, o una confirmación humana identificada. Sin moneda se registra MISSING y no se propone PAGAR. No se infiere EUR del idioma, del NIF ni del país; el símbolo $ aislado se considera ambiguo. El parser no tiene entradas por nombre/hash de factura ni una tabla de resultados esperados.
 
 El marcador de instrucciones sospechosas obliga a ESCALAR. Alberto puede resolver esa alerta con motivo, evidencia y confirmación expresa, sin saltarse los demás controles. No es un detector universal. La barrera principal sigue siendo arquitectónica: el texto del documento no es código ni política, no se ejecuta y no invoca herramientas externas.
 
@@ -58,19 +62,21 @@ La persona confirma lecturas con autor y motivo. La vista previa calcula el resu
 
 La agrupación exige igual identidad, regla, evidencia y versiones. Resuelve correcciones repetidas de lectura con alcance explícito, no cambios masivos de cuenta bancaria ni aprobación ciega de pagos. Si no existen causas compartidas, no inventa grupos.
 
-La respuesta humana de negocio es distinta de la corrección de lectura. Conserva resultado del motor, respuesta, autor declarado, motivo, referencia y minutos declarados. PAGAR solo admite resolver explícitamente conflictos de precedencia o reglas adicionales; no omite controles técnicos/bancarios. El anclaje identifica hechos, revisiones, política y código. Si deja de coincidir, vuelve a ESCALAR incluso si el motor por sí solo propondría PAGAR.
+La respuesta humana de negocio es distinta de la corrección de lectura. Conserva resultado del motor, respuesta, autor declarado, motivo y referencia. La ficha ya no pide minutos; se conservan los declarados anteriormente. PAGAR no omite controles técnicos/bancarios. El anclaje identifica hechos, revisiones, política y código. Si deja de coincidir, vuelve a ESCALAR. Retirar una respuesta deja su motivo en un evento y sella los metadatos de retirada; nunca reactiva una respuesta más antigua.
 
-Actualizar fuentes es parte del flujo principal del reto, no el bonus. Un borrador compara dependencias por factura: pedido ERP; proveedor/pedido/norma del maestro; política completa. Primero muestra impacto, después cambia la fuente con guardia de concurrencia. Solo reevalúa afectados y reutiliza OCR; para los demás conserva la decisión y registra por qué sigue siendo aplicable. Un fallo entre commit y reevaluación deja decisiones pendientes, recuperables. La norma textual no modifica código por sí misma.
+Actualizar fuentes es parte del flujo principal del reto, no el bonus. Un borrador compara dependencias por factura: pedido ERP; proveedor/pedido/norma y filas históricas coincidentes del maestro; política completa. Primero muestra impacto, después cambia la fuente con guardia de concurrencia. Solo reevalúa afectados y reutiliza OCR; para los demás conserva la decisión y registra por qué sigue siendo aplicable. El índice de duplicados interlote se construye una sola vez por comparación. Un fallo entre commit y reevaluación deja decisiones pendientes, recuperables. La norma textual no modifica código por sí misma.
+
+«Datos y actualizaciones» presenta tres fuentes con fecha registrada y estado, detalles desplegables, vista previa y un historial compacto. Las cantidades de impacto son disjuntas: afectados sin cambio, nuevos ESCALAR y otros cambios; reutilizados aparte. Solo la política o una norma textual modificada requieren confirmación de reglas. Nombre y nota de actualización son opcionales; sin nombre se registra una sesión local sin identificar, nunca una identidad inventada. Esto no relaja los requisitos de autor/motivo/evidencia de una decisión humana.
 
 La mejora adicional propuesta al jurado es la preparación de comunicaciones: preguntas abiertas agrupadas por proveedor, con facturas y referencias, listas para descargar y revisar. No se envían emails, no hay aprobación masiva y no se afirma reducción de tiempo medida todavía. Su consideración como bonus corresponde al jurado.
 
 ## Observabilidad y coste
 
-Se registran solicitudes ERP sin credenciales, intentos, estados HTTP, latencias, errores y eventos de publicación; extracción/evaluación por expediente; duración del worker y suma de llamadas externas facturadas. El detalle deja ver cada intento y la página origen.
+Se registran solicitudes ERP sin credenciales, intentos, estados HTTP, latencias, errores y eventos de publicación; extracción/evaluación por expediente; duración del worker y suma de llamadas externas facturadas. La vista de Alberto muestra el motivo destacado, los datos y la página origen. Los intentos, JSON, hashes y costes se consultan por separado en `/documents/{id}/audit` y `/operations`; la separación de pantallas no es control de acceso.
 
-El benchmark incluye ERP normal + OCR + reglas, no solo extracción PDF. La memoria máxima es del proceso Python; no mide por separado memoria del ERP. La cifra de workers es uno; ONNX puede usar dos hilos internos. No hay tokens LLM porque no se llama a un LLM.
+El benchmark local histórico incluye ERP normal + OCR + reglas, no solo extracción PDF. La memoria máxima es del proceso Python; no mide por separado memoria del ERP. La cifra de workers es uno; ONNX puede usar dos hilos internos. Con el método opcional `modelo` se registran tokens, neuronas y coste según las tarifas configuradas; sin tarifas, cero registrado no demuestra gratuidad.
 
-La precisión real no está medida: requiere etiquetas independientes. La distribución de salidas se reporta separadamente. El coste externo de inferencia es cero, pero falta imputar hardware y revisión humana con las tarifas del equipo.
+La precisión real no está medida: requiere etiquetas independientes. La distribución de salidas se reporta separadamente. Sin llamadas externas el coste externo de inferencia es cero; con modelo depende del proveedor y tarifas. Falta imputar hardware y revisión humana. No se ha repetido el benchmark de 500 documentos con el motor integrado 0.9.2.
 
 ## Evolución y límites
 

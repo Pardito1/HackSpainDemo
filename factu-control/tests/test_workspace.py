@@ -215,20 +215,15 @@ def test_new_code_does_not_silently_discard_human_rejection(bundle):
     assert decision["result"] == "ESCALAR" and decision["human_response_stale"]
 
 
-def test_consultation_draft_is_downloadable_and_never_applies_a_decision(bundle):
+def test_internal_human_question_does_not_become_supplier_email(bundle):
     service, batch, doc = processed(bundle)
     args, preview = answer(service, doc)
     service.human_commit(*args, preview["preview_token"])
     before = service.document(doc["id"])["latest_decision"]
-    draft = service.consultation_drafts(batch)[0]
-    assert doc["file_id"] in draft["draft"]
-    assert "NO ENVIADO" in draft["draft"]
+    assert service.consultation_drafts(batch) == []
     app = create_app(service.store.root)
     with TestClient(app) as client:
-        response = client.get(f"/api/consultations/{draft['id']}/draft?batch={batch}")
-        assert response.status_code == 200
-        assert "text/plain" in response.headers["content-type"]
-        assert "BORRADOR" in response.text
+        assert "No hay consultas externas" in client.get("/groups?batch=" + batch).text
         assert client.get("/api/consultations/not-found/draft").status_code == 404
     assert service.document(doc["id"])["latest_decision"] == before
 

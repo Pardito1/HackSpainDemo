@@ -1,0 +1,42 @@
+{
+  "version": "0.7.0",
+  "date": "2026-09-19",
+  "code_sha256": "d7f58976f40ba6c3bdd211bbdae1763a6a8e621d8bca7da0a783be73c7e816fd",
+  "documents": 500,
+  "counts": {
+    "ESCALAR": 218,
+    "PAGAR": 273,
+    "NO_PAGAR": 9
+  },
+  "pending": 0,
+  "invoice_pages_http_ok": 500,
+  "export_unique_records": 500,
+  "official_human_approvals_added": 0,
+  "historical_records": 2,
+  "historical_coverage": "partial",
+  "historical_matches": [],
+  "original_workbook_unchanged": true,
+  "audit": {
+    "valid": true,
+    "chain_valid": true,
+    "head": "54988d99c26f9c0887851411b9c60778e36a5ce70bbf06355e7fa2eaf4de8bcf",
+    "issues": [],
+    "warnings": [],
+    "checked": {
+      "documents": 500,
+      "decisions": 3000,
+      "sources": 5,
+      "blobs": 501
+    },
+    "scope": "Eventos, manifiestos, originales, fuentes, decisiones y registros sellados; no identidad autenticada ni firma externa"
+  },
+  "python_tests": 153,
+  "javascript_tests": 6,
+  "limitations": [
+    "Historical sheet has no supplier, invoice number or payment status",
+    "No private judge validation or measured accuracy",
+    "Local session without authentication",
+    "Second official batch not validated",
+    "Windows requires WSL2, not tested here"
+  ]
+}

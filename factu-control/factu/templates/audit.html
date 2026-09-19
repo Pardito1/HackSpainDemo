@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Auditoría · {{ document.file_id }}{% endblock %}
+{% block breadcrumb %}Área técnica / Auditoría{% endblock %}
+{% block content %}
+<a class="back" href="/documents/{{ document.id }}">← Volver al expediente de Alberto</a>
+<p class="eyebrow">PARA EL EQUIPO TÉCNICO</p><h1 class="filename">Auditoría de {{ document.file_id }}</h1>
+<p class="lede">Registro de evidencias, fuentes y operaciones. Esta pantalla está separada de la revisión de Alberto; no añade permisos ni autenticación.</p>
+<section class="card"><h2>Fuentes de la decisión</h2><p class="mono">PDF SHA-256: {{ document.sha256 }}</p>
+{% if decision %}{% for key,label in [('master_id','Maestro Excel'),('snapshot_id','Consulta ERP'),('policy_id','Norma aplicada')] %}<p class="source-link"><span>{{ label }}</span><a href="/api/sources/{{ decision.context[key] }}">{{ decision.context[key] }}</a></p>{% endfor %}<p>Norma: {{ decision.policy_version }} · fecha de referencia {{ batch.as_of }}</p><p class="mono">Código SHA-256: {{ decision.context.code_sha256 }}</p>{% endif %}</section>
+{% if decision %}<section class="card"><h2>Reglas y evidencia completa</h2>{% for rule in decision.rules %}<details class="rule"><summary>{{ rule.id }} · {{ rule.state }} · {{ rule.message }}</summary><pre>{{ rule.evidence|tojson(indent=2) }}</pre></details>{% endfor %}<details class="rule"><summary>Decisión completa</summary><pre>{{ decision|tojson(indent=2) }}</pre></details></section>{% endif %}
+{% if extraction %}<section class="card"><details><summary>Extracción original · sin correcciones humanas</summary><pre>{{ extraction|tojson(indent=2) }}</pre></details></section>{% endif %}
+<section class="card"><h2>Historia técnica y consumo</h2><p>Coste externo no incluye hardware ni tiempo humano. Un coste externo de 0 € es válido si toda la extracción es local. El ERP se mide por lote.</p><table><thead><tr><th>Etapa</th><th>Segundos registrados</th><th>Gasto externo</th></tr></thead><tbody>{% for cost in costs %}<tr><td>{{ cost.stage }}</td><td>{{ '%.4f'|format(cost.seconds) }}</td><td>{{ cost.external_eur|euros }} €</td></tr>{% endfor %}</tbody></table>
+{% for event in events %}<details class="rule"><summary>{{ event_labels.get(event.kind,event.kind) }} <small>{{ event.created[:19] }}</small></summary><pre>{{ event.payload|tojson(indent=2) }}</pre></details>{% endfor %}</section>
+<a class="text-link" href="/operations?batch={{ document.batch_id }}">Integridad y operaciones del lote {{ icon('arrow') }}</a>
+{% endblock %}

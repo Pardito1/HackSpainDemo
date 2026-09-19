@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import math
 import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -95,16 +96,16 @@ class ERPClient:
                         try:
                             retry_after = max(0, float(raw))
                         except ValueError:
-                            retry_after = max(
-                                0,
-                                (
-                                    parsedate_to_datetime(raw)
-                                    - datetime.now(timezone.utc)
-                                ).total_seconds(),
-                            )
+                            try:
+                                retry_after = max(0, (parsedate_to_datetime(raw)
+                                    - datetime.now(timezone.utc)).total_seconds())
+                            except (ValueError, TypeError, OverflowError):
+                                retry_after = None
+                        if retry_after is not None and not math.isfinite(retry_after):
+                            retry_after = None
                 else:
                     raise ERPUnavailable(f"ERP HTTP {status} en {path}")
-            except (httpx.TimeoutException, httpx.NetworkError) as exc:
+            except httpx.TransportError as exc:
                 self.attempts += 1
                 self.callback(
                     "erp_request",
@@ -156,10 +157,12 @@ class ERPClient:
                 if page == 1
                 else self._request(f"/erp/asientos?pagina={page}")
             )
-            if (
-                int(root.findtext("meta/total", "-1")) != total
-                or int(root.findtext("meta/paginas", "-1")) != pages
-            ):
+            try:
+                same = (int(root.findtext("meta/total", "-1")) == total
+                        and int(root.findtext("meta/paginas", "-1")) == pages)
+            except (ValueError, TypeError):
+                same = False
+            if not same:
                 raise ERPUnavailable(
                     "El ERP cambió durante la paginación; repetir snapshot"
                 )

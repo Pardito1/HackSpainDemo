@@ -7,6 +7,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from .extract import FIELDS
 from .utils import identifier, money
 from .presentation import FIELDS_ES
+from .historical import history_dependency
 
 
 def validate_policy(policy):
@@ -294,6 +295,16 @@ def evaluate(extraction, master, snapshot, policy, as_of, duplicate=None):
         "Obligación no duplicada",
         "Revisa las facturas que comparten pedido.",
         duplicate,
+    )
+    historical = history_dependency(master, order)
+    check(
+        "historical_order",
+        not historical["rows"] if historical["loaded"] and order else None,
+        "Pedido contrastado con el archivo histórico disponible",
+        "Este pedido aparece en el archivo antiguo. Confirma si es una obligación distinta y aporta evidencia de su estado de pago."
+        if historical["rows"] else "Vuelve a cargar el Excel para comprobar el histórico o confirma el número de pedido.",
+        {**historical, "order": order,
+         "limit": "Archivo parcial: no contiene proveedor, número de factura ni estado de pago. La ausencia de coincidencia no descarta otros antecedentes."},
     )
     for extra in policy["extra_rules"]:
         current = val(extra["field"])

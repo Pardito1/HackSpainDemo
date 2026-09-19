@@ -20,7 +20,7 @@ def sin_credenciales_modelo(monkeypatch):
         monkeypatch.delenv(variable, raising=False)
 
 
-def make_pdf(path, total="121,00", iban=IBAN, extra="", raster=False):
+def make_pdf(path, total="121,00", iban=IBAN, extra="", raster=False, currency="EUR"):
     doc = fitz.open()
     page = doc.new_page()
     page.insert_text(
@@ -37,6 +37,7 @@ def make_pdf(path, total="121,00", iban=IBAN, extra="", raster=False):
                 "Base imponible: 100,00",
                 "IVA (21%): 21,00",
                 f"TOTAL: {total}",
+                f"Moneda: {currency}" if currency else "",
                 extra,
             ]
         ),

@@ -9,17 +9,50 @@ const pageSelect=document.getElementById('page-select');const paper=document.que
 function changePage(number){if(!paper)return;pageSelect.value=String(number);pageImage.src=`/api/documents/${paper.dataset.document}/pages/${number}`;evidence.hidden=true;}
 if(pageSelect)pageSelect.addEventListener('change',()=>changePage(pageSelect.value));
 document.querySelectorAll('button.evidence').forEach(button=>button.addEventListener('click',()=>{changePage(button.dataset.page);const option=pageSelect.selectedOptions[0];const box=JSON.parse(button.dataset.bbox);evidence.style.left=100*box[0]/Number(option.dataset.width)+'%';evidence.style.top=100*box[1]/Number(option.dataset.height)+'%';evidence.style.width=100*(box[2]-box[0])/Number(option.dataset.width)+'%';evidence.style.height=100*(box[3]-box[1])/Number(option.dataset.height)+'%';evidence.hidden=false;paper.scrollIntoView({behavior:'smooth',block:'center'});}));
-document.querySelectorAll('.review-form').forEach(form=>{let pending=null;const preview=form.querySelector('.preview'),commit=form.querySelector('.commit');form.addEventListener('input',()=>{pending=null;commit.hidden=true;preview.hidden=true;});form.addEventListener('submit',async e=>{e.preventDefault();const data=new FormData(form);const body={document_ids:form.dataset.document?[form.dataset.document]:data.getAll('document_ids'),field:data.get('field'),value:data.get('value'),actor:data.get('actor'),reason:data.get('reason')};try{const r=await api('/api/reviews/preview',body);pending={...body,preview_token:r.preview_token};preview.textContent=r.previews.map(p=>`${p.file_id}: ${p.before||'pendiente'} → ${p.after||'pendiente'}\n${p.remaining_questions.join('\n')}`).join('\n\n');preview.hidden=false;commit.hidden=false;}catch(e){toast(e.message);}});commit.addEventListener('click',async()=>{if(!pending)return;commit.disabled=true;try{await api('/api/reviews/commit',pending);location.reload();}catch(e){toast(e.message);commit.disabled=false;}});});
+document.querySelectorAll('.review-form').forEach(form=>{
+  let pending=null;const preview=form.querySelector('.preview'),commit=form.querySelector('.commit'),submit=form.querySelector('[type=submit],button:not([type])');
+  const resetPreview=()=>{pending=null;commit.hidden=true;preview.hidden=true;};
+  const read=()=>{const data=new FormData(form);return {document_ids:form.dataset.document?[form.dataset.document]:data.getAll('document_ids'),field:data.get('field'),value:data.get('value'),actor:data.get('actor'),reason:data.get('reason')};};
+  form.addEventListener('input',resetPreview);
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();resetPreview();submit.disabled=true;const body=read();
+    try{const r=await api('/api/reviews/preview',body);
+      if(JSON.stringify(read())!==JSON.stringify(body)){toast('Has cambiado la corrección. Comprueba su efecto de nuevo.');return;}
+      pending={...body,preview_token:r.preview_token};
+      preview.textContent=r.previews.map(p=>`${p.file_id}\nAntes: ${resultLabels[p.before]||'Pendiente de comprobar'}\nDespués: ${resultLabels[p.after]||'Pendiente de comprobar'}\n${p.remaining_questions.join('\n')}\n\nGuardar el dato no registra una aprobación de pago.`).join('\n\n');preview.hidden=false;commit.hidden=false;
+    }catch(e){toast(e.message);}finally{submit.disabled=false;}
+  });
+  commit.addEventListener('click',async()=>{if(!pending)return;commit.disabled=true;try{await api('/api/reviews/commit',pending);location.reload();}catch(e){toast(e.message);commit.disabled=false;}});
+});
 
-const resultLabels={PAGAR:'Propuesta de pago',NO_PAGAR:'No pagar',ESCALAR:'Consultar a Alberto'};
+const resultLabels={PAGAR:'Propuesta de pago',NO_PAGAR:'No pagar',ESCALAR:'Requiere revisión'};
 document.querySelectorAll('.human-form').forEach(form=>{
   let pending=null;
   const preview=form.querySelector('.preview'),commit=form.querySelector('.commit'),submit=form.querySelector('[type=submit]');
-  form.addEventListener('input',()=>{pending=null;commit.hidden=true;preview.hidden=true;});
+  const resetPreview=()=>{pending=null;commit.hidden=true;preview.hidden=true;};
+  const choices=form.querySelectorAll('[data-human-choice]'),fields=form.querySelector('.answer-fields'),result=form.querySelector('[name=result]');
+  const actionLabels={PAGAR:'Aprobar para pago',NO_PAGAR:'No pagar'};
+  choices.forEach(button=>button.addEventListener('click',()=>{
+    if(button.disabled)return;
+    resetPreview();result.value=button.dataset.humanChoice;
+    choices.forEach(choice=>choice.setAttribute('aria-pressed',String(choice===button)));
+    fields.hidden=false;fields.disabled=false;
+    form.querySelector('.chosen-action').textContent=actionLabels[result.value];
+    commit.textContent={PAGAR:'Confirmar aprobación para pago',NO_PAGAR:'Confirmar que no se pagará'}[result.value];
+    fields.querySelector('[name=actor]').focus();
+  }));
+  form.addEventListener('input',resetPreview);
   form.addEventListener('submit',async event=>{
-    event.preventDefault();submit.disabled=true;
-    const data=new FormData(form),body={result:data.get('result'),actor:data.get('actor'),reason:data.get('reason'),evidence:data.get('evidence'),acknowledged:data.getAll('acknowledged'),seconds:Number(data.get('minutes'))*60};
-    try{const r=await api(`/api/documents/${form.dataset.document}/answer/preview`,body);pending={...body,preview_token:r.preview_token};preview.textContent=`Antes: ${resultLabels[r.before]}\nCon tu respuesta: ${resultLabels[r.result]}\n\nQuedará registrada a nombre de ${r.actor}, con tu motivo y la evidencia indicada. No se ejecuta ningún pago.`;preview.hidden=false;commit.hidden=false;}catch(e){toast(e.message);}finally{submit.disabled=false;}
+    event.preventDefault();resetPreview();
+    if(!actionLabels[result.value]){toast('Elige primero qué quieres hacer con esta factura.');return;}
+    submit.disabled=true;choices.forEach(b=>b.setAttribute('aria-busy','true'));
+    const data=new FormData(form),body={result:data.get('result'),actor:data.get('actor'),reason:data.get('reason'),evidence:data.get('evidence'),acknowledged:data.getAll('acknowledged')};
+    const submitted=JSON.stringify(body);
+    try{const r=await api(`/api/documents/${form.dataset.document}/answer/preview`,body);
+      const current=new FormData(form),live={result:current.get('result'),actor:current.get('actor'),reason:current.get('reason'),evidence:current.get('evidence'),acknowledged:current.getAll('acknowledged')};
+      if(JSON.stringify(live)!==submitted){toast('Has cambiado tu respuesta. Compruébala de nuevo antes de guardarla.');return;}
+      pending={...body,preview_token:r.preview_token};preview.textContent=`Vas a registrar: ${actionLabels[r.result]}\nA nombre de: ${r.actor}\nMotivo: ${r.reason}\nEvidencia: ${r.evidence}\n\nNo se ejecuta ningún pago. Confirma abajo para guardar esta decisión.`;preview.hidden=false;commit.hidden=false;
+    }catch(e){toast(e.message);}finally{submit.disabled=false;choices.forEach(b=>b.removeAttribute('aria-busy'));}
   });
   commit.addEventListener('click',async()=>{if(!pending)return;commit.disabled=true;try{await api(`/api/documents/${form.dataset.document}/answer/commit`,pending);location.reload();}catch(e){toast(e.message);commit.disabled=false;}});
 });
@@ -29,13 +62,42 @@ document.querySelectorAll('.retract-form').forEach(form=>form.addEventListener('
   try{await api(`/api/documents/${form.dataset.document}/answer/retract`,{actor:data.get('actor'),reason:data.get('reason')});location.reload();}
   catch(e){toast(e.message);button.disabled=false;}
 }));
-function showChange(batch,id){location.href=`/sources?batch=${encodeURIComponent(batch)}&change=${encodeURIComponent(id)}#change-${encodeURIComponent(id)}`;}
-document.querySelectorAll('.source-form,.erp-change-form').forEach(form=>form.addEventListener('submit',async event=>{
+function showChange(batch,id){const path=`/sources?batch=${encodeURIComponent(batch)}&change=${encodeURIComponent(id)}`;if(location.pathname+location.search===path)location.reload();else location.href=path+`#change-${encodeURIComponent(id)}`;}
+function sourceMode(kind){
+  const erp=kind==='erp',policy=kind==='policy';
+  return {erp,policy,upload:!erp,accept:policy?'.json':'.xlsx',label:policy?'Archivo de reglas actualizado':'Excel actualizado',submit:erp?'Consultar ERP y ver facturas afectadas':'Ver facturas afectadas'};
+}
+function sourceRequest(data){
+  const erp=data.get('kind')==='erp';
+  return {endpoint:erp?'erp':'upload',body:erp?{actor:data.get('actor')||'',reason:data.get('reason')||''}:data};
+}
+document.querySelectorAll('.source-form').forEach(form=>{
+  const kind=form.querySelector('[name=kind]'),file=form.querySelector('[name=file]'),confirmation=form.querySelector('.policy-confirm');
+  const update=()=>{
+    const mode=sourceMode(kind.value);
+    file.accept=mode.accept;file.value='';file.disabled=!mode.upload;file.required=mode.upload;
+    form.querySelector('.upload-label').hidden=!mode.upload;
+    form.querySelector('[data-upload-label]').textContent=mode.label;
+    form.querySelector('[data-erp-help]').hidden=!mode.erp;
+    form.querySelector('[data-source-submit]').textContent=mode.submit;
+    confirmation.hidden=!mode.policy;confirmation.disabled=!mode.policy;
+    confirmation.querySelector('input').checked=false;confirmation.querySelector('input').required=mode.policy;
+    form.querySelector('.policy-help').hidden=!mode.policy;
+  };
+  kind.addEventListener('change',update);update();
+});
+document.querySelectorAll('.source-form').forEach(form=>form.addEventListener('submit',async event=>{
   event.preventDefault();const button=form.querySelector('button[type=submit]');button.disabled=true;
   toast('Consultando las fuentes y calculando el alcance. Aún no se ha aplicado ningún cambio.');
-  try{const data=new FormData(form),isERP=form.classList.contains('erp-change-form');const body=isERP?{actor:data.get('actor'),reason:data.get('reason')}:data;
-    const r=await api(`/api/batches/${form.dataset.batch}/changes/${isERP?'erp':'upload'}`,body);showChange(form.dataset.batch,r.id);
-  }catch(e){toast(e.message);button.disabled=false;}
+  try{const request=sourceRequest(new FormData(form));
+    const r=await api(`/api/batches/${form.dataset.batch}/changes/${request.endpoint}`,request.body);showChange(form.dataset.batch,r.id);
+  }catch(e){toast(e.message);button.disabled=false;
+    if(e.message.includes('norma del Excel ha cambiado')){
+      const confirmation=form.querySelector('.policy-confirm');
+      if(confirmation){confirmation.hidden=false;confirmation.disabled=false;confirmation.querySelector('input').required=true;
+        const help=form.querySelector('.policy-help');help.hidden=false;help.textContent='El Excel también cambia la norma de pagos. Pide al equipo que revise la correspondencia con las reglas antes de confirmar.';}
+    }
+  }
 }));
 document.querySelectorAll('[data-commit-change]').forEach(button=>button.addEventListener('click',async()=>{
   button.disabled=true;try{const r=await api(`/api/changes/${button.dataset.commitChange}/commit`);showChange(r.batch_id,r.id);}catch(e){toast(e.message);button.disabled=false;}
@@ -44,7 +106,10 @@ const costForm=document.getElementById('cost-form');if(costForm)costForm.addEven
   event.preventDefault();const data=new FormData(costForm),count=Number(costForm.dataset.documents);
   const output=document.getElementById('cost-result');output.hidden=false;
   if(!count){output.textContent='Añade un lote para calcular el coste por factura.';return;}
-  const total=Number(costForm.dataset.external)+Number(data.get('hours'))*Number(data.get('infra'))+Number(costForm.dataset.human)*Number(data.get('human'));
+  const inputs=[count,Number(costForm.dataset.external),Number(data.get('hours')),Number(data.get('infra')),Number(costForm.dataset.human),Number(data.get('human'))];
+  if(inputs.some(value=>!Number.isFinite(value)||value<0)){output.textContent='Introduce importes y tiempos válidos, iguales o mayores que cero.';return;}
+  const total=inputs[1]+inputs[2]*inputs[3]+inputs[4]*inputs[5];
+  if(!Number.isFinite(total)){output.textContent='Las cifras son demasiado grandes para calcular esta estimación.';return;}
   const money=value=>value.toLocaleString('es-ES',{style:'currency',currency:'EUR',minimumFractionDigits:4});
   output.textContent=`Estimación con tus tarifas: ${money(total)} en total · ${money(total/count)} por factura.\nIncluye ${Number(costForm.dataset.human).toFixed(1)} minutos humanos declarados y ${count} documentos. Las tarifas no se guardan.`;
 });

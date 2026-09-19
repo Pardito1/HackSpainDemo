@@ -167,8 +167,10 @@ def test_ocr_label_in_rendered_page(bundle, monkeypatch):
     doc = service.store.one("SELECT id FROM documents")["id"]
     with TestClient(create_app(service.store.root)) as client:
         page = client.get(f"/documents/{doc}").text
-        assert "Página 1 · OCR" in page and "Ver en p. 1 · OCR" in page
-        assert "Página 1 · Texto" not in page
+        assert "Página 1" in page and "Ver en p. 1" in page
+        assert "OCR" not in page and "rapidocr-onnxruntime" not in page
+        audit = client.get(f"/documents/{doc}/audit").text
+        assert "rapidocr-onnxruntime" in audit
 
 
 def test_export_rejects_old_code(bundle):

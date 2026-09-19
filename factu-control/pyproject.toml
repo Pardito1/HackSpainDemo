@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "factu-control"
-version = "0.3.0"
+version = "0.9.2"
 description = "Conciliación de facturas con evidencia, ERP, revisión humana y coste medible"
 readme = "README.md"
 requires-python = ">=3.11"
