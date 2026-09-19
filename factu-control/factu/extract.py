@@ -103,7 +103,7 @@ def union(boxes):
     ]
 
 
-def group_lines(tokens, page_number, method):
+def group_lines(tokens, page_number, method, warnings=None):
     groups = []
     for token in sorted(
         tokens, key=lambda t: ((t["bbox"][1] + t["bbox"][3]) / 2, t["bbox"][0])
@@ -128,6 +128,9 @@ def group_lines(tokens, page_number, method):
         text = ""
         for token in words:
             token["start"] = len(text)
+            if warnings is not None and re.search(r'[\u200b\u200c\u200d\ufeff\u2060\u00ad]', token["text"]):
+                if not any(w.get("code") == "ZERO_WIDTH_CHARS" and w.get("page") == page_number for w in warnings):
+                    warnings.append({"code": "ZERO_WIDTH_CHARS", "page": page_number, "message": "Caracteres invisibles limpiados."})
             text += clean(token["text"])
             token["end"] = len(text)
             text += " "
@@ -360,50 +363,64 @@ def fusionar_modelo(fields, campos):
 def extract_pdf(path, ocr=True):
     start = time.monotonic()
     pages, lines, warnings = [], [], []
-    with fitz.open(path) as doc:
-        if doc.needs_pass or not 1 <= len(doc) <= 100:
-            raise ValueError("PDF protegido, vacío o con más de 100 páginas")
-        for i, page in enumerate(doc):
-            tokens = [
-                {"text": w[4], "bbox": list(w[:4]), "confidence": None}
-                for w in page.get_text("words")
-            ]
-            native_length = sum(len(t["text"]) for t in tokens)
-            image_area = sum(
-                r.width * r.height
-                for image in page.get_images()
-                for r in page.get_image_rects(image[0])
-            )
-            needs_ocr = (
-                native_length < 60
-                or image_area > page.rect.width * page.rect.height * 0.45
-            )
-            method = "pymupdf"
-            if needs_ocr and ocr:
-                try:
-                    ocr_tokens = ocr_page(page)
-                    if ocr_tokens:
-                        tokens, method = ocr_tokens, "rapidocr-onnxruntime"
-                    else:
-                        warnings.append({"code": "OCR_EMPTY", "page": i + 1})
-                except (ImportError, RuntimeError) as exc:
-                    warnings.append(
-                        {"code": "OCR_UNAVAILABLE", "page": i + 1, "message": str(exc)}
+    try:
+        with fitz.open(path) as doc:
+            if doc.needs_pass or not 1 <= len(doc) <= 100:
+                warnings.append(
+                    {
+                        "code": "PDF_CORRUPT",
+                        "page": 0,
+                        "message": "PDF protegido, vacío o con más de 100 páginas",
+                    }
+                )
+            else:
+                for i, page in enumerate(doc):
+                    tokens = [
+                        {"text": w[4], "bbox": list(w[:4]), "confidence": None}
+                        for w in page.get_text("words")
+                    ]
+                    native_length = sum(len(t["text"]) for t in tokens)
+                    image_area = sum(
+                        r.width * r.height
+                        for image in page.get_images()
+                        for r in page.get_image_rects(image[0])
                     )
-            elif needs_ocr:
-                warnings.append({"code": "OCR_DISABLED", "page": i + 1})
-            page_lines = group_lines(tokens, i + 1, method)
-            lines.extend(page_lines)
-            pages.append(
-                {
-                    "number": i + 1,
-                    "width": page.rect.width,
-                    "height": page.rect.height,
-                    "method": method,
-                    "text": "\n".join(l["text"] for l in page_lines),
-                    "needs_ocr": needs_ocr,
-                }
-            )
+                    needs_ocr = (
+                        native_length < 60
+                        or image_area > page.rect.width * page.rect.height * 0.45
+                    )
+                    method = "pymupdf"
+                    if needs_ocr and ocr:
+                        try:
+                            ocr_tokens = ocr_page(page)
+                            if ocr_tokens:
+                                tokens, method = ocr_tokens, "rapidocr-onnxruntime"
+                            else:
+                                warnings.append({"code": "OCR_EMPTY", "page": i + 1})
+                        except (ImportError, RuntimeError) as exc:
+                            warnings.append(
+                                {
+                                    "code": "OCR_UNAVAILABLE",
+                                    "page": i + 1,
+                                    "message": str(exc),
+                                }
+                            )
+                    elif needs_ocr:
+                        warnings.append({"code": "OCR_DISABLED", "page": i + 1})
+                    page_lines = group_lines(tokens, i + 1, method, warnings)
+                    lines.extend(page_lines)
+                    pages.append(
+                        {
+                            "number": i + 1,
+                            "width": page.rect.width,
+                            "height": page.rect.height,
+                            "method": method,
+                            "text": "\n".join(l["text"] for l in page_lines),
+                            "needs_ocr": needs_ocr,
+                        }
+                    )
+    except Exception as exc:
+        warnings.append({"code": "PDF_CORRUPT", "page": 0, "message": str(exc)})
     fields = parse_fields(lines)
     model_usage = None
     pendientes = [p["number"] for p in pages if p["needs_ocr"]]

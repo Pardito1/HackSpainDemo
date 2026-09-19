@@ -110,8 +110,8 @@ class Service(WorkspaceMixin):
         manifest = []
         for file in files:
             data = file.read_bytes()
-            if len(data) > 50 * 1024 * 1024 or not data.startswith(b"%PDF"):
-                raise ValueError(f"PDF inválido o demasiado grande: {file.name}")
+            # Un fichero corrupto o que no es PDF se ingesta igualmente: la
+            # extracción lo marcará PDF_CORRUPT y la decisión será ESCALAR.
             blob = self.store.blob(data, ".pdf")
             manifest.append((secrets.token_hex(10), file.name, digest(data), str(blob)))
         with self.store.connect() as db:
