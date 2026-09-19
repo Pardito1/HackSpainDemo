@@ -1,0 +1,11 @@
+# Esqueleto: solo stdlib. Dependencias reales por módulo (aún no usadas):
+# P1
+# pypdf
+# pdf2image
+# pytesseract
+# P2
+# openpyxl
+# P3
+# (urllib de la stdlib basta para el bridge HTTP)
+# P4
+# (stdlib json)
