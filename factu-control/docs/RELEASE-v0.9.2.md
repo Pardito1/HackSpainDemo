@@ -20,7 +20,7 @@ La retirada de la última respuesta vuelve al motor sin reactivar respuestas ant
 - `python -m pytest -q` en `factu-control`: **251 aprobadas**; avisos de deprecación de dependencias, sin errores.
 - `node --test tests/test_frontend.mjs`: **13 aprobadas**.
 - Incluye pruebas de demo mediante HTTP real en localhost, interrupciones del ERP, recuperación, integridad, revisiones, moneda ausente, reglas y fallos simulados del proveedor de modelo. No se han hecho llamadas facturables a un LLM.
-- Las pruebas del prototipo raíz `tests/` son independientes: 51 aprobadas y 3 fallos en `test_robustez.py`, porque `pipeline/extraccion.py` sigue siendo un stub. Los mismos tres fallos se han reproducido en un checkout limpio de `main` 5b3fe97. Ese motor no se importa desde FactU y no se sustituye en esta integración. No se afirma que todo el repositorio esté libre de fallos.
+- Las pruebas del prototipo `tests/` (hoy archivado en `legacy/`) son independientes: 51 aprobadas y 3 fallos en `test_robustez.py`, porque `pipeline/extraccion.py` sigue siendo un stub. Los mismos tres fallos se han reproducido en un checkout limpio de `main` 5b3fe97. Ese motor no se importa desde FactU y no se sustituye en esta integración. No se afirma que todo el repositorio esté libre de fallos.
 
 ## Antes de usar datos anteriores
 

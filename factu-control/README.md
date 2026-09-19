@@ -1,63 +1,30 @@
-# FactU · La mesa de las cuentas claras · v0.10.0
+# FactU v0.10.0
 
-**Actualización Lote 2:** añade un perfil de extracción aislado para los 40
-PDFs nuevos, `lote2_ocr_v1`, y conserva el perfil existente para el lote de
-500. Usa texto nativo y RapidOCR local solo como segundo testigo cuando hace
-falta. Contra transcripciones manuales internas revisadas de los originales
-públicos, el holdout interno agrupado alcanza **99,0 % de exact match macro de
-campos** y 8/10 expedientes con campos de riesgo autoaceptados y correctos
-frente a etiqueta; no es una métrica de pagos ni una garantía fuera de este
-lote. La ejecución integrada produce **19
-PAGAR, 1 NO_PAGAR y 20 ESCALAR**, con auditoría válida. **279 pruebas Python
-superadas**. [Cambios, límites y protocolo de evaluación](docs/RELEASE-v0.10.0.md).
+Aplicación local y CLI que, sobre facturas PDF cruzadas con un maestro Excel y un ERP legado, propone `PAGAR`, `NO_PAGAR` o `ESCALAR` con traza auditable por campo. El modelo y el OCR **leen**; el motor de reglas determinista **decide**. Hecha para el track Maisa «500 sombras de Alberto».
+
+Contra transcripciones manuales internas revisadas del Lote 2 público, el holdout interno agrupado alcanza **99,0 % de exact match macro de campos** y 8/10 expedientes con campos de riesgo autoaceptados y correctos frente a etiqueta; no es una métrica de precisión de pagos ni de la referencia privada del jurado, no compara `PAGAR`/`NO_PAGAR`/`ESCALAR` con etiquetas contables ni es una garantía fuera de este lote.
 
 La aplicación se ejecuta con `python -m factu`, dentro de `factu-control`. Conserva tu carpeta de estado: se admite tanto `factu.sqlite3` como una única base antigua `alberto.sqlite3`; si están ambas, se pide elegir sin borrar ninguna. Haz copia de seguridad con la app parada antes de actualizar.
 
-El repositorio completo contiene los materiales oficiales ya aportados por el equipo. El ZIP creado por `scripts/package.py` contiene solo la app. Los resultados y el plan de la ejecución local 0.9.1 están separados en `../entrega-parcial-v0.9.1/`; no se han regenerado ni atribuido al motor integrado 0.9.2.
+## Cifras vigentes (medidas)
 
-## Historial de versiones y documentación
+Ejecuciones locales de 2026-09-20 en **MacBook Air M1**, ERP oficial con **latencia real**, **sin modelo externo** operativo (embudo texto nativo → RapidOCR local; el proveedor `modelo` no interviene):
 
-**Actualización 0.9.1:** corregida la lectura de `Importe` / `Importe_Total` y el historial repetitivo, sin borrar auditoría. **207 tests Python y 13 JavaScript superados.** v7 y v8 se leen correctamente; las reglas nuevas del Excel v8 de prueba NO se han implementado ni aplicado al lote real. [Cambios, límites y actualización](docs/RELEASE-v0.9.1.md).
+- **Lote 1 · 500 facturas:** 435 `PAGAR` / 9 `NO_PAGAR` / 56 `ESCALAR`, extremo a extremo en 53,8 s.
+- **Lote 2 · 40 facturas:** 24 `PAGAR` / 1 `NO_PAGAR` / 15 `ESCALAR`, extremo a extremo en 8,3 s.
+- **Pruebas:** 345 pruebas Python + 15 de Node en verde (28,3 s, mismo M1).
+- **Coste externo de inferencia:** 0 €. Sin llamadas facturables al proveedor `modelo`; RapidOCR y las reglas son locales. No es coste total (no incluye hardware ni tiempo humano).
 
-El ZIP completo incluye esta app y, en carpetas separadas, los materiales del
-primer lote y la entrega parcial. `outcomes.jsonl` contiene 500 resultados; el
-Lote 2 se procesa mediante un comando dedicado, con sus fuentes y su perfil
-registrados. La exportación de `outcomes_lote2.jsonl` sigue siendo una acción
-explícita y verificable; no subas el ZIP completo al repositorio de entrega del
-jurado.
+Estos repartos son la aplicación de la política v3 sobre las fuentes registradas en esa fecha y **no son métrica de precisión** frente a la referencia privada del jurado, que no publica su umbral. Cualquier nueva norma o lote requiere evaluación y versionado antes de ampliar automatizaciones. La documentación histórica se mantiene en [`docs/CHANGELOG.md`](docs/CHANGELOG.md); las notas completas de la release en [`docs/RELEASE-v0.10.0.md`](docs/RELEASE-v0.10.0.md).
 
-**Ajuste de interfaz UI1:** la ficha muestra solo «Aprobar para pago» y «No pagar», sin solicitar minutos dedicados. Las dudas siguen pendientes de revisión. Excel, ERP y política se eligen desde un único selector; el ERP no requiere archivo y conserva la vista previa antes de aplicar. [Detalle del ajuste](docs/INTERFAZ-v0.9.0-UI1.md).
+El repositorio completo contiene los materiales oficiales ya aportados por el equipo. El ZIP creado por `scripts/package.py` contiene solo la app. Los resultados y el plan de la ejecución local 0.9.1 están separados en `../entrega-parcial-v0.9.1/`; no se han regenerado ni atribuido al motor integrado 0.10.0.
 
-**Nuevo en 0.9.0:** extracción de importes unidos por OCR corregida; avisos importantes en amarillo; error del ERP persistente y recuperable; percentil y validación de costes corregidos. **197 pruebas Python y 10 JavaScript superadas.** En el lote comprobado: 275 propuestas de pago, 9 no pagar, 216 para revisión y 0 pendientes de procesar. Estos resultados sustituyen las cifras históricas de versiones anteriores; no son una medida de precisión. [Verificación y actualización](docs/RELEASE-v0.9.0.md).
-
-**Una sola Bandeja:** todas las facturas y sus consultas pendientes, con una columna «Fallo detectado» separada de «Qué falta por hacer». Ya no existe la sección «Para Alberto». Las acciones de revisión se conservan al abrir cada expediente. [Cambios y actualización 0.6.0](docs/RELEASE-v0.6.0.md).
-
-**Nuevo en 0.8.0:** marca FactU, hojas del Excel consultables y consultas a proveedores con temas desplegables, borrador editable y confirmación de moneda con evidencia. [Cambios y actualización 0.8.0](docs/RELEASE-v0.8.0.md).
-
-**Desde 0.7.0:** letra más grande, «Datos y actualizaciones» con comparación antes de aplicar, notas opcionales y comprobación de `Pedidos_2025_OLD` como histórico parcial. Una coincidencia de pedido pide revisión; no prueba que esté pagado. [Cambios y actualización 0.7.0](docs/RELEASE-v0.7.0.md).
-
-El uso habitual es con el lote oficial mediante PROCESAR-500.md. Los generadores sintéticos se conservan exclusivamente como herramientas de prueba: no se ejecutan ni se cargan al arrancar la aplicación, y sus bases de datos no se incluyen en el ZIP.
-
-Histórico 0.5.0: revisiones humanas destacadas e historial que explica quién cambió cada dato, sin selector de lotes ni panel de fuentes/versiones en el expediente. UI1 simplifica las acciones visibles a «Aprobar para pago» y «No pagar». La auditoría completa se conserva aparte. Consulta [cómo actualizar conservando tus datos](docs/RELEASE-v0.5.0.md). Una corrección no es una aprobación y ningún botón mueve dinero.
-
-**Para las 500 facturas reales: [PROCESAR-500.md](PROCESAR-500.md).** Incluye comandos para Mac y Windows con WSL2; no uses el generador de demo para importar el lote oficial.
-
-Novedades 0.4.0: carga/reanudación `lote1` sin copiar identificadores; 500 documentos procesados con ERP HTTP; moneda ausente sin EUR inventado; motivo destacado al principio; auditoría técnica en una pantalla separada. Ver [docs/RELEASE-v0.4.0.md](docs/RELEASE-v0.4.0.md). Los resultados medidos son 273 PAGAR, 9 NO_PAGAR y 218 ESCALAR, con cero documentos pendientes. No son una medición de precisión.
-
-
-Para subir el proyecto a GitHub, lee [GITHUB.md](GITHUB.md). El ZIP contiene la solución completa, pruebas, documentación y una demo reproducible; no contiene la base de datos local ni los materiales oficiales. El repositorio de entrega del concurso es distinto.
-
-Histórico — corrección 0.3.1: demo y ERP sintéticos coherentes con cuatro casos independientes, prueba de recorrido completo y filtros que explican cuántos resultados se muestran. **115 pruebas Python y 4 JavaScript pasan**. Se mantienen las correcciones 0.3 de OCR, integridad, entradas inválidas y consulta ante instrucciones sospechosas. Consulta [ACTUALIZAR-DEMO.md](ACTUALIZAR-DEMO.md) si ya tenías la demo antigua. La herramienta sigue siendo local, sin autenticación ni pagos reales; lote 2 y validación privada pendientes.
-
-Para actualizar desde 0.4-0.6, conserva una copia de la carpeta `data` con la app parada. Verifica con `factu --data data verify-audit`, arranca la versión nueva con el mismo estado y vuelve a cargar el Excel original en «Datos y actualizaciones». Compara y aplica para incorporar el histórico, sin repetir OCR. Si vienes de 0.3 o anterior, actualiza primero la extracción siguiendo PROCESAR-500.md. Las respuestas cuyo contexto cambie requieren nueva revisión. No ignores una comprobación de integridad fallida ni borres el historial para hacerla pasar. Pruebas del navegador: `node --test tests/test_frontend.mjs`.
-
-Aplicación local y CLI para **conciliar facturas con pruebas**, consultar el ERP y proponer `PAGAR`, `NO_PAGAR` o `ESCALAR`. Hecha para el track Maisa «500 sombras de Alberto».
+**Para las 500 facturas reales: [PROCESAR-500.md](PROCESAR-500.md).** Incluye comandos para Mac y Windows con WSL2; no uses el generador de demo para importar el lote oficial. Para subir el proyecto a GitHub, lee [GITHUB.md](GITHUB.md). El repositorio de entrega del concurso es distinto.
 
 **Código funcional, no un sistema bancario de producción. No ejecuta pagos ni
 modifica el ERP.** Se ha probado sobre los 500 PDFs iniciales y los 40 PDFs
 públicos de Lote 2, con OCR local y el bridge HTTP oficial. Los resultados no
-están contrastados con la referencia privada del jurado. Cualquier nueva norma
-o lote requiere evaluación y versionado antes de ampliar automatizaciones.
+están contrastados con la referencia privada del jurado.
 
 ## Qué incluye
 
@@ -204,7 +171,7 @@ La norma v3 está implementada en `factu/policy.py` y configurada en `factu/poli
 
 ## Lectura con modelo (tercer método)
 
-Las mediciones de esta sección son **históricas del `main` anterior** (extractor `native-rapidocr-modelo-2`). No se han repetido en 0.9.2. Esta integración conserva moneda ausente como MISSING y añade histórico de pedidos, por lo que esos repartos no describen las decisiones actuales. Las pruebas del proveedor en esta integración usan respuestas simuladas, sin llamadas facturables.
+Las mediciones de esta sección son **históricas del `main` anterior** (extractor `native-rapidocr-modelo-2`). No se han repetido en 0.9.2. Esta integración conserva moneda ausente como MISSING y añade histórico de pedidos, por lo que esos repartos no describen las decisiones actuales. Las pruebas del proveedor en esta integración usan respuestas simuladas, sin llamadas facturables. El reparto vigente sin modelo externo es 435/9/56 (ver Cifras vigentes).
 
 El embudo de lectura es texto nativo → OCR local → modelo, y cada paso solo actúa donde el anterior no llega. El modelo multimodal se consulta únicamente si una página necesitó OCR **y** algún campo distinto del número de factura sigue sin lectura firme. Devuelve, por campo, el valor, la **línea literal del documento de la que lo copió** y la página; entra como un candidato más (`method="modelo"`) junto a los del OCR: sin lectura previa firme resuelve el campo, y si contradice una lectura OK del OCR el campo queda en CONFLICT y la factura se consulta. El modelo **nunca decide**: `PAGAR`/`NO_PAGAR`/`ESCALAR` sale siempre del motor de reglas.
 
