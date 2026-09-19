@@ -9,3 +9,9 @@ outputs/revisor.html
 .env
 .env.*
 !.env.example
+
+# Estado de ejecución y salidas: se regeneran con `factu` y no se versionan.
+estado-*/
+factu-control/estado-*/
+entrega/
+outcomes*.jsonl
