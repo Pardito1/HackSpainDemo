@@ -414,3 +414,32 @@ def test_tax_rate_normalized_as_int():
     assert modelo.normalizar_tipo("21 %") == 21
     with pytest.raises(ValueError):
         modelo.normalizar_tipo("veintiuno")
+
+
+# --- (h) cortacircuito: tres errores de red seguidos y no se llama más ---------
+
+
+def test_circuit_opens_after_three_network_errors(tmp_path, monkeypatch):
+    llamadas = []
+
+    def post_con_timeout(*args, **kwargs):
+        llamadas.append(1)
+        raise modelo.httpx.TimeoutException("sin respuesta")
+
+    monkeypatch.setenv("CF_ACCOUNT_ID", "cuenta")
+    monkeypatch.setenv("CLOUDFLARE_API_TOKEN", "token-de-prueba")
+    monkeypatch.setattr(modelo.httpx, "post", post_con_timeout)
+    path = tmp_path / "escaneada.pdf"
+    make_pdf(path, raster=True)
+    modelo.reiniciar_circuito()
+    try:
+        for _ in range(modelo.UMBRAL_CIRCUITO):
+            assert modelo.leer_campos(path, [1]) == {"error": "timeout"}
+        previas = len(llamadas)
+        assert modelo.leer_campos(path, [1]) == {"error": "circuito_abierto"}
+        assert len(llamadas) == previas  # la cuarta lectura no toca la red
+        modelo.reiniciar_circuito()  # lo que hace service.process() al arrancar
+        assert modelo.leer_campos(path, [1]) == {"error": "timeout"}
+        assert len(llamadas) == previas + 1
+    finally:
+        modelo.reiniciar_circuito()

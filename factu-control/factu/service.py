@@ -261,6 +261,7 @@ class Service(WorkspaceMixin):
     @exclusive
     def process(self, batch_id, ocr=True, limit=None, fault_after=None):
         self.batch(batch_id)
+        modelo.reiniciar_circuito()
         started = time.monotonic()
         count = 0
         while limit is None or count < limit:

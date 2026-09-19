@@ -82,6 +82,26 @@ ESQUEMA_RESPUESTA = {
 # en el mismo proceso: la sonda cuesta una petición.
 _response_format_soportado = None
 
+# Cortacircuito por proceso: tras UMBRAL_CIRCUITO errores de red seguidos
+# (timeout/red/429) no se vuelve a llamar al proveedor en el resto del lote.
+# service.process() lo rearma al arrancar; cualquier respuesta del proveedor
+# (éxito, auth o malformado) pone el contador a cero.
+UMBRAL_CIRCUITO = 3
+_errores_red_seguidos = 0
+
+
+def reiniciar_circuito():
+    global _errores_red_seguidos
+    _errores_red_seguidos = 0
+
+
+def _anotar_resultado_red(error):
+    global _errores_red_seguidos
+    if error in ("timeout", "red", "429"):
+        _errores_red_seguidos += 1
+    else:
+        _errores_red_seguidos = 0
+
 
 def _env(name):
     value = os.environ.get(name, "").strip()
@@ -389,11 +409,14 @@ def leer_campos(path_pdf, paginas):
     """Lee los CAMPOS de las páginas indicadas con el backend configurado.
 
     Devuelve {"campos": {campo: {raw_value, evidencia, page}}, "uso": {...}}
-    o {"error": "timeout|429|malformado|auth|red|sin_clave"}. Nunca lanza.
+    o {"error": "timeout|429|malformado|auth|red|sin_clave|circuito_abierto"}.
+    Nunca lanza.
     """
     backend = backend_activo()
     if not credenciales_completas(backend):
         return {"error": "sin_clave"}
+    if _errores_red_seguidos >= UMBRAL_CIRCUITO:
+        return {"error": "circuito_abierto"}
     inicio = time.monotonic()
     try:
         if backend == "cf_workers_ai":
@@ -402,6 +425,7 @@ def leer_campos(path_pdf, paginas):
         else:
             data, error, modelo = _leer_anthropic(path_pdf)
             enviadas = None
+        _anotar_resultado_red(error)
         if error:
             return {"error": error}
         uso_bruto = data.get("usage") or {}
