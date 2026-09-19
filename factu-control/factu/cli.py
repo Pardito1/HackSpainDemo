@@ -82,7 +82,7 @@ def main(argv=None):
                 import uvicorn
                 from .web import create_app
                 os.environ["ERP_URL"] = args.url
-                uvicorn.run(create_app(args.data), host="127.0.0.1", port=args.port)
+                uvicorn.run(create_app(args.data), host=os.getenv("FACTU_HOST", "127.0.0.1"), port=args.port)
             return
         elif args.command == "lote2":
             from .lote2 import run_lote2
@@ -94,7 +94,7 @@ def main(argv=None):
                 import uvicorn
                 from .web import create_app
                 os.environ["ERP_URL"] = args.url
-                uvicorn.run(create_app(args.data), host="127.0.0.1", port=args.port)
+                uvicorn.run(create_app(args.data), host=os.getenv("FACTU_HOST", "127.0.0.1"), port=args.port)
             return
         elif args.command == "ingest":
             result = service.ingest(
@@ -131,7 +131,7 @@ def main(argv=None):
             import uvicorn
             from .web import create_app
 
-            uvicorn.run(create_app(args.data), host="127.0.0.1", port=args.port)
+            uvicorn.run(create_app(args.data), host=os.getenv("FACTU_HOST", "127.0.0.1"), port=args.port)
             return
         print(json.dumps(result, ensure_ascii=False, indent=2))
     except (ValueError, RuntimeError, OSError) as exc:

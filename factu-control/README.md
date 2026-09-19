@@ -311,7 +311,7 @@ El validador comprueba nombres exactos, unicidad, cobertura, valores permitidos 
 - OCR genérico, no perfecto. Escaneos borrosos, faxes, rotaciones o caracteres confusos pueden requerir revisión humana.
 - Extractor orientado a campos de factura ES/EN y pedidos `PO-año-número`. No hay extracción general de tablas/líneas, abonos complejos, varios tipos de IVA ni adaptación universal de formatos.
 - El LLM solo lee campos y siempre con evidencia literal validada; no hay orquestador multiagente. Si el proveedor cae, rate-limita o devuelve basura, la lectura degrada a OCR + consulta humana con aviso; el failover se demuestra retirando las credenciales.
-- No hay SSO, roles, cifrado de base de datos, almacenamiento WORM ni separación de tenants. No exponer a Internet ni usar datos reales sin endurecimiento.
+- No hay SSO, roles, cifrado de base de datos, almacenamiento WORM ni separación de tenants. No exponer a Internet ni usar datos reales sin endurecimiento. Única excepción asumida: la demo del pitch se publica por túnel como copia desechable del estado, con datos del reto ya públicos y sin acceso a la entrega.
 - El historial encadenado detecta modificaciones ordinarias; un administrador con acceso total puede reescribir base y cadena. Guardar el hash final fuera de la máquina reforzaría la evidencia.
 - «PAGAR» es coherencia con las fuentes registradas; no acredita autenticidad legal del PDF, cuenta bancaria o persona revisora.
 

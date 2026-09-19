@@ -87,8 +87,16 @@ def create_app(data_dir=None):
     service = Service(data_dir or os.environ.get("FACTU_DATA", "data"))
     app = FastAPI(title="FactU · Mesa de trabajo", version="0.10.0")
     app.state.service = service
+    # `FACTU_ALLOWED_HOSTS` (comma-separated) amplía la lista para despliegues detrás
+    # de un proxy/túnel; sin la variable el comportamiento es el de siempre.
+    default_hosts = ["127.0.0.1", "localhost", "testserver"]
+    extra_hosts = [
+        host.strip()
+        for host in os.environ.get("FACTU_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    ]
     app.add_middleware(
-        TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]
+        TrustedHostMiddleware, allowed_hosts=default_hosts + extra_hosts
     )
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
     templates = Jinja2Templates(directory=ROOT / "templates")

@@ -48,7 +48,7 @@ No confundir cobertura (500 decisiones) con precisión; automatización con acie
 
 La recuperación demostrada corresponde al ERP y al worker/OCR. No usamos proveedor LLM: no atribuimos al producto un failover generativo inexistente. Explicarlo al jurado y mostrar una caída real del conector o una interrupción del worker.
 
-Esta versión es local, sin roles/SSO ni endurecimiento para datos bancarios reales. No exponerla a Internet.
+Esta versión es local, sin roles/SSO ni endurecimiento para datos bancarios reales. No exponerla a Internet. La demo pública del pitch es la excepción declarada: copia desechable del estado, datos del reto ya públicos, sin acceso a la entrega ni a credenciales.
 
 ## Lista antes de enviar
 

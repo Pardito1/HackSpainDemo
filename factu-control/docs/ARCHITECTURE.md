@@ -86,4 +86,4 @@ Para nuevos layouts, ampliar extractores sobre el mismo contrato con evidencia y
 
 Para más volumen: medir cuello de botella, mover blobs a almacenamiento de objetos, SQLite a PostgreSQL, jobs a cola durable, workers de extracción independientes y un publicador de decisiones/duplicados transaccional. Mantener un único regulador de consultas al ERP. No multiplicar el tráfico del bridge por el número de workers. Este escalado es un plan, no infraestructura desplegada.
 
-No exponer esta versión fuera de localhost. SSO, RBAC, cifrado, retención, cuotas globales, sandbox de parsers, autenticidad de documentos, firma externa del historial y cumplimiento de licencias son trabajo previo a producción.
+No exponer esta versión fuera de localhost (excepción asumida: la demo del pitch, servida por túnel sobre una copia desechable del estado con datos ya públicos del reto). SSO, RBAC, cifrado, retención, cuotas globales, sandbox de parsers, autenticidad de documentos, firma externa del historial y cumplimiento de licencias son trabajo previo a producción.
