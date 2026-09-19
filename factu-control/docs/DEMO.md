@@ -63,7 +63,8 @@ del bloque: *el sistema te dice qué va a cambiar antes de que cambie nada*.
   fuera de maestro, duplicado no exacto o anotación manual. Un fallo técnico
   sigue siendo técnico, nunca se disfraza de `ESCALAR`.
 - No hay orquestador multiagente, ni SSO, ni WORM: no exponer a Internet ni
-  usar datos reales sin endurecimiento.
+  usar datos reales sin endurecimiento. El link público del pitch se asume en
+  voz alta como demo desechable (copia del estado, datos ya públicos del reto).
 
 ## 4:30–5:00 · Cierre
 

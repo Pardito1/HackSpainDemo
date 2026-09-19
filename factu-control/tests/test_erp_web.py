@@ -123,3 +123,40 @@ def test_ui_routes_csrf_and_local_host(bundle):
             ).status_code
             == 403
         )
+
+
+def test_cli_serve_binds_env_host(tmp_path, monkeypatch):
+    """`factu serve` respeta FACTU_HOST y por defecto se ata a 127.0.0.1."""
+    from factu import cli
+
+    calls = []
+
+    def fake_run(app, host, port):
+        calls.append({"host": host, "port": port})
+
+    monkeypatch.setattr("uvicorn.run", fake_run)
+
+    monkeypatch.delenv("FACTU_HOST", raising=False)
+    cli.main(["--data", str(tmp_path / "d1"), "serve", "--port", "9101"])
+    assert calls[-1] == {"host": "127.0.0.1", "port": 9101}
+
+    monkeypatch.setenv("FACTU_HOST", "0.0.0.0")
+    cli.main(["--data", str(tmp_path / "d2"), "serve", "--port", "9102"])
+    assert calls[-1] == {"host": "0.0.0.0", "port": 9102}
+
+
+def test_allowed_hosts_env(bundle, monkeypatch):
+    """La variable FACTU_ALLOWED_HOSTS amplía la lista de hosts aceptados."""
+    service, batch, _, _ = bundle
+    monkeypatch.setenv(
+        "FACTU_ALLOWED_HOSTS", "demo.example, otro.example ,"
+    )
+    app = create_app(service.store.root)
+    with TestClient(app) as client:
+        # Los hosts por defecto siguen aceptándose.
+        assert client.get("/", headers={"Host": "localhost"}).status_code == 200
+        # Los añadidos por la variable, también.
+        assert client.get("/", headers={"Host": "demo.example"}).status_code == 200
+        assert client.get("/", headers={"Host": "otro.example"}).status_code == 200
+        # Los que no aparecen siguen rechazados.
+        assert client.get("/", headers={"Host": "evil.example"}).status_code == 400
