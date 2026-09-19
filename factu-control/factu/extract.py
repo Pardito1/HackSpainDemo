@@ -9,6 +9,7 @@ from functools import lru_cache
 
 import pymupdf as fitz
 
+from . import modelo
 from .utils import clean, digest, identifier, invoice_date, money
 
 VERSION = "native-rapidocr-4"
@@ -272,6 +273,62 @@ def parse_fields(lines):
     return fields
 
 
+_NORMALIZADORES_MODELO = {
+    "invoice_number": invoice_number,
+    "supplier_nif": identifier,
+    "iban": identifier,
+    "order": identifier,
+    "date": invoice_date,
+    "base": modelo.normalizar_importe,
+    "tax_amount": modelo.normalizar_importe,
+    "total": modelo.normalizar_importe,
+    "tax_rate": modelo.normalizar_tipo,
+}
+
+
+def fusionar_modelo(fields, campos):
+    """El modelo solo aporta candidatos: sin OK previo resuelve; si contradice
+    una lectura OK, CONFLICT. Una lectura que no supera la validación entra
+    como INVALID con su motivo y la política la escalará."""
+    for field in FIELDS:
+        entrada = campos.get(field)
+        if not entrada or entrada.get("raw_value") is None:
+            continue
+        normalize = _NORMALIZADORES_MODELO[field]
+        raw, evidencia = str(entrada["raw_value"]), entrada.get("evidencia")
+        value, error = None, None
+        try:
+            value = str(normalize(raw))
+        except (ValueError, ArithmeticError) as exc:
+            error = str(exc)
+        if error is None:
+            motivo = modelo.validar_lectura_modelo(field, value, evidencia)
+            if motivo:
+                value, error = None, motivo
+        fact = fields[field]
+        fact["evidence"].append(
+            {
+                "raw_value": raw,
+                "value": value,
+                "error": error,
+                "page": entrada.get("page"),
+                "bbox": None,
+                "coordinate_space": None,
+                "method": "modelo",
+                "confidence": None,
+                "source_text": evidencia,
+                "transformations": ["modelo", normalize.__name__],
+            }
+        )
+        if fact["status"] == "OK":
+            if value is not None and value != fact["value"]:
+                fact["status"], fact["value"] = "CONFLICT", None
+        elif value is not None:
+            fact["status"], fact["value"] = "OK", value
+        elif fact["status"] == "MISSING":
+            fact["status"] = "INVALID"
+
+
 def extract_pdf(path, ocr=True):
     start = time.monotonic()
     pages, lines, warnings = [], [], []
@@ -319,6 +376,26 @@ def extract_pdf(path, ocr=True):
                     "needs_ocr": needs_ocr,
                 }
             )
+    fields = parse_fields(lines)
+    model_usage = None
+    pendientes = [p["number"] for p in pages if p["needs_ocr"]]
+    incompletos = [
+        f for f in FIELDS if f != "invoice_number" and fields[f]["status"] != "OK"
+    ]
+    if ocr and pendientes and incompletos:
+        lectura = modelo.leer_campos(path, pendientes)
+        if "error" in lectura:
+            warnings.append(
+                {
+                    "code": "MODELO_NO_DISPONIBLE",
+                    "message": lectura["error"]
+                    + (": " + lectura["detalle"] if lectura.get("detalle") else ""),
+                    "fields": incompletos,
+                }
+            )
+        else:
+            fusionar_modelo(fields, lectura["campos"])
+            model_usage = lectura["uso"]
     flagged = [
         {"page": l["page"], "bbox": l["bbox"], "text": l["text"]}
         for l in lines
@@ -331,12 +408,15 @@ def extract_pdf(path, ocr=True):
             re.I,
         )
     ]
-    return {
+    out = {
         "version": VERSION,
-        "fields": parse_fields(lines),
+        "fields": fields,
         "pages": pages,
         "warnings": warnings,
         "untrusted_instructions": flagged,
         "seconds": time.monotonic() - start,
         "engines": engine_versions(),
     }
+    if model_usage:
+        out["model_usage"] = model_usage
+    return out
