@@ -1,0 +1,501 @@
+file_id	result	origen	motivo
+2026-01-08_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-11_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-12_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-12_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-14_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-15_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-16_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-17_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-18_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-22_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-23_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-24_P009.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-25_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-26_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-26_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-27_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-28_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-28_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-30_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-30_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-01-31_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-04_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-05_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-05_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-05_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-07_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-07_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-09_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-12_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-15_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-19_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-22_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-22_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-23_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-25_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-25_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-02-27_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-0233-A_catering.pdf	ESCALAR	texto	R5b: otros ficheros con el mismo pedido: ['factura_41082.pdf']
+2026-03-01_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-01_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-03_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-03_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-05_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-07_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-08_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-09_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-10_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-11_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-11_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-16_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-16_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-17_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-17_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-19_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-19_P008.pdf	ESCALAR	texto	R6: extraccion incompleta: fecha_invalida
+2026-03-20_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-20_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-21_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-21_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-21_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-24_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-26_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-28_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-03-28_P002.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0476: PAGADA
+2026-04-03_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-06_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-06_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-07_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-08_P007.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0814: PAGADA
+2026-04-08_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-10_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-10_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-11_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-12_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-15_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-21_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-22_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-23_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-27_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-27_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-27_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-27_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-28_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-29_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-30_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-04-30_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-03_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-03_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-03_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-04_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-04_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-09_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-09_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-12_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-13_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-14_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-14_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-15_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-16_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-17_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-18_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-20_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-20_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-21_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-22_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-22_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-24_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-24_P009.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-26_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-28_P003.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0471: PAGADA
+2026-05-28_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-05-30_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-01_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-04_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-04_P006.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0803: PAGADA
+2026-06-05_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-06_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-06_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-07_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-08_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-10_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-12_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-13_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-16_P009.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-21_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-22_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-22_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-23_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-24_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-24_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-25_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-26_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-27_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-28_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-28_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-29_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-29_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-06-30_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-01_P009.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-02_P006.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-04_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-06_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-07_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-07_P007.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-08_P010.pdf	NO_PAGAR	texto	R1b: IBAN factura ES2702390806667122334455 vs maestro ES4414650100951704302211 | R2b: pedido PO-2026-0708 es del NIF B98455101, factura del NIF B98120774
+2026-07-09_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-10_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-12_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-13_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-14_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-14_P003.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-15_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-16_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-17_P010.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-20_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-22_P002.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-23_P001.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-28_P008.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-29_P004.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-29_P011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-07-31_P005.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-0811-B_catering.pdf	ESCALAR	texto	R2c: total factura 2920.10 vs importe pedido 2795.1 (tol 0.01) | R3b: total 2920.10 vs base+IVA 2795.10
+2026-14406_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-14500-C_informática.pdf	ESCALAR	texto	R2c: total factura 1819.00 vs importe pedido 1754.5 (tol 0.01) | R3b: total 1819.00 vs base+IVA 1754.50
+2026-15144_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-17547_suministros.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0475: PAGADA
+2026-22807_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-23904_construcciones.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-23919_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-24626_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-25603_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-37816_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-47946_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-51245_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-51936_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-54710_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-71213_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-79712_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-83338_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-85839_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-87003_construcciones.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-89511_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-91934_limpiezas.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-94906_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+2026-96909_suministros.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-2163_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-2201_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-2478_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-3011_suministros.pdf	ESCALAR	texto	R6: extraccion incompleta: iban_no_encontrado
+F26-3355_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-4013_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-5240_ofimática.pdf	ESCALAR	texto	R2c: total factura 4872.00 vs importe pedido 5082 (tol 0.01) | R3a: IVA 672.00 vs esperado 882.00 sobre base 4200.00 al 21%
+F26-5522_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-5989_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-6702_limpiezas.pdf	ESCALAR	texto	R2c: total factura 3538.00 vs importe pedido 3690.5 (tol 0.01) | R3a: IVA 488.00 vs esperado 640.50 sobre base 3050.00 al 21%
+F26-6964_ofimática.pdf	ESCALAR	texto	R2c: total factura 3480.00 vs importe pedido 3630 (tol 0.01) | R3a: IVA 480.00 vs esperado 630.00 sobre base 3000.00 al 21%
+F26-7261_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-7263_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-7728_limpiezas2.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-8497_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-8801_suministros.pdf	ESCALAR	texto	R2c: total factura 2750.00 vs importe pedido 3025 (tol 0.01) | R3a: IVA 250.00 vs esperado 525.00 sobre base 2500.00 al 21%
+F26-8812_electricidad.pdf	NO_PAGAR	texto	R1b: IBAN factura ES0221008877334600214488 vs maestro ES3520385778983000765410
+F26-8905_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9007_catering.pdf	NO_PAGAR	texto	R1b: IBAN factura ES1800815290070001234567 vs maestro ES4414650100951704302211 | R2b: pedido PO-2026-0808 es del NIF B96233419, factura del NIF B98120774
+F26-9012_electricidad.pdf	ESCALAR	texto	R2c: total factura 3248.00 vs importe pedido 3388 (tol 0.01) | R3a: IVA 448.00 vs esperado 588.00 sobre base 2800.00 al 21%
+F26-9180_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9252_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9300_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9628_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9655_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9865_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+F26-9887_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1016_papelería.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0474: PAGADA
+FA-1080_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1088_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1120_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1123_construcciones.pdf	ESCALAR	texto	R6: extraccion incompleta: fecha_invalida
+FA-1191_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1289_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1291_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1352_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1926_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-1943_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2116_mensajería.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0473: PAGADA
+FA-2195_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2212_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2332_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2434_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2477_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2508_consultoría.pdf	ESCALAR	texto	R1a: NIF B87654321 NO esta en el maestro
+FA-2670_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2892_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2965_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-2967_seguridad.pdf	ESCALAR	texto	R6: extraccion incompleta: fecha_invalida
+FA-3096_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3118_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3388_ofimática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3497_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3527_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3784_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3788_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-3939_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4125_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4290_mensajería.pdf	NO_PAGAR	texto	R1b: IBAN factura ES8721004433115088770011 vs maestro ES9368884400123588900142
+FA-4294_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4349_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4385_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4488_transportes.pdf	ESCALAR	texto	R2c: total factura 2 vs importe pedido 2637.8 (tol 0.01) | R3b: total 2 vs base+IVA 2637.80
+FA-4634_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4666_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4673_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4813_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4816_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4819_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-4962_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-5044_mensajería2.pdf	NO_PAGAR	texto	R1b: IBAN factura ES3900815290070012345678 vs maestro ES9368884400123588900142
+FA-5077_electricidad.pdf	ESCALAR	texto	R2c: total factura 12874.40 vs importe pedido 12847.4 (tol 0.01)
+FA-5197_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-5377_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-5418_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-5590_ofimática.pdf	ESCALAR	texto	R2c: total factura 2900.00 vs importe pedido 3025 (tol 0.01) | R3a: IVA 400.00 vs esperado 525.00 sobre base 2500.00 al 21%
+FA-5633_transportes.pdf	NO_PAGAR	texto	R1b: IBAN factura ES9100754477116000219042 vs maestro ES7621000813610123456789
+FA-5712_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-5753_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-5855_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6007_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6187_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6321_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6350_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6734_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6886_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-6909_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7218_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7263_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7311_transportes.pdf	NO_PAGAR	texto	R1b: IBAN factura ES9100754477116000219042 vs maestro ES7621000813610123456789
+FA-7344_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7432_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7441_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7514_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7634_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7712_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7792_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7878_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-7983_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8018_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8046_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8091_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8163_mensajería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8245_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8437_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8488_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8496_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8528_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8613_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8627_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8635_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8694_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8720_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8728_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8766_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8929_electricidad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8954_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8987_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-8996_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9034_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9104_electricidad.pdf	NO_PAGAR	texto	R1b: IBAN factura ES1400496170682100043399 vs maestro ES3520385778983000765410
+FA-9145_papelería.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9322_informática.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9455_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9459_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9507_catering.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9517_transportes.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+FA-9810_seguridad.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+copia_2026_0518.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+factura_0088.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0102.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0279.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0287.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0292.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0323.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0341.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0381.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0396.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0524.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0722.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0776.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0893.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_0998.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1045.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1162.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1217.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1298.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1457.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1529.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1556.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1582.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_15828.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1607.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1693.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1697.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1796.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_1936.pdf	ESCALAR	texto	R2c: total factura 8845.10 vs importe pedido 8100.1 (tol 0.01)
+factura_2018.pdf	ESCALAR	texto	R2c: total factura 4295.50 vs importe pedido 4295.1 (tol 0.01)
+factura_2026.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2052.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2053.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2067.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2087.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2088.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2166.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_22612.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2450.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2647.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2792.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2875.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2886.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_2952.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3095.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3164.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3184.pdf	ESCALAR	texto	R2c: total factura 10805.30 vs importe pedido 10125.3 (tol 0.01)
+factura_3223.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3421.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3561.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3570.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3602.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_36166.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_3888.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4024.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4067.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_41082.pdf	ESCALAR	texto	R5b: otros ficheros con el mismo pedido: ['2026-0233-A_catering.pdf']
+factura_4124.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4185.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4210.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4218.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4273.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4427.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4485.pdf	ESCALAR	texto	R1a: NIF B41908877 NO esta en el maestro
+factura_4522.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4619.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0472: PAGADA
+factura_4635.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4698.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4784.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_4845.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5011.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_50310.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5206.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5231.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5269.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5277.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_52876.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5311.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5347.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5349.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5391.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5401.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5402.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5512.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5518.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5604.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5659.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5705.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5819.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5856.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5888.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_5911.pdf	NO_PAGAR	texto	R5a: estado ERP del pedido PO-2026-0703: PAGADA
+factura_5986.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6016.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6021.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6041.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6105.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6146.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6179.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6197.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6209.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6297.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6313.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6374.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6407.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6436.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_65982.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6612.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6663.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6707.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6721.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6734.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_6806.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7023.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7034.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7087.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7120.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7209.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7265.pdf	ESCALAR	texto	R1a: NIF B41908877 NO esta en el maestro
+factura_7294.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7295.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7341.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7381.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7394.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7397.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7474.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7500.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7521.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7583.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7624.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7789.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7799.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7827.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_7835.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8043.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8101.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8130.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8225.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8322.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8358.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8429.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8508.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8515.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8764.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8785.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8801.pdf	ESCALAR	texto	R2c: total factura 7139.00 vs importe pedido 6540.9 (tol 0.01)
+factura_8848.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_8928.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9031.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9052.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_91242.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9286.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9473.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9527.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9534.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9539.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9590.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_9696.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+factura_97183.pdf	PAGAR	texto	todas las comprobaciones de la norma pasan
+fax_2026_0411.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+reimpresion_0712.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_001.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_002.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_003.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_004.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_005.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_006.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_007.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_008.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_009.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_010.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_011.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_012.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_013.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_014.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_015.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_016.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_017.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_018.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_021.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_022.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_023.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_025.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_026.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_027.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_028.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
+scan_029.pdf	ESCALAR	texto	R6: extraccion incompleta: sin_texto
