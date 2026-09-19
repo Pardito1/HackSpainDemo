@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 import threading
 import time
@@ -84,7 +85,7 @@ class SupplierResponseRequest(BaseModel):
 
 def create_app(data_dir=None):
     service = Service(data_dir or os.environ.get("FACTU_DATA", "data"))
-    app = FastAPI(title="FactU · Mesa de trabajo", version="0.9.2")
+    app = FastAPI(title="FactU · Mesa de trabajo", version="0.10.0")
     app.state.service = service
     app.add_middleware(
         TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]
@@ -168,6 +169,29 @@ def create_app(data_dir=None):
             except BaseException as exc:
                 state["error"] = str(exc)
         return state
+
+    def erp_progress(batch_id):
+        # Reconstruido a partir de los eventos de auditoría que ya emite ERPClient,
+        # no de un estado aparte: lo que se ve en vivo es lo mismo que queda registrado.
+        rows = service.store.all(
+            "SELECT kind,payload FROM events WHERE batch_id=? AND kind IN ('erp_request','erp_pages_known') "
+            "ORDER BY id DESC LIMIT 500",
+            (batch_id,),
+        )
+        pages = total = page = retries = None
+        for row in rows:
+            payload = json.loads(row["payload"])
+            if row["kind"] == "erp_pages_known":
+                if pages is None:
+                    pages, total = payload["pages"], payload["total"]
+                continue
+            if payload.get("attempt", 1) > 1:
+                retries = (retries or 0) + 1
+            if page is None and payload.get("status") == 200:
+                match = re.search(r"pagina=(\d+)", payload.get("path", ""))
+                if match:
+                    page = int(match.group(1))
+        return {"page": page, "pages": pages, "total": total, "retries": retries}
 
     def _amount(d):
         # El total llega como texto ("9221.75") porque Decimal no es JSON-serializable;
@@ -331,6 +355,8 @@ def create_app(data_dir=None):
             "active": bool(task and not task["future"].done()),
             "task": task["task"] if task else None,
         }
+        if run["active"] and run["task"] == "ERP":
+            run["erp"] = erp_progress(batch_id)
         if task and task["future"].done():
             try:
                 run["result"] = task["future"].result()

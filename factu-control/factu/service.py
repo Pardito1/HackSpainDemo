@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import inspect
 import json
 import os
 import secrets
@@ -30,6 +31,45 @@ from .utils import (
     now,
 )
 from .workspace import WorkspaceMixin
+
+
+# The extraction route is immutable per batch.  A profile is deliberately not
+# inferred from a filename or current feature flag: re-running an old batch
+# must retain the method that produced its original evidence.
+EXTRACTION_PROFILES = frozenset(("standard", "lote2_ocr_v1"))
+
+
+def validate_extraction_profile(profile):
+    if not isinstance(profile, str) or profile not in EXTRACTION_PROFILES:
+        allowed = ", ".join(sorted(EXTRACTION_PROFILES))
+        raise ValueError(f"Perfil de extracción no admitido. Usa: {allowed}")
+    return profile
+
+
+def extraction_version_for(profile):
+    """Return the version of the route actually selected for this batch."""
+    profile = validate_extraction_profile(profile)
+    if profile == "lote2_ocr_v1":
+        from .lote2_ocr import VERSION as lote2_version
+
+        return lote2_version
+    return VERSION
+
+
+def extraction_cache_identity_for(profile):
+    """Return every configuration value that can alter extracted evidence.
+
+    A batch records an immutable extraction *profile*, but the Lote 2 route
+    also has a bounded OCR mode.  Including that mode in the cache key avoids
+    accidentally presenting evidence created with ``defects`` as if it had
+    been created with the more exhaustive ``always`` route (or vice versa).
+    """
+    profile = validate_extraction_profile(profile)
+    if profile == "lote2_ocr_v1":
+        from .lote2_ocr import cache_identity
+
+        return cache_identity()
+    return {"profile": profile, "version": VERSION}
 
 
 def exclusive(function):
@@ -101,7 +141,18 @@ class Service(WorkspaceMixin):
         return self.store.put_source("policy", policy)
 
     @exclusive
-    def ingest(self, folder, workbook, name, as_of, policy_path=None, actor="equipo"):
+    def ingest(
+        self,
+        folder,
+        workbook,
+        name,
+        as_of,
+        policy_path=None,
+        actor="equipo",
+        profile="standard",
+        master_payload=None,
+    ):
+        profile = validate_extraction_profile(profile)
         date.fromisoformat(as_of)
         files = sorted(
             p
@@ -111,7 +162,12 @@ class Service(WorkspaceMixin):
         if not files or len({file_name(p.name) for p in files}) != len(files):
             raise ValueError("El lote debe contener PDFs y nombres de archivo únicos")
         workbook = Path(workbook)
-        master = read_master(workbook)
+        workbook_bytes = workbook.read_bytes()
+        master = copy.deepcopy(master_payload) if master_payload is not None else read_master(workbook)
+        if not isinstance(master, dict) or not {"suppliers", "orders", "rules", "sha256"}.issubset(master):
+            raise ValueError("El maestro compuesto no tiene la estructura esperada")
+        if master["sha256"] != digest(workbook_bytes):
+            raise ValueError("El maestro compuesto no corresponde al Excel original registrado")
         # No se puede evaluar "hoy" antes del último pedido conocido: con un
         # as_of anterior toda factura posterior parecería futura y escalaría.
         last_order = master.get("last_order_date")
@@ -120,7 +176,7 @@ class Service(WorkspaceMixin):
                 f"as_of {as_of} es anterior al último pedido del maestro "
                 f"({last_order}); revisa la fecha de referencia"
             )
-        master["blob"] = str(self.store.blob(workbook.read_bytes(), ".xlsx"))
+        master["blob"] = str(self.store.blob(workbook_bytes, ".xlsx"))
         master_id = self.store.put_source("master", master)
         policy_id = self.policy(policy_path, actor)
         batch_id = secrets.token_hex(6)
@@ -140,8 +196,10 @@ class Service(WorkspaceMixin):
                 "UPDATE documents SET latest_decision=NULL,state=CASE WHEN extraction IS NOT NULL THEN 'EXTRACTED' ELSE state END"
             )
             db.execute(
-                "INSERT INTO batches VALUES(?,?,?,?,?,?,?)",
-                (batch_id, name, master_id, policy_id, None, as_of, now()),
+                """INSERT INTO batches(
+                    id,name,master_id,policy_id,snapshot_id,as_of,extraction_profile,created
+                ) VALUES(?,?,?,?,?,?,?,?)""",
+                (batch_id, name, master_id, policy_id, None, as_of, profile, now()),
             )
             for doc_id, filename, sha, path in manifest:
                 db.execute(
@@ -155,6 +213,7 @@ class Service(WorkspaceMixin):
                     "count": len(manifest),
                     "master_id": master_id,
                     "policy_id": policy_id,
+                    "extraction_profile": profile,
                     "manifest": [{"file_id": m[1], "sha256": m[2]} for m in manifest],
                 },
                 batch_id=batch_id,
@@ -276,7 +335,10 @@ class Service(WorkspaceMixin):
 
     @exclusive
     def process(self, batch_id, ocr=True, limit=None, fault_after=None):
-        self.batch(batch_id)
+        batch = self.batch(batch_id)
+        profile = validate_extraction_profile(batch.get("extraction_profile", "standard"))
+        extractor_version = extraction_version_for(profile)
+        extractor_cache_identity = extraction_cache_identity_for(profile)
         modelo.reiniciar_circuito()
         started = time.monotonic()
         count = 0
@@ -287,9 +349,11 @@ class Service(WorkspaceMixin):
             key = digest(
                 {
                     "sha256": job["sha256"],
-                    "extractor": VERSION,
+                    "extractor": extractor_version,
                     "engines": engine_versions(),
                     "ocr": ocr,
+                    "profile": profile,
+                    "profile_config": extractor_cache_identity,
                 }
             )
             cached = self.store.one(
@@ -299,11 +363,22 @@ class Service(WorkspaceMixin):
             try:
                 if digest(Path(job["path"]).read_bytes()) != job["sha256"]:
                     raise ValueError("El PDF almacenado ha sido alterado; restaura el original")
-                extraction = (
-                    json.loads(cached["payload"])
-                    if cached
-                    else extract_pdf(job["path"], ocr=ocr)
-                )
+                if cached:
+                    extraction = json.loads(cached["payload"])
+                else:
+                    # Some old test doubles predate the explicit profile
+                    # argument.  Production extractors must receive it; the
+                    # compatibility branch only keeps those local doubles
+                    # useful while the route is migrated.
+                    parameters = inspect.signature(extract_pdf).parameters.values()
+                    supports_profile = (
+                        "profile" in inspect.signature(extract_pdf).parameters
+                        or any(p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters)
+                    )
+                    kwargs = {"ocr": ocr}
+                    if supports_profile:
+                        kwargs["profile"] = profile
+                    extraction = extract_pdf(job["path"], **kwargs)
                 # Fault injection occurs after extraction, before the transaction. It leaves the lease recoverable.
                 if fault_after is not None and count >= fault_after:
                     raise KeyboardInterrupt(
@@ -338,10 +413,13 @@ class Service(WorkspaceMixin):
                         batch_id,
                         {
                             "cache_hit": bool(cached),
+                            "profile": profile,
                             "pages": len(extraction["pages"]),
                             "engines": extraction["engines"],
                             "ocr_used": any(
                                 p.get("method") == "rapidocr-onnxruntime"
+                                or p.get("method") == "rapidocr-lote2"
+                                or p.get("witness_method") == "rapidocr-lote2"
                                 for p in extraction["pages"]
                             ),
                         },
@@ -358,6 +436,7 @@ class Service(WorkspaceMixin):
                             {
                                 "backend": uso.get("backend"),
                                 "modelo": uso.get("modelo"),
+                                "profile": profile,
                                 "tokens_in": uso.get("tokens_in"),
                                 "tokens_out": uso.get("tokens_out"),
                                 "neurons": uso.get("neurons"),
@@ -370,7 +449,8 @@ class Service(WorkspaceMixin):
                         "extracted",
                         {
                             "cache_hit": bool(cached),
-                            "version": VERSION,
+                            "version": extractor_version,
+                            "profile": profile,
                             "warnings": extraction["warnings"],
                         },
                         job["document_id"],
@@ -421,6 +501,7 @@ class Service(WorkspaceMixin):
                 "processed": count,
                 "wall_seconds": time.monotonic() - started,
                 "ocr": ocr,
+                "profile": profile,
             },
             batch_id=batch_id,
         )
@@ -506,6 +587,7 @@ class Service(WorkspaceMixin):
             "policy_id": batch["policy_id"],
             "document_sha256": document["sha256"],
             "extraction_version": extraction["version"],
+            "extraction_profile": batch.get("extraction_profile", "standard"),
             "as_of": batch["as_of"],
             "code_sha256": self.code_sha256,
         }
@@ -541,7 +623,12 @@ class Service(WorkspaceMixin):
     @exclusive
     def evaluate_batch(self, batch_id, document_ids=None):
         batch = self.batch(batch_id)
-        pending = self.store.one("SELECT count(*) n FROM jobs WHERE state!='DONE'")["n"]
+        pending = self.store.one(
+            """SELECT count(*) n FROM jobs j
+               JOIN documents d ON d.id=j.document_id
+               WHERE d.batch_id=? AND j.state!='DONE'""",
+            (batch_id,),
+        )["n"]
         if pending:
             return {"decisions": 0, "pending_jobs": pending}
         if not batch["snapshot_id"]:
@@ -853,7 +940,8 @@ class Service(WorkspaceMixin):
     @exclusive
     def reextract(self, batch_id):
         """Explicitly create new extractions without erasing history or cached evidence."""
-        self.batch(batch_id)
+        batch = self.batch(batch_id)
+        profile = validate_extraction_profile(batch.get("extraction_profile", "standard"))
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute(
@@ -867,7 +955,11 @@ class Service(WorkspaceMixin):
             ).rowcount
             self.store.event(
                 "reextraction_requested",
-                {"count": changed, "extractor_version": VERSION},
+                {
+                    "count": changed,
+                    "extractor_version": extraction_version_for(profile),
+                    "profile": profile,
+                },
                 batch_id=batch_id,
                 db=db,
             )

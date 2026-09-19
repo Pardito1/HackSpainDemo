@@ -1,0 +1,15 @@
+{
+  "schema_version": "factu-lote2-ocr-splits-v1",
+  "purpose": "Partición retrospectiva interna agrupada por proveedor. Los template_id actuales se derivan del proveedor y no acreditan independencia de layout visual. Ningún proveedor aparece en más de un split; test es holdout de desarrollo, no validación ciega ni privada.",
+  "splits": {
+    "train": [
+      "2026-08-05_P005.pdf", "2026-08-09_P001.pdf", "2026-27450_suministros.pdf", "2026-72452_suministros.pdf", "FA-6217_transportes.pdf", "e01_P001.pdf", "e02_P002.pdf", "e03_P002.pdf", "e04_P003.pdf", "e18_P001.pdf", "factura_1210.pdf", "factura_1221.pdf", "factura_7036.pdf", "factura_7495.pdf", "factura_9660.pdf"
+    ],
+    "validation": [
+      "2026-08-22_P010.pdf", "2026-08-26_P010.pdf", "2026-08-27_P007.pdf", "2026-42111_construcciones.pdf", "FA-3955_electricidad.pdf", "FA-5103_electricidad.pdf", "FA-7357_papelería.pdf", "FA-7532_informática.pdf", "e07_P006.pdf", "e10_P006.pdf", "e12_P010.pdf", "e17_P007.pdf", "factura_6932.pdf", "factura_6990.pdf", "factura_7713.pdf"
+    ],
+    "test": [
+      "e05_P004.pdf", "e06_P013.pdf", "e08_P012.pdf", "e09_P015.pdf", "e11_P011.pdf", "e13_P014.pdf", "e14_P004.pdf", "e15_P012.pdf", "e16_P011.pdf", "factura_2923.pdf"
+    ]
+  }
+}

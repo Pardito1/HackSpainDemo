@@ -1,8 +1,25 @@
-# Cumplimiento y pendientes · v0.7.0
+# Cumplimiento y pendientes · v0.10.0
 
-Actualización vigente 0.7.0: 500 facturas comprobadas, 273 PAGAR / 9 NO_PAGAR / 218 ESCALAR y cero pendientes de proceso. Se incorporan dos pedidos del histórico parcial, sin coincidencias en el lote. 153 pruebas Python y 6 JavaScript pasan. Auditoría válida, 500 páginas de expediente responden correctamente y exportación con 500 registros únicos. PDF de arquitectura actualizado a 0.7.0. Siguen pendientes lote 2 oficial y validación privada; no es una certificación APTO. Las cifras siguientes describen versiones anteriores.
+## Estado actual · Lote 2 público
 
-Actualización vigente: 500 facturas procesadas con ERP y OCR habilitado; 273 PAGAR, 9 NO_PAGAR, 218 ESCALAR, cero pendientes. No se asume EUR, motivo arriba y auditoría separada. 127 pruebas Python y 4 JavaScript pasan; plan PDF 0.4.0 de cuatro páginas. Sigue pendiente el lote 2 oficial y la validación privada. Las cifras y descripciones de las versiones anteriores se conservan debajo como histórico, no como resultados actuales.
+El runner dedicado valida los 40 PDFs oficiales, el Excel v7, los dos CSV
+incrementales y la actualización ERP antes de publicar resultados. La ejecución
+end-to-end contra el bridge oficial produjo 19 `PAGAR`, 1 `NO_PAGAR` y 20
+`ESCALAR`, con auditoría válida. El resultado es un corte local de fuentes,
+política v3 y fecha `2026-09-19`; no es una certificación APTO ni precisión
+frente a la referencia privada.
+
+El perfil `lote2_ocr_v1` está aislado del lote de 500. Se evaluó como perfil de
+extracción completo frente a transcripciones manuales internas revisadas: 99,0
+% de exact match macro de campos en un holdout interno agrupado de 10
+documentos y 8/10 expedientes con campos de riesgo autoaceptados y correctos
+frente a etiqueta. Es una división retrospectiva por proveedor, no validación
+privada ni evidencia independiente de layout visual. No se vende como accuracy
+de pagos ni de RapidOCR aislado. Moneda ausente/ambigua, no-EUR sin FX
+trazable, inconsistencias, anotaciones y texto no fiable se escalan.
+
+**279 pruebas Python pasan** (dos avisos de deprecación de dependencias). Las
+cifras y descripciones que siguen son históricas de versiones anteriores.
 
 ## Histórico de versiones anteriores
 
@@ -16,15 +33,15 @@ Correcciones verificadas: campo OCR contiguo, etiquetas OCR, errores de Excel/JS
 | PAGAR / NO_PAGAR / ESCALAR | Motor determinista con política de equipo y respuesta humana explícita; no ejecuta pagos |
 | Preguntar ante duda | Bandeja de consultas, preguntas, evidencia, respuesta con motivo y caducidad si cambian hechos |
 | Trazabilidad / observabilidad (20) | Original, bbox/celda, reglas, versiones, historial, intentos, errores, tiempos y costes |
-| Producto / arquitectura / ADRs (35) | App local, documentación de lo implementado y cinco ADRs en albertitos_plan.pdf |
+| Producto / arquitectura / ADRs (35) | App local, arquitectura y seis ADRs en Markdown; `docs/albertitos_plan.pdf` v0.10.0 ya está generado y debe conservarse junto al código que lo reproduce |
 | Escala / coste (25) | Benchmark extremo a extremo con ERP normal, hardware/RSS, fórmula editable de coste y límites; un worker real |
 | Resiliencia (10) | Persistencia, reintentos, leases, idempotencia, recuperación y exportación bloqueada ante pendientes |
 | Ejecución (10) | Interfaz editorial orientada a tareas, español claro, filtros, consulta, evidencia y cambios |
 | Cambio de dato en defensa | Vista previa de impacto y reproceso selectivo sin OCR; pruebas de afectados/no afectados y respuesta obsoleta |
-| +40 facturas oficiales | Pendiente de recibir/procesar. Existe prueba sintética de 40 documentos, no es el lote oficial |
+| +40 facturas oficiales | Implementado: runner de 40 PDFs, perfil OCR separado, fuentes incrementales versionadas y ejecución contra bridge oficial |
 | Bonus (+10) | Borradores de consulta por proveedor implementados; no cuentan como aceptación del jurado ni ahorro medido |
-| Dos JSONL + plan en repo separado | Exportador y validador disponibles. Falta lote 2; no se ha publicado ni presentado una entrega |
-| APTO / accuracy | Desconocidos: solo el verificador privado puede acreditar elegibilidad; falta muestra etiquetada independiente |
+| Dos JSONL + plan en repo separado | Exportador y validador disponibles; exportar desde el estado auditado e incluir el PDF v0.10.0 ya generado |
+| APTO / accuracy | APTO sigue desconocido: solo el verificador privado puede acreditarlo. Hay métrica interna de extracción Lote 2, no precisión de pagos |
 
 ## Preparación de la defensa
 
@@ -37,7 +54,7 @@ Esta versión es local, sin roles/SSO ni endurecimiento para datos bancarios rea
 ## Lista antes de enviar
 
 1. Validar políticas y revisar una muestra independiente más escalados críticos.
-2. Incorporar lote 2/ERP/norma con versiones, regresiones y auditoría del impacto.
-3. Exportar ambos lotes; actualizar plan con mediciones finales.
+2. Revisar todos los escalados críticos del Lote 2 y una muestra independiente de `PAGAR` antes de exportar.
+3. Exportar ambos lotes e incluir `albertitos_plan.pdf` v0.10.0 ya regenerado (solo se regenera si cambian código, métricas o ADRs).
 4. Ejecutar validate_submission.py. Solo comprueba estructura/cobertura; no referencia privada.
 5. Publicar por decisión del equipo un repositorio de resultados separado con exactamente los tres archivos y compartir teamId/URL a tiempo.

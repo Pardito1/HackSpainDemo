@@ -379,7 +379,8 @@ def test_pedido_solo_del_modelo_no_produce_no_pagar(facts):
     decision = evaluate(solo_modelo, master, pagado, policy, "2026-09-19")
     assert decision["result"] == "ESCALAR"
     assert any(
-        "lo leyó el modelo y el ERP lo da por pagado" in q for q in decision["questions"]
+        "lo leyó un OCR o modelo y el ERP lo da por pagado" in q
+        for q in decision["questions"]
     )
 
 

@@ -6,6 +6,14 @@ Actualización 0.3 de ADR-01/02/04/05: las instrucciones sospechosas detectadas 
 
 Actualización 0.4.0: no se asume moneda cuando no está impresa. Se conserva la ausencia y se solicita confirmación con autor, motivo y fuente; el valor humano no se presenta como leído. La interfaz de Alberto se separa de la auditoría técnica sin eliminar evidencia ni añadir una falsa barrera de permisos. Evidencia: `test_currency_and_alberto_ui.py` y `test_lote1_runner.py`. Trade-off aceptado: más consultas (218 en el lote medido) a cambio de no inventar divisas.
 
+Actualización 0.10.0: Lote 2 usa el perfil aislado `lote2_ocr_v1`, con
+RapidOCR como segundo testigo local cuando la lectura nativa tiene defectos.
+No se asume EUR por idioma/país y las divisas extranjeras se conservan sin
+convertir mientras no exista FX trazable. El ERP puede exponer historial del
+mismo pedido: se conserva entero y solo se usa su asiento más reciente si es
+único y consistente. Evidencia: `test_lote2_ocr.py`, `test_lote2_runner.py`,
+`test_policy.py` y `docs/LOTE2-OCR-EVALUACION.md`.
+
 ## ADR-01 · Reglas explícitas y abstención; sin decisor LLM
 
 Actualización 0.7 de ADR-01/03/05: se contrasta el ID completo de pedido con `Pedidos_2025_OLD`. Alternativas descartadas: ignorar el histórico o rechazar por importe coincidente. Se elige alerta revisable con celdas de origen, sin confundir un archivo parcial de dos pedidos con un registro de pagos. La vista previa invalida únicamente dependencias históricas coincidentes; duplicados entre lotes se indexan una vez por comparación. Alberto puede resolver la alerta con evidencia y confirmación expresa; la aplicación no autentica al revisor. Evidencia: `test_history_and_sources_ui.py` y comprobación del lote de 500 sin repetir OCR. Consecuencia aceptada: más consultas si aparecen coincidencias, y cobertura limitada al histórico aportado.
@@ -69,3 +77,39 @@ Actualización 0.7 de ADR-01/03/05: se contrasta el ID completo de pedido con `P
 **Consecuencias:** resolución auditable, con coste humano declarado. No sustituye identidad autenticada ni prueba automáticamente la veracidad de una referencia aportada. No ejecuta pagos. La mejora adicional prepara borradores por proveedor con preguntas y expedientes; no envía ni aplica decisiones masivas.
 
 **Evidencia:** test_workspace.py comprueba caducidad por cambios, confirmaciones obsoletas, restricciones de PAGAR, conservación selectiva, borrador descargable y auditoría. Tests de corrección no destructiva, CSRF/Host/origen. La demo muestra preguntas aún pendientes tras corregir una lectura.
+
+## ADR-06 · Perfil OCR específico, evaluado y acotado para Lote 2
+
+**Contexto:** los 40 PDFs del segundo lote introducen idiomas, monedas y
+formas de manipulación que no deben cambiar el comportamiento ya comprobado
+del lote de 500. Forzar OCR a todo encarece y puede reemplazar texto nativo
+bueno; aceptar cualquier lectura OCR aumentaría falsos pagos.
+
+**Alternativas:** usar el extractor estándar sin adaptación; mandar los 40
+PDFs a un servicio cloud; reentrenar un modelo con 40 ejemplos; o introducir
+un perfil local separado con evaluación de etiquetas y abstención.
+
+**Decisión:** última opción. `lote2_ocr_v1` combina PyMuPDF y RapidOCR/ONNX
+local como segundo testigo cuando hay defecto crítico; en el modo `defects`
+puede recorrer todas las páginas si falta un campo crítico no monetario.
+Preserva ambos candidatos y sus coordenadas, y añade parsing de etiquetas
+multilingües/ISO. La clave de caché incluye perfil, versión, modo y umbrales.
+Las anotaciones/tachones y los conflictos bloquean `PAGAR`; el código de
+política sigue siendo el único que decide. La evaluación es una división
+retrospectiva agrupada por proveedor; no presenta extracción como una medición
+de pago ni como validación privada.
+
+**Consecuencias:** más cobertura local, sin enviar facturas a terceros y sin
+regresar Lote 1; a cambio, no se afirma fine-tuning ni generalización universal.
+El holdout interno agrupado es pequeño (10 documentos), no es ciego y debe
+repetirse ante un lote oculto/nuevo antes de mover umbrales. Los `template_id`
+del lote público son derivados de proveedor, no evidencia independiente de
+layout. Las monedas no EUR se extraen pero v3 las escala hasta que exista una
+política FX versionada.
+
+**Evidencia:** `scripts/evaluate_lote2_ocr.py`, etiquetas/splits versionados y
+el informe con 99,0 % exact match macro de campos en el holdout interno
+agrupado, 8/10 expedientes con campos de riesgo autoaceptados y correctos
+frente a etiqueta, 31/38 de cobertura segura elegible y 31/40 (77,50 %) sobre
+el lote completo. La ejecución E2E guarda 19 `PAGAR`, 1 `NO_PAGAR`, 20
+`ESCALAR` y auditoría íntegra; no se vende ese reparto como accuracy.

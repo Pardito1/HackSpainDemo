@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const source=fs.readFileSync(new URL('../factu/static/app.js',import.meta.url),'utf8');
 function client(fetch){
-  const sandbox={fetch,FormData,document:{querySelector:()=>({content:'test'})}};
+  const sandbox={fetch,FormData,document:{querySelector:()=>({content:'test'}),getElementById:()=>null}};
   vm.runInNewContext(source.slice(0,source.indexOf("document.querySelectorAll"))+';this.callAPI=api;',sandbox);
   return sandbox.callAPI;
 }

@@ -11,7 +11,8 @@ from .utils import canonical, digest, now
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS sources(id TEXT PRIMARY KEY, kind TEXT NOT NULL, payload TEXT NOT NULL, created TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS batches(id TEXT PRIMARY KEY, name TEXT NOT NULL, master_id TEXT NOT NULL REFERENCES sources(id),
- policy_id TEXT NOT NULL REFERENCES sources(id), snapshot_id TEXT REFERENCES sources(id), as_of TEXT NOT NULL, created TEXT NOT NULL);
+ policy_id TEXT NOT NULL REFERENCES sources(id), snapshot_id TEXT REFERENCES sources(id), as_of TEXT NOT NULL,
+ extraction_profile TEXT NOT NULL DEFAULT 'standard', created TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS documents(id TEXT PRIMARY KEY, batch_id TEXT NOT NULL REFERENCES batches(id),
  file_id TEXT NOT NULL, sha256 TEXT NOT NULL, path TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'RECEIVED',
  extraction TEXT, latest_decision INTEGER, created TEXT NOT NULL, UNIQUE(batch_id,file_id));
@@ -56,12 +57,20 @@ class Store:
         self.path = legacy if legacy.exists() else current
         with self.connect() as db:
             db.executescript(SCHEMA)
-            # Additive migration for a base created before retraction existed;
-            # CREATE TABLE IF NOT EXISTS does not add columns to an old table.
+            # Additive migrations: CREATE TABLE IF NOT EXISTS does not add
+            # columns to an existing local desk.  A profile belongs to the
+            # batch, rather than to the global installation, so an initial
+            # batch and Lote 2 can be replayed together without changing each
+            # other's extraction path.
             existing = {r[1] for r in db.execute("PRAGMA table_info(human_decisions)")}
             for column in ("retracted_at", "retracted_by", "retracted_reason"):
                 if column not in existing:
                     db.execute(f"ALTER TABLE human_decisions ADD COLUMN {column} TEXT")
+            batch_columns = {r[1] for r in db.execute("PRAGMA table_info(batches)")}
+            if "extraction_profile" not in batch_columns:
+                db.execute(
+                    "ALTER TABLE batches ADD COLUMN extraction_profile TEXT NOT NULL DEFAULT 'standard'"
+                )
         token_path = self.root / ".csrf-token"
         try:
             with token_path.open("x") as handle:

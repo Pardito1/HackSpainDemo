@@ -9,7 +9,7 @@ from functools import lru_cache
 
 import pymupdf as fitz
 
-from . import modelo
+from . import lote2_ocr, modelo
 from .utils import (
     DATE_WORDS,
     clean,
@@ -450,7 +450,24 @@ def fusionar_modelo(fields, campos):
             fact["status"] = "INVALID"
 
 
-def extract_pdf(path, ocr=True):
+def extract_pdf(path, ocr=True, profile="standard"):
+    """Extrae una factura con el perfil indicado.
+
+    ``standard`` conserva exactamente la ruta histórica (texto nativo,
+    RapidOCR en páginas que lo necesitan y modelo opcional). El segundo lote
+    usa una ruta separada y explícita: texto nativo + RapidOCR como testigo,
+    sin enviar el documento al proveedor de modelo ni cambiar el comportamiento
+    de los lotes ya procesados.
+    """
+    if profile not in {"standard", lote2_ocr.PROFILE}:
+        raise ValueError("Perfil de extracción no soportado: " + str(profile))
+    if profile == lote2_ocr.PROFILE:
+        return lote2_ocr.extract_lote2_pdf(
+            path,
+            ocr=ocr,
+            ocr_page=ocr_page,
+            local_engines=_engines_locales,
+        )
     start = time.monotonic()
     pages, lines, warnings = [], [], []
     try:

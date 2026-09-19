@@ -2,7 +2,7 @@ import copy
 from decimal import Decimal
 import pytest
 from factu.utils import money, identifier, invoice_date, iban_checksum
-from factu.policy import evaluate, validate_policy
+from factu.policy import evaluate, resolve_erp_history, validate_policy
 from factu.extract import extract_pdf
 from conftest import make_pdf, IBAN
 
@@ -54,6 +54,156 @@ def test_no_pagar_confirmed_paid(facts):
     assert decision(facts)["result"] == "NO_PAGAR"
 
 
+def test_erp_history_uses_unique_latest_record_and_preserves_evidence(facts):
+    extraction, master, snapshot, policy = copy.deepcopy(facts)
+    previous = copy.deepcopy(snapshot["rows"][0])
+    previous.update(id="AS-00071", fecha="24/05/2026", estado="PENDIENTE")
+    latest = {
+        "id": "AS-90001",
+        "fecha_registro": "2026-09-01",
+        "proveedor_id": "P001",
+        "nif": "B12345678",
+        "pedido": "PO-2026-0001",
+        "importe_esperado": "121.00",
+        "estado": "PAGADA",
+    }
+    snapshot["rows"] = [previous, latest]
+
+    result = evaluate(extraction, master, snapshot, policy, "2026-09-19")
+    history = next(rule for rule in result["rules"] if rule["id"] == "erp_history")
+
+    assert result["result"] == "NO_PAGAR"
+    assert history["state"] == "PASS"
+    assert history["evidence"]["records"] == [previous, latest]
+    assert history["evidence"]["selected_record"] == latest
+    assert history["evidence"]["erp"]["estado"] == "PAGADA"
+
+
+def test_ambiguous_erp_history_escalates_even_for_a_confirmed_copy(facts):
+    extraction, master, snapshot, policy = copy.deepcopy(facts)
+    duplicate = copy.deepcopy(snapshot["rows"][0])
+    duplicate.update(id="AS-2", fecha="01/02/2026", estado="PAGADA")
+    snapshot["rows"].append(duplicate)
+
+    result = evaluate(
+        extraction,
+        master,
+        snapshot,
+        policy,
+        "2026-09-19",
+        duplicate={"state": "confirmed_copy", "related": ["copy.pdf"]},
+    )
+
+    assert result["result"] == "ESCALAR"
+    assert next(rule for rule in result["rules"] if rule["id"] == "erp_history")["state"] == "FAIL"
+
+
+@pytest.mark.parametrize(
+    "rows,reason",
+    [
+        (
+            [
+                {
+                    "id": "AS-1",
+                    "fecha": "24/05/2026",
+                    "proveedor": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe": "951.89",
+                    "estado": "PENDIENTE",
+                },
+                {
+                    "id": "AS-2",
+                    "fecha_registro": "2026-09-01",
+                    "proveedor_id": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe_esperado": "951.89",
+                    "estado": "PAGADA",
+                },
+                {
+                    "id": "AS-3",
+                    "fecha": "01/09/2026",
+                    "proveedor": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe": "951.89",
+                    "estado": "PAGADA",
+                },
+            ],
+            "equal_latest_dates",
+        ),
+        (
+            [
+                {
+                    "id": "AS-1",
+                    "fecha": "24/05/2026",
+                    "proveedor": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe": "951.89",
+                    "estado": "PENDIENTE",
+                },
+                {
+                    "id": "AS-2",
+                    "fecha_registro": "2026-09-01",
+                    "proveedor_id": "P999",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe_esperado": "951.89",
+                    "estado": "PAGADA",
+                },
+            ],
+            "conflicting_identity_or_amount",
+        ),
+        (
+            [
+                {
+                    "id": "AS-1",
+                    "fecha": "fecha rota",
+                    "proveedor": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe": "951.89",
+                    "estado": "PENDIENTE",
+                }
+            ],
+            "malformed_fecha",
+        ),
+        (
+            [
+                {
+                    "id": "AS-1",
+                    "fecha": "24/05/2026",
+                    "proveedor": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe": "951.89",
+                    "estado": "PENDIENTE",
+                },
+                {
+                    "id": "AS-2",
+                    "fecha_registro": "2026-09-01",
+                    "proveedor_id": "P001",
+                    "nif": "B12345678",
+                    "pedido": "PO-2026-0071",
+                    "importe_esperado": "952.00",
+                    "estado": "PAGADA",
+                },
+            ],
+            "conflicting_identity_or_amount",
+        ),
+    ],
+)
+def test_erp_history_ambiguities_never_select_an_effective_row(rows, reason):
+    history = resolve_erp_history(rows)
+
+    assert history["state"] == "AMBIGUOUS"
+    assert history["reason"] == reason
+    assert history["records"] == rows
+    assert "erp" not in history
+
+
 def test_paid_wrong_identity_escalates(facts):
     facts[2]["rows"][0].update(estado="PAGADA", proveedor="P999")
     assert decision(facts)["result"] == "ESCALAR"
@@ -88,6 +238,26 @@ def test_missing_or_low_quality_does_not_get_filled_from_master(facts):
     facts[0]["fields"]["iban"].update(value=None, status="MISSING")
     assert decision(facts)["result"] == "ESCALAR"
     assert decision(facts)["fields"]["iban"]["value"] is None
+
+
+def test_foreign_currency_needs_a_traced_conversion_even_if_future_policy_allows_it(facts):
+    extraction, master, snapshot, policy = copy.deepcopy(facts)
+    extraction["fields"]["currency"]["value"] = "JPY"
+    policy["version"] = "v4-fx-pending"
+    policy["allowed_currencies"] = ["EUR", "JPY"]
+    result = evaluate(extraction, master, snapshot, policy, "2026-09-19")
+    rule = next(r for r in result["rules"] if r["id"] == "amount_matches_order")
+    assert result["result"] == "ESCALAR"
+    assert rule["state"] == "UNKNOWN"
+    assert rule["evidence"]["comparable"] is False
+
+
+def test_annotation_risk_blocks_automatic_payment(facts):
+    extraction, master, snapshot, policy = copy.deepcopy(facts)
+    extraction["annotation_risks"] = [{"page": 1, "reason": "tachón", "evidence": "TOTAL"}]
+    result = evaluate(extraction, master, snapshot, policy, "2026-09-19")
+    assert result["result"] == "ESCALAR"
+    assert next(r for r in result["rules"] if r["id"] == "document_annotations")["state"] == "FAIL"
 
 
 def test_incomplete_erp_never_authorizes_payment(facts):

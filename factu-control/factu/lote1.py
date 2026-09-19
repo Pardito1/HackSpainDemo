@@ -8,6 +8,9 @@ from .extract import VERSION
 from .utils import digest
 
 
+BATCH_NAME = "Lote inicial · 500 facturas"
+
+
 def validate_materials(materials):
     root = Path(materials).expanduser().resolve()
     folder = root / "facturas"
@@ -29,10 +32,20 @@ def prepare_batch(service, materials, as_of):
     folder, workbook, manifest = validate_materials(materials)
     batches = service.store.all("SELECT * FROM batches ORDER BY created")
     if not batches:
-        return service.ingest(folder, workbook, "Lote inicial · 500 facturas", as_of)["batch_id"]
-    if len(batches) != 1:
+        return service.ingest(folder, workbook, BATCH_NAME, as_of)["batch_id"]
+    # Lote 2 is a distinct, explicitly versioned batch.  Its presence must not
+    # make a valid Lote 1 impossible to resume: each runner validates only its
+    # own manifest and profile, while the service still rebuilds the global
+    # duplicate index before publishing decisions.  Arbitrary demo/unknown
+    # batches remain a reason to keep a separate --data directory.
+    candidates = [
+        batch
+        for batch in batches
+        if batch["name"] == BATCH_NAME and batch.get("extraction_profile", "standard") == "standard"
+    ]
+    if len(candidates) != 1:
         raise ValueError("Usa una carpeta de estado exclusiva para las 500 facturas, sin la demo ni otros lotes.")
-    batch = batches[0]
+    batch = candidates[0]
     documents = service.store.all("SELECT file_id,sha256,extraction FROM documents WHERE batch_id=?", (batch["id"],))
     actual = {d["file_id"]: d["sha256"] for d in documents}
     master = service.store.source(batch["master_id"])
