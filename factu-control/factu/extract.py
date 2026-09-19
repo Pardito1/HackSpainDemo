@@ -12,7 +12,7 @@ import pymupdf as fitz
 from . import modelo
 from .utils import clean, digest, identifier, invoice_date, money
 
-VERSION = "native-rapidocr-modelo-1"
+VERSION = "native-rapidocr-modelo-2"
 FIELDS = (
     "invoice_number",
     "supplier_nif",
@@ -329,6 +329,9 @@ def fusionar_modelo(fields, campos):
                 "method": "modelo",
                 "confidence": None,
                 "source_text": evidencia,
+                "checksum": modelo.checksum_identificador(
+                    field, value if value is not None else raw
+                ),
                 "transformations": ["modelo", normalize.__name__],
             }
         )

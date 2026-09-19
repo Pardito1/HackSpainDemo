@@ -121,12 +121,12 @@ El embudo de lectura es texto nativo → OCR local → modelo, y cada paso solo 
 
 Toda lectura del modelo pasa una validación previa, porque un modelo puede calcular o inventar en lugar de copiar:
 
-- NIF del emisor: 9 caracteres y dígito de control correcto; el CIF del cliente nunca se acepta como emisor.
-- IBAN: `ES` + 24 caracteres + checksum mod 97. Bloqueante solo para lecturas del modelo: una cuenta mal leída no puede convertirse en un dato firme (ni, por tanto, en NO_PAGAR).
+- NIF del emisor: forma de NIF/CIF de 9 caracteres; el CIF del cliente nunca se acepta como emisor.
+- IBAN: `ES` + 22 dígitos (formato).
 - Pedido: formato `PO-AAAA-NNNN` tal cual impreso; no se reconstruyen guiones perdidos.
 - Importes y tipo de IVA: el valor debe aparecer en la evidencia literal; un importe derivado se rechaza como `inferido`.
 
-Lo rechazado queda como INVALID con su motivo, visible en el expediente, y la política escala.
+La validación es formato + evidencia literal + contraste con maestro y ERP: el dígito de control del NIF y el módulo 97 del IBAN se registran en el candidato como diagnóstico (`checksum`), sin bloquear, porque los identificadores del caso son sintéticos (en el maestro solo 1 de 12 NIF pasa el dígito de control y 0 de 12 IBAN pasan el módulo 97). Un valor mal leído no coincide con el maestro y la política lo escala. Lo rechazado por formato queda como INVALID con su motivo, visible en el expediente, y la política escala.
 
 Configuración por variables de entorno (en `.env`, fuera de Git): `LLM_BACKEND` (`cf_workers_ai` por defecto, `cf_anthropic` opcional vía AI Gateway), `CF_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CF_GATEWAY_ID`, `CF_AIG_TOKEN` o `LLM_ANTHROPIC_URL` para el backend Anthropic, `MODELO_EXTRACCION` y `LLM_TIMEOUT_S`. Los precios (`LLM_PRECIO_NEURONA_MIL`, `LLM_PRECIO_IN_MTOK`, `LLM_PRECIO_OUT_MTOK`) también son variables, nunca constantes en el código.
 

@@ -12,7 +12,7 @@ import openpyxl
 import pytest
 
 from factu import modelo
-from factu.extract import extract_pdf
+from factu.extract import extract_pdf, fusionar_modelo
 from factu.service import Service
 from conftest import make_pdf
 
@@ -277,10 +277,10 @@ def test_ocr_disabled_never_calls_model(tmp_path, monkeypatch):
 @pytest.mark.parametrize(
     "campo,valor,evidencia,motivo",
     [
-        ("supplier_nif", "B963120774", None, "nif_invalido"),  # scan_002: 10 caracteres
-        ("supplier_nif", "B9623341", None, "nif_invalido"),  # scan_023: 8 caracteres
+        ("supplier_nif", "B963120774", None, "nif_formato"),  # scan_002: 10 caracteres
+        ("supplier_nif", "B9623341", None, "nif_formato"),  # scan_023: 8 caracteres
         ("supplier_nif", "A58231074", None, "cif_cliente"),  # scan_021: CIF del cliente
-        ("iban", "E393 8888 6371 8888 5555 21", None, "iban_invalido"),  # scan_013
+        ("iban", "E393 8888 6371 8888 5555 21", None, "iban_formato"),  # scan_013
         ("order", "PO20260487", None, "formato_pedido"),  # scan_010/016: sin guiones
         ("total", "5310.00", "Total a pagar en plazo", "inferido"),  # calculado, no leído
     ],
@@ -294,14 +294,43 @@ def test_model_reading_rejected(campo, valor, evidencia, motivo):
     [
         ("supplier_nif", NIF_OK, None),
         ("iban", IBAN_OK, None),
+        ("supplier_nif", "A41220987", None),  # del maestro: checksum incorrecto
+        ("iban", "ES21 0049 1500 0512 3456 7890", None),  # del maestro: mod 97 falla
         ("order", "PO-2026-0487", None),
         ("total", "5310.00", "TOTAL: 5.310,00"),
+        ("total", "535.35", "Total 535,35."),  # puntuación final en la evidencia
         ("tax_rate", "21", "IVA (21%): 1.115,10"),
         ("date", "01/02/2026", None),
     ],
 )
 def test_model_reading_accepted(campo, valor, evidencia):
     assert modelo.validar_lectura_modelo(campo, valor, evidencia) is None
+
+
+def test_checksum_es_diagnostico_no_bloqueo():
+    """Identificadores del maestro con checksum sintético se aceptan y quedan
+    marcados con checksum=False en el candidato; la política hace el contraste."""
+    fields = {
+        f: {"status": "MISSING", "value": None, "evidence": []}
+        for f in ("supplier_nif", "iban", "total")
+    }
+    fusionar_modelo(
+        fields,
+        {
+            "supplier_nif": {"raw_value": "A41220987", "evidencia": "NIF: A41220987", "page": 1},
+            "iban": {
+                "raw_value": "ES21 0049 1500 0512 3456 7890",
+                "evidencia": "IBAN: ES21 0049 1500 0512 3456 7890",
+                "page": 1,
+            },
+            "total": {"raw_value": "121,00", "evidencia": "TOTAL: 121,00", "page": 1},
+        },
+    )
+    assert fields["supplier_nif"]["status"] == "OK"
+    assert fields["supplier_nif"]["evidence"][-1]["checksum"] is False
+    assert fields["iban"]["status"] == "OK"
+    assert fields["iban"]["evidence"][-1]["checksum"] is False
+    assert fields["total"]["evidence"][-1]["checksum"] is None
 
 
 # --- (g) parseo de la salida del modelo ----------------------------------------

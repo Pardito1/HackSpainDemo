@@ -152,11 +152,26 @@ def _importe_en_evidencia(valor, evidencia):
     objetivo = Decimal(str(valor))
     for token in re.findall(r"\d[\d.,]*", str(evidencia)):
         try:
-            if money(token) == objetivo:
+            if money(token.rstrip(".,")) == objetivo:
                 return True
         except (ValueError, ArithmeticError):
             continue
     return False
+
+
+def checksum_identificador(campo, valor):
+    """Diagnóstico True/False para NIF e IBAN; None para el resto.
+
+    Los identificadores del caso son sintéticos (en el maestro solo 1 de 12
+    NIF pasa el dígito de control y 0 de 12 IBAN pasan el módulo 97), así que
+    el checksum se registra en el candidato pero nunca bloquea: el contraste
+    real lo hace la política contra el maestro y el ERP.
+    """
+    if campo == "supplier_nif":
+        return _nif_correcto(valor)
+    if campo == "iban":
+        return iban_checksum(valor)
+    return None
 
 
 def validar_lectura_modelo(campo, valor, evidencia):
@@ -164,16 +179,17 @@ def validar_lectura_modelo(campo, valor, evidencia):
 
     Solo aplica a valores con method="modelo": una lectura dudosa del modelo
     debe ESCALAR con su evidencia, nunca convertirse en un dato firme.
+    Valida forma y evidencia literal, no checksums (ver checksum_identificador).
     """
     if campo == "supplier_nif":
-        if identifier(valor) == CIF_CLIENTE:
-            return "cif_cliente: es el CIF del cliente, no del emisor"
-        if not _nif_correcto(valor):
-            return "nif_invalido: longitud o dígito de control incorrecto"
-    elif campo == "iban":
         s = identifier(valor)
-        if not (s.startswith("ES") and len(s) == 24 and iban_checksum(s)):
-            return "iban_invalido: formato o checksum incorrecto"
+        if s == CIF_CLIENTE:
+            return "cif_cliente: es el CIF del cliente, no del emisor"
+        if not re.fullmatch(r"[A-Z]\d{7}[0-9A-Z]|\d{8}[A-Z]", s):
+            return "nif_formato: no tiene la forma de un NIF/CIF de 9 caracteres"
+    elif campo == "iban":
+        if not re.fullmatch(r"ES\d{22}", identifier(valor)):
+            return "iban_formato: no es ES + 22 dígitos"
     elif campo == "order":
         if not re.fullmatch(r"PO-\d{4}-\d{3,6}", identifier(valor)):
             return "formato_pedido: no coincide con PO-AAAA-NNNN tal cual impreso"
