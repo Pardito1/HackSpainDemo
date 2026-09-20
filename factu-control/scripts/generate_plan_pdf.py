@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -36,9 +37,20 @@ FONT_REGULAR = "FactU-DejaVu"
 FONT_BOLD = "FactU-DejaVu-Bold"
 
 
+def _find_font(filename: str) -> str:
+    candidates = [Path("/usr/share/fonts/truetype/dejavu") / filename]
+    spec = importlib.util.find_spec("matplotlib")
+    if spec and spec.origin:
+        candidates.append(Path(spec.origin).parent / "mpl-data" / "fonts" / "ttf" / filename)
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    raise FileNotFoundError(f"No se encuentra {filename} en {candidates}")
+
+
 def register_fonts():
-    pdfmetrics.registerFont(TTFont(FONT_REGULAR, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
-    pdfmetrics.registerFont(TTFont(FONT_BOLD, "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"))
+    pdfmetrics.registerFont(TTFont(FONT_REGULAR, _find_font("DejaVuSans.ttf")))
+    pdfmetrics.registerFont(TTFont(FONT_BOLD, _find_font("DejaVuSans-Bold.ttf")))
 
 
 def styles():
@@ -190,7 +202,7 @@ def footer(canvas, doc):
     canvas.line(doc.leftMargin, 1.45 * cm, A4[0] - doc.rightMargin, 1.45 * cm)
     canvas.setFillColor(MUTED)
     canvas.setFont(FONT_REGULAR, 7.5)
-    canvas.drawString(doc.leftMargin, 0.95 * cm, "FactU / Arquitectura y ADRs / v0.10.0 / 19.09.2026")
+    canvas.drawString(doc.leftMargin, 0.95 * cm, "FactU / Arquitectura y ADRs / v0.10.0 / 20.09.2026")
     canvas.drawRightString(A4[0] - doc.rightMargin, 0.95 * cm, str(doc.page))
     canvas.restoreState()
 
@@ -219,7 +231,7 @@ def build():
     )
     story.append(HRFlowable(width="100%", thickness=0.7, color=LINE, spaceAfter=12))
     metrics = Table(
-        [[metric("40", "PDFs Lote 2 procesados"), metric("19 / 1 / 20", "PAGAR / NO_PAGAR / ESCALAR"), metric("279", "pruebas Python superadas")]],
+        [[metric("435 / 9 / 56", "Lote 1 (500 PDFs, 53,8 s): PAGAR / NO_PAGAR / ESCALAR"), metric("24 / 1 / 15", "Lote 2 (40 PDFs, 8,3 s): PAGAR / NO_PAGAR / ESCALAR"), metric("359 + 15", "pruebas Python y Node superadas")]],
         colWidths=[5.3 * cm, 5.3 * cm, 5.3 * cm],
     )
     metrics.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), SAGE), ("BOX", (0, 0), (-1, -1), 0.5, LINE), ("INNERGRID", (0, 0), (-1, -1), 0.5, LINE), ("TOPPADDING", (0, 0), (-1, -1), 9), ("BOTTOMPADDING", (0, 0), (-1, -1), 9)]))
@@ -238,7 +250,7 @@ def build():
     table = Table(grid, colWidths=[8.25 * cm, 8.25 * cm], rowHeights=[3.25 * cm, 3.25 * cm], hAlign="LEFT")
     table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
     story.append(table)
-    story += [Spacer(1, 8), p("La distribución 19 / 1 / 20 es una ejecución concreta con política v3, fuentes registradas y fecha 2026-09-19. No es una métrica de precisión ni un pago real.", "small")]
+    story += [Spacer(1, 8), p("Las distribuciones 435 / 9 / 56 (Lote 1) y 24 / 1 / 15 (Lote 2) son ejecuciones concretas con política v3 y fuentes registradas (cortes del 19 y 20-09-2026, MacBook Air M1, ERP con latencia real). No son métricas de precisión ni pagos reales. Coste externo de inferencia: 0 € — RapidOCR y las reglas corren en local.", "small")]
     story.append(PageBreak())
 
     story += section("Lote 2: más lectura, no más riesgo", "Perfil de extracción aislado")
@@ -318,7 +330,7 @@ def build():
 
     story += section("Demo ganadora en diez minutos", "Cómo contarlo")
     demo_rows = [
-        [p("0:00 - 2:00", "h2"), p("Abrir la bandeja del Lote 2. Decir 19 / 1 / 20 y aclarar que es una ejecución, no accuracy. Elegir una factura JPY o sin moneda.", "card")],
+        [p("0:00 - 2:00", "h2"), p("Abrir la bandeja del Lote 2. Decir 24 / 1 / 15 y aclarar que es una ejecución, no accuracy. Elegir una factura JPY o sin moneda.", "card")],
         [p("2:00 - 4:00", "h2"), p("Seguir PDF, lectura nativa, testigo OCR y regla. Mostrar que manuscrito/tachón o texto que intenta mandar al agente bloquea PAGAR.", "card")],
         [p("4:00 - 6:00", "h2"), p("Abrir PO-2026-0071: dos asientos conservados, selección trazable del PAGADA más reciente y NO_PAGAR seguro.", "card")],
         [p("6:00 - 8:00", "h2"), p("Preparar un cambio de fuente en una copia de estado: vista previa de impacto, decisiones afectadas y OCR reutilizado.", "card")],
