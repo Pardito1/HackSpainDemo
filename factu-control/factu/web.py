@@ -5,7 +5,6 @@ import os
 import re
 import tempfile
 import threading
-import time
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -26,8 +25,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .service import Service
 from .erp import ERPUnavailable
-from .live import live as live_view
-from .utils import canonical, now
+from .utils import canonical
 from .source_view import source_view
 from .consultations import workspace as consultations_workspace
 from .sheets import sheet_view, workbook_path
@@ -141,34 +139,8 @@ def create_app(data_dir=None):
                     409,
                     "Ya hay un trabajo activo. Su estado se conserva en la bandeja.",
                 )
-            item = {"task": task, "started": now(), "t0": time.monotonic(), "ended": None}
-            item["future"] = executor.submit(function)
-            # El tiempo total se congela cuando acaba el trabajo, no cuando
-            # alguien sondea: la pantalla enseña el mismo número para siempre.
-            item["future"].add_done_callback(
-                lambda _f, item=item: item.update(ended=time.monotonic())
-            )
-            active[batch_id] = item
+            active[batch_id] = {"task": task, "future": executor.submit(function)}
         return {"accepted": True, "task": task}
-
-    def run_state(batch_id):
-        """El trabajo tal y como lo ve la pantalla: sin el `future` ni el reloj crudo."""
-        task = active.get(batch_id)
-        if not task:
-            return {"active": False, "task": None, "started": None, "elapsed_s": 0}
-        done = task["future"].done()
-        state = {
-            "active": not done,
-            "task": task["task"],
-            "started": task["started"],
-            "elapsed_s": round((task["ended"] or time.monotonic()) - task["t0"], 2),
-        }
-        if done:
-            try:
-                state["result"] = task["future"].result()
-            except BaseException as exc:
-                state["error"] = str(exc)
-        return state
 
     def erp_progress(batch_id):
         # Reconstruido a partir de los eventos de auditoría que ya emite ERPClient,
@@ -279,18 +251,6 @@ def create_app(data_dir=None):
         return render(request, "sources.html", **data, **view, batches=batches, selected_batch=batch,
                       focused_change=change, technical=request.url.path.endswith("/audit"), materials=json.loads(material_path.read_text()) if material_path.exists() else None)
 
-    @app.get("/live", response_class=HTMLResponse)
-    def live_page(request: Request, batch: str | None = None):
-        batches = service.store.all("SELECT * FROM batches ORDER BY created DESC")
-        batch = batch or (batches[0]["id"] if batches else None)
-        return render(
-            request,
-            "live.html",
-            batches=batches,
-            selected_batch=batch,
-            live=live_view(service, batch, run_state(batch)) if batch else None,
-        )
-
     @app.get("/operations", response_class=HTMLResponse)
     def operations(request: Request, batch: str | None = None):
         data = service.dashboard(batch)
@@ -363,10 +323,6 @@ def create_app(data_dir=None):
             except BaseException as exc:
                 run["error"] = str(exc)
         return {"metrics": data["metrics"], "run": run}
-
-    @app.get("/api/batches/{batch_id}/live")
-    def live(batch_id: str):
-        return live_view(service, batch_id, run_state(batch_id))
 
     @app.post("/api/batches")
     async def ingest(
